@@ -28,7 +28,7 @@ AddIcon specialization=3 help=main
 		ProtectionDefaultCdActions()
 		
 		# Short Cooldowns
-		ProtectionDefaultShortCdActions()
+		ProtectionDefaultShortCDActions()
 		# Default rotation
 		ProtectionDefaultMainActions()
 	}
@@ -52,9 +52,9 @@ AddFunction ProtectionGetInMeleeRange
 	}
 }
 
-AddFunction ProtectionInterruptActions
+AddFunction InterruptActions
 {
-	if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.Casting()
+	if not target.IsFriend() and target.Casting()
 	{
 		if target.InRange(pummel) and target.IsInterruptible() Spell(pummel)
 		if target.InRange(storm_bolt) and not target.Classification(worldboss) Spell(storm_bolt)
@@ -127,7 +127,7 @@ AddFunction ProtectionDefaultAoEActions
 
 AddFunction ProtectionDefaultCdActions 
 {
-	ProtectionInterruptActions()
+	InterruptActions()
 	ProtectionOffensiveCooldowns()
 	if IncomingDamage(1.5 magic=1) > 0 Spell(spell_reflection)
 	if (HasEquippedItem(shifting_cosmic_sliver)) Spell(shield_wall)
