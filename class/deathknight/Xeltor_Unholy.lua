@@ -4,13 +4,8 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "xeltor_unholy"
-	local desc = "[Xel][7.1.5] Death Knight: Unholy"
+	local desc = "[Xel][7.2.5] Death Knight: Unholy"
 	local code = [[
-# Based on SimulationCraft profile "Death_Knight_Unholy_T18M".
-#	class=deathknight
-#	spec=unholy
-#	talents=3330021
-
 # Include Ovale Defaults (racials & trinkets).
 Include(ovale_common)
 Include(ovale_interrupt)
@@ -74,7 +69,6 @@ AddFunction InterruptActions
 
 AddFunction UnholyDefaultMainActions
 {
-    #potion,name=prolonged_power,if=buff.unholy_strength.react
     #outbreak,target_if=!dot.virulent_plague.ticking
     if not target.DebuffPresent(virulent_plague_debuff) Spell(outbreak)
     #run_action_list,name=valkyr,if=talent.dark_arbiter.enabled&pet.valkyr_battlemaiden.active
@@ -145,18 +139,26 @@ AddFunction UnholyDefaultCdActions
     Spell(blood_fury_ap)
     #berserking
     Spell(berserking)
-    #use_item,slot=trinket1
+    #use_items
     # UnholyUseItemActions()
+    #potion,if=buff.unholy_strength.react
+    # if BuffPresent(unholy_strength_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
 
-    unless not target.DebuffPresent(virulent_plague_debuff) and Spell(outbreak) or HasEquippedItem(137075) and SpellCooldown(dark_arbiter) > 165 and Spell(dark_transformation) or HasEquippedItem(137075) and not Talent(shadow_infusion_talent) and SpellCooldown(dark_arbiter) > 55 and Spell(dark_transformation) or HasEquippedItem(137075) and Talent(shadow_infusion_talent) and SpellCooldown(dark_arbiter) > 35 and Spell(dark_transformation) or HasEquippedItem(137075) and target.TimeToDie() < SpellCooldown(dark_arbiter) - 8 and Spell(dark_transformation) or HasEquippedItem(137075) and SpellCooldown(summon_gargoyle) > 160 and Spell(dark_transformation) or HasEquippedItem(137075) and not Talent(shadow_infusion_talent) and SpellCooldown(summon_gargoyle) > 55 and Spell(dark_transformation) or HasEquippedItem(137075) and Talent(shadow_infusion_talent) and SpellCooldown(summon_gargoyle) > 35 and Spell(dark_transformation) or HasEquippedItem(137075) and target.TimeToDie() < SpellCooldown(summon_gargoyle) - 8 and Spell(dark_transformation) or not HasEquippedItem(137075) and Rune() < 4 and Spell(dark_transformation) or Rune() < 4 and Spell(blighted_rune_weapon)
+    unless not target.DebuffPresent(virulent_plague_debuff) and Spell(outbreak)
     {
-        #run_action_list,name=valkyr,if=talent.dark_arbiter.enabled&pet.valkyr_battlemaiden.active
-        if Talent(dark_arbiter_talent) and pet.Present() UnholyValkyrCdActions()
+        #army_of_the_dead
+        Spell(army_of_the_dead)
 
-        unless Talent(dark_arbiter_talent) and pet.Present() and UnholyValkyrCdPostConditions()
+        unless HasEquippedItem(137075) and SpellCooldown(dark_arbiter) > 165 and Spell(dark_transformation) or HasEquippedItem(137075) and not Talent(shadow_infusion_talent) and SpellCooldown(dark_arbiter) > 55 and Spell(dark_transformation) or HasEquippedItem(137075) and Talent(shadow_infusion_talent) and SpellCooldown(dark_arbiter) > 35 and Spell(dark_transformation) or HasEquippedItem(137075) and target.TimeToDie() < SpellCooldown(dark_arbiter) - 8 and Spell(dark_transformation) or HasEquippedItem(137075) and SpellCooldown(summon_gargoyle) > 160 and Spell(dark_transformation) or HasEquippedItem(137075) and not Talent(shadow_infusion_talent) and SpellCooldown(summon_gargoyle) > 55 and Spell(dark_transformation) or HasEquippedItem(137075) and Talent(shadow_infusion_talent) and SpellCooldown(summon_gargoyle) > 35 and Spell(dark_transformation) or HasEquippedItem(137075) and target.TimeToDie() < SpellCooldown(summon_gargoyle) - 8 and Spell(dark_transformation) or not HasEquippedItem(137075) and Rune() < 4 and Spell(dark_transformation) or Rune() < 4 and Spell(blighted_rune_weapon)
         {
-            #call_action_list,name=generic
-            UnholyGenericCdActions()
+            #run_action_list,name=valkyr,if=talent.dark_arbiter.enabled&pet.valkyr_battlemaiden.active
+            if Talent(dark_arbiter_talent) and pet.Present() UnholyValkyrCdActions()
+
+            unless Talent(dark_arbiter_talent) and pet.Present() and UnholyValkyrCdPostConditions()
+            {
+                #call_action_list,name=generic
+                UnholyGenericCdActions()
+            }
         }
     }
 }
@@ -254,6 +256,8 @@ AddFunction UnholyCastigatorCdPostConditions
 
 AddFunction UnholyGenericMainActions
 {
+    #chains_of_ice,if=buff.unholy_strength.up&buff.cold_heart.stack>19
+    if BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 19 Spell(chains_of_ice)
     #death_coil,if=runic_power.deficit<10
     if RunicPowerDeficit() < 10 Spell(death_coil)
     #death_coil,if=!talent.dark_arbiter.enabled&buff.sudden_doom.up&!buff.necrosis.up&rune<=3
@@ -297,37 +301,43 @@ AddFunction UnholyGenericMainPostConditions
 
 AddFunction UnholyGenericShortCdActions
 {
-    #soul_reaper,if=debuff.festering_wound.stack>=6&cooldown.apocalypse.remains<4
-    if target.DebuffStacks(festering_wound_debuff) >= 6 and SpellCooldown(apocalypse) < 4 Spell(soul_reaper_unholy)
-    #apocalypse,if=debuff.festering_wound.stack>=6
-    if target.DebuffStacks(festering_wound_debuff) >= 6 Spell(apocalypse)
+    #apocalypse,if=equipped.137075&debuff.festering_wound.stack>=6&talent.dark_arbiter.enabled
+    if HasEquippedItem(137075) and target.DebuffStacks(festering_wound_debuff) >= 6 and Talent(dark_arbiter_talent) Spell(apocalypse)
 
-    unless RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike)
+    unless BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 19 and Spell(chains_of_ice)
     {
-        #soul_reaper,if=debuff.festering_wound.stack>=3
-        if target.DebuffStacks(festering_wound_debuff) >= 3 Spell(soul_reaper_unholy)
+        #soul_reaper,if=debuff.festering_wound.stack>=6&cooldown.apocalypse.remains<4
+        if target.DebuffStacks(festering_wound_debuff) >= 6 and SpellCooldown(apocalypse) < 4 Spell(soul_reaper_unholy)
+        #apocalypse,if=debuff.festering_wound.stack>=6
+        if target.DebuffStacks(festering_wound_debuff) >= 6 Spell(apocalypse)
 
-        unless target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows)
+        unless RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike)
         {
-            #defile
-            Spell(defile)
-            #call_action_list,name=aoe,if=active_enemies>=2
-            if Enemies(tagged=1) >= 2 UnholyAoeShortCdActions()
+            #soul_reaper,if=debuff.festering_wound.stack>=3
+            if target.DebuffStacks(festering_wound_debuff) >= 3 Spell(soul_reaper_unholy)
 
-            unless Enemies(tagged=1) >= 2 and UnholyAoeShortCdPostConditions()
+            unless target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows)
             {
-                #call_action_list,name=instructors,if=equipped.132448
-                if HasEquippedItem(132448) UnholyInstructorsShortCdActions()
+                #defile
+                Spell(defile)
+                #call_action_list,name=aoe,if=active_enemies>=2
+                if Enemies(tagged=1) >= 2 UnholyAoeShortCdActions()
 
-                unless HasEquippedItem(132448) and UnholyInstructorsShortCdPostConditions()
+                unless Enemies(tagged=1) >= 2 and UnholyAoeShortCdPostConditions()
                 {
-                    #call_action_list,name=standard,if=!talent.castigator.enabled&!equipped.132448
-                    if not Talent(castigator_talent) and not HasEquippedItem(132448) UnholyStandardShortCdActions()
+                    #call_action_list,name=instructors,if=equipped.132448
+                    if HasEquippedItem(132448) UnholyInstructorsShortCdActions()
 
-                    unless not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardShortCdPostConditions()
+                    unless HasEquippedItem(132448) and UnholyInstructorsShortCdPostConditions()
                     {
-                        #call_action_list,name=castigator,if=talent.castigator.enabled&!equipped.132448
-                        if Talent(castigator_talent) and not HasEquippedItem(132448) UnholyCastigatorShortCdActions()
+                        #call_action_list,name=standard,if=!talent.castigator.enabled&!equipped.132448
+                        if not Talent(castigator_talent) and not HasEquippedItem(132448) UnholyStandardShortCdActions()
+
+                        unless not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardShortCdPostConditions()
+                        {
+                            #call_action_list,name=castigator,if=talent.castigator.enabled&!equipped.132448
+                            if Talent(castigator_talent) and not HasEquippedItem(132448) UnholyCastigatorShortCdActions()
+                        }
                     }
                 }
             }
@@ -337,39 +347,47 @@ AddFunction UnholyGenericShortCdActions
 
 AddFunction UnholyGenericShortCdPostConditions
 {
-    RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows) or Enemies(tagged=1) >= 2 and UnholyAoeShortCdPostConditions() or HasEquippedItem(132448) and UnholyInstructorsShortCdPostConditions() or not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardShortCdPostConditions() or Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyCastigatorShortCdPostConditions()
+    BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 19 and Spell(chains_of_ice) or RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows) or Enemies(tagged=1) >= 2 and UnholyAoeShortCdPostConditions() or HasEquippedItem(132448) and UnholyInstructorsShortCdPostConditions() or not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardShortCdPostConditions() or Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyCastigatorShortCdPostConditions()
 }
 
 AddFunction UnholyGenericCdActions
 {
     #dark_arbiter,if=!equipped.137075&runic_power.deficit<30
     if not HasEquippedItem(137075) and RunicPowerDeficit() < 30 Spell(dark_arbiter)
-    #dark_arbiter,if=equipped.137075&runic_power.deficit<30&cooldown.dark_transformation.remains<2
-    if HasEquippedItem(137075) and RunicPowerDeficit() < 30 and SpellCooldown(dark_transformation) < 2 Spell(dark_arbiter)
-    #summon_gargoyle,if=!equipped.137075,if=rune<=3
-    if Rune() < 4 Spell(summon_gargoyle)
-    #summon_gargoyle,if=equipped.137075&cooldown.dark_transformation.remains<10&rune<=3
-    if HasEquippedItem(137075) and SpellCooldown(dark_transformation) < 10 and Rune() < 4 Spell(summon_gargoyle)
 
-    unless target.DebuffStacks(festering_wound_debuff) >= 6 and SpellCooldown(apocalypse) < 4 and Spell(soul_reaper_unholy) or target.DebuffStacks(festering_wound_debuff) >= 6 and Spell(apocalypse) or RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike) or target.DebuffStacks(festering_wound_debuff) >= 3 and Spell(soul_reaper_unholy) or target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows) or Spell(defile)
+    unless HasEquippedItem(137075) and target.DebuffStacks(festering_wound_debuff) >= 6 and Talent(dark_arbiter_talent) and Spell(apocalypse)
     {
-        #call_action_list,name=aoe,if=active_enemies>=2
-        if Enemies(tagged=1) >= 2 UnholyAoeCdActions()
+        #dark_arbiter,if=equipped.137075&runic_power.deficit<30&cooldown.dark_transformation.remains<2
+        if HasEquippedItem(137075) and RunicPowerDeficit() < 30 and SpellCooldown(dark_transformation) < 2 Spell(dark_arbiter)
+        #summon_gargoyle,if=!equipped.137075,if=rune<=3
+        if Rune() < 4 Spell(summon_gargoyle)
 
-        unless Enemies(tagged=1) >= 2 and UnholyAoeCdPostConditions()
+        unless BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 19 and Spell(chains_of_ice)
         {
-            #call_action_list,name=instructors,if=equipped.132448
-            if HasEquippedItem(132448) UnholyInstructorsCdActions()
+            #summon_gargoyle,if=equipped.137075&cooldown.dark_transformation.remains<10&rune<=3
+            if HasEquippedItem(137075) and SpellCooldown(dark_transformation) < 10 and Rune() < 4 Spell(summon_gargoyle)
 
-            unless HasEquippedItem(132448) and UnholyInstructorsCdPostConditions()
+            unless target.DebuffStacks(festering_wound_debuff) >= 6 and SpellCooldown(apocalypse) < 4 and Spell(soul_reaper_unholy) or target.DebuffStacks(festering_wound_debuff) >= 6 and Spell(apocalypse) or RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike) or target.DebuffStacks(festering_wound_debuff) >= 3 and Spell(soul_reaper_unholy) or target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows) or Spell(defile)
             {
-                #call_action_list,name=standard,if=!talent.castigator.enabled&!equipped.132448
-                if not Talent(castigator_talent) and not HasEquippedItem(132448) UnholyStandardCdActions()
+                #call_action_list,name=aoe,if=active_enemies>=2
+                if Enemies(tagged=1) >= 2 UnholyAoeCdActions()
 
-                unless not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardCdPostConditions()
+                unless Enemies(tagged=1) >= 2 and UnholyAoeCdPostConditions()
                 {
-                    #call_action_list,name=castigator,if=talent.castigator.enabled&!equipped.132448
-                    if Talent(castigator_talent) and not HasEquippedItem(132448) UnholyCastigatorCdActions()
+                    #call_action_list,name=instructors,if=equipped.132448
+                    if HasEquippedItem(132448) UnholyInstructorsCdActions()
+
+                    unless HasEquippedItem(132448) and UnholyInstructorsCdPostConditions()
+                    {
+                        #call_action_list,name=standard,if=!talent.castigator.enabled&!equipped.132448
+                        if not Talent(castigator_talent) and not HasEquippedItem(132448) UnholyStandardCdActions()
+
+                        unless not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardCdPostConditions()
+                        {
+                            #call_action_list,name=castigator,if=talent.castigator.enabled&!equipped.132448
+                            if Talent(castigator_talent) and not HasEquippedItem(132448) UnholyCastigatorCdActions()
+                        }
+                    }
                 }
             }
         }
@@ -378,35 +396,35 @@ AddFunction UnholyGenericCdActions
 
 AddFunction UnholyGenericCdPostConditions
 {
-    target.DebuffStacks(festering_wound_debuff) >= 6 and SpellCooldown(apocalypse) < 4 and Spell(soul_reaper_unholy) or target.DebuffStacks(festering_wound_debuff) >= 6 and Spell(apocalypse) or RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike) or target.DebuffStacks(festering_wound_debuff) >= 3 and Spell(soul_reaper_unholy) or target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows) or Spell(defile) or Enemies(tagged=1) >= 2 and UnholyAoeCdPostConditions() or HasEquippedItem(132448) and UnholyInstructorsCdPostConditions() or not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardCdPostConditions() or Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyCastigatorCdPostConditions()
+    HasEquippedItem(137075) and target.DebuffStacks(festering_wound_debuff) >= 6 and Talent(dark_arbiter_talent) and Spell(apocalypse) or BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 19 and Spell(chains_of_ice) or target.DebuffStacks(festering_wound_debuff) >= 6 and SpellCooldown(apocalypse) < 4 and Spell(soul_reaper_unholy) or target.DebuffStacks(festering_wound_debuff) >= 6 and Spell(apocalypse) or RunicPowerDeficit() < 10 and Spell(death_coil) or not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 and Spell(death_coil) or Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 and Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) <= 6 and Spell(festering_strike) or target.DebuffStacks(festering_wound_debuff) >= 3 and Spell(soul_reaper_unholy) or target.DebuffPresent(soul_reaper_unholy_debuff) and not target.DebuffPresent(festering_wound_debuff) and Spell(festering_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(scourge_strike) or target.DebuffPresent(soul_reaper_unholy_debuff) and target.DebuffStacks(festering_wound_debuff) >= 1 and Spell(clawing_shadows) or Spell(defile) or Enemies(tagged=1) >= 2 and UnholyAoeCdPostConditions() or HasEquippedItem(132448) and UnholyInstructorsCdPostConditions() or not Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyStandardCdPostConditions() or Talent(castigator_talent) and not HasEquippedItem(132448) and UnholyCastigatorCdPostConditions()
 }
 
 ### actions.instructors
 
 AddFunction UnholyInstructorsMainActions
 {
-    #festering_strike,if=debuff.festering_wound.stack<=3&runic_power.deficit>13
-    if target.DebuffStacks(festering_wound_debuff) <= 3 and RunicPowerDeficit() > 13 Spell(festering_strike)
+    #festering_strike,if=debuff.festering_wound.stack<=2&runic_power.deficit>5
+    if target.DebuffStacks(festering_wound_debuff) <= 2 and RunicPowerDeficit() > 5 Spell(festering_strike)
     #death_coil,if=!buff.necrosis.up&talent.necrosis.enabled&rune<=3
     if not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 Spell(death_coil)
-    #scourge_strike,if=buff.necrosis.react&debuff.festering_wound.stack>=4&runic_power.deficit>29
-    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 Spell(scourge_strike)
-    #clawing_shadows,if=buff.necrosis.react&debuff.festering_wound.stack>=3&runic_power.deficit>11
-    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 Spell(clawing_shadows)
-    #scourge_strike,if=buff.unholy_strength.react&debuff.festering_wound.stack>=4&runic_power.deficit>29
-    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 Spell(scourge_strike)
-    #clawing_shadows,if=buff.unholy_strength.react&debuff.festering_wound.stack>=3&runic_power.deficit>11
-    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 Spell(clawing_shadows)
-    #scourge_strike,if=rune>=2&debuff.festering_wound.stack>=4&runic_power.deficit>29
-    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 Spell(scourge_strike)
-    #clawing_shadows,if=rune>=2&debuff.festering_wound.stack>=3&runic_power.deficit>11
-    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 Spell(clawing_shadows)
-    #death_coil,if=talent.shadow_infusion.enabled&talent.dark_arbiter.enabled&!buff.dark_transformation.up&cooldown.dark_arbiter.remains>15
-    if Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 15 Spell(death_coil)
+    #scourge_strike,if=buff.necrosis.react&debuff.festering_wound.stack>=3&runic_power.deficit>9
+    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 Spell(scourge_strike)
+    #clawing_shadows,if=buff.necrosis.react&debuff.festering_wound.stack>=3&runic_power.deficit>9
+    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 Spell(clawing_shadows)
+    #scourge_strike,if=buff.unholy_strength.react&debuff.festering_wound.stack>=3&runic_power.deficit>9
+    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 Spell(scourge_strike)
+    #clawing_shadows,if=buff.unholy_strength.react&debuff.festering_wound.stack>=3&runic_power.deficit>9
+    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 Spell(clawing_shadows)
+    #scourge_strike,if=rune>=2&debuff.festering_wound.stack>=3&runic_power.deficit>9
+    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 Spell(scourge_strike)
+    #clawing_shadows,if=rune>=2&debuff.festering_wound.stack>=3&runic_power.deficit>9
+    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 Spell(clawing_shadows)
+    #death_coil,if=talent.shadow_infusion.enabled&talent.dark_arbiter.enabled&!buff.dark_transformation.up&cooldown.dark_arbiter.remains>10
+    if Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 10 Spell(death_coil)
     #death_coil,if=talent.shadow_infusion.enabled&!talent.dark_arbiter.enabled&!buff.dark_transformation.up
     if Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) Spell(death_coil)
-    #death_coil,if=talent.dark_arbiter.enabled&cooldown.dark_arbiter.remains>15
-    if Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 15 Spell(death_coil)
+    #death_coil,if=talent.dark_arbiter.enabled&cooldown.dark_arbiter.remains>10
+    if Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 10 Spell(death_coil)
     #death_coil,if=!talent.shadow_infusion.enabled&!talent.dark_arbiter.enabled
     if not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) Spell(death_coil)
 }
@@ -421,7 +439,7 @@ AddFunction UnholyInstructorsShortCdActions
 
 AddFunction UnholyInstructorsShortCdPostConditions
 {
-    target.DebuffStacks(festering_wound_debuff) <= 3 and RunicPowerDeficit() > 13 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
+    target.DebuffStacks(festering_wound_debuff) <= 2 and RunicPowerDeficit() > 5 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
 }
 
 AddFunction UnholyInstructorsCdActions
@@ -430,17 +448,13 @@ AddFunction UnholyInstructorsCdActions
 
 AddFunction UnholyInstructorsCdPostConditions
 {
-    target.DebuffStacks(festering_wound_debuff) <= 3 and RunicPowerDeficit() > 13 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 4 and RunicPowerDeficit() > 29 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
+    target.DebuffStacks(festering_wound_debuff) <= 2 and RunicPowerDeficit() > 5 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 3 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
 }
 
 ### actions.precombat
 
 AddFunction UnholyPrecombatMainActions
 {
-    #flask,name=countless_armies
-    #food,name=nightborne_delicacy_platter
-    #augmentation,name=defiled
-    Spell(augmentation)
 }
 
 AddFunction UnholyPrecombatMainPostConditions
@@ -449,23 +463,24 @@ AddFunction UnholyPrecombatMainPostConditions
 
 AddFunction UnholyPrecombatShortCdActions
 {
-    unless Spell(augmentation)
-    {
-        #snapshot_stats
-        #potion,name=prolonged_power
-        #raise_dead
-        Spell(raise_dead)
-    }
+    #raise_dead
+    Spell(raise_dead)
 }
 
 AddFunction UnholyPrecombatShortCdPostConditions
 {
-    Spell(augmentation)
 }
 
 AddFunction UnholyPrecombatCdActions
 {
-    unless Spell(augmentation) or Spell(raise_dead)
+    #flask
+    #food
+    #augmentation
+    #snapshot_stats
+    #potion
+    # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+
+    unless Spell(raise_dead)
     {
         #army_of_the_dead
         Spell(army_of_the_dead)
@@ -474,35 +489,35 @@ AddFunction UnholyPrecombatCdActions
 
 AddFunction UnholyPrecombatCdPostConditions
 {
-    Spell(augmentation) or Spell(raise_dead)
+    Spell(raise_dead)
 }
 
 ### actions.standard
 
 AddFunction UnholyStandardMainActions
 {
-    #festering_strike,if=debuff.festering_wound.stack<=3&runic_power.deficit>13
-    if target.DebuffStacks(festering_wound_debuff) <= 3 and RunicPowerDeficit() > 13 Spell(festering_strike)
+    #festering_strike,if=debuff.festering_wound.stack<=2&runic_power.deficit>5
+    if target.DebuffStacks(festering_wound_debuff) <= 2 and RunicPowerDeficit() > 5 Spell(festering_strike)
     #death_coil,if=!buff.necrosis.up&talent.necrosis.enabled&rune<=3
     if not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 Spell(death_coil)
-    #scourge_strike,if=buff.necrosis.react&debuff.festering_wound.stack>=1&runic_power.deficit>15
-    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 Spell(scourge_strike)
-    #clawing_shadows,if=buff.necrosis.react&debuff.festering_wound.stack>=1&runic_power.deficit>11
-    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 Spell(clawing_shadows)
-    #scourge_strike,if=buff.unholy_strength.react&debuff.festering_wound.stack>=1&runic_power.deficit>15
-    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 Spell(scourge_strike)
-    #clawing_shadows,if=buff.unholy_strength.react&debuff.festering_wound.stack>=1&runic_power.deficit>11
-    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 Spell(clawing_shadows)
-    #scourge_strike,if=rune>=2&debuff.festering_wound.stack>=1&runic_power.deficit>15
-    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 Spell(scourge_strike)
-    #clawing_shadows,if=rune>=2&debuff.festering_wound.stack>=1&runic_power.deficit>11
-    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 Spell(clawing_shadows)
-    #death_coil,if=talent.shadow_infusion.enabled&talent.dark_arbiter.enabled&!buff.dark_transformation.up&cooldown.dark_arbiter.remains>15
-    if Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 15 Spell(death_coil)
+    #scourge_strike,if=buff.necrosis.react&debuff.festering_wound.stack>=1&runic_power.deficit>9
+    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 Spell(scourge_strike)
+    #clawing_shadows,if=buff.necrosis.react&debuff.festering_wound.stack>=1&runic_power.deficit>9
+    if BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 Spell(clawing_shadows)
+    #scourge_strike,if=buff.unholy_strength.react&debuff.festering_wound.stack>=1&runic_power.deficit>9
+    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 Spell(scourge_strike)
+    #clawing_shadows,if=buff.unholy_strength.react&debuff.festering_wound.stack>=1&runic_power.deficit>9
+    if BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 Spell(clawing_shadows)
+    #scourge_strike,if=rune>=2&debuff.festering_wound.stack>=1&runic_power.deficit>9
+    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 Spell(scourge_strike)
+    #clawing_shadows,if=rune>=2&debuff.festering_wound.stack>=1&runic_power.deficit>9
+    if Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 Spell(clawing_shadows)
+    #death_coil,if=talent.shadow_infusion.enabled&talent.dark_arbiter.enabled&!buff.dark_transformation.up&cooldown.dark_arbiter.remains>10
+    if Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 10 Spell(death_coil)
     #death_coil,if=talent.shadow_infusion.enabled&!talent.dark_arbiter.enabled&!buff.dark_transformation.up
     if Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) Spell(death_coil)
-    #death_coil,if=talent.dark_arbiter.enabled&cooldown.dark_arbiter.remains>15
-    if Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 15 Spell(death_coil)
+    #death_coil,if=talent.dark_arbiter.enabled&cooldown.dark_arbiter.remains>10
+    if Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 10 Spell(death_coil)
     #death_coil,if=!talent.shadow_infusion.enabled&!talent.dark_arbiter.enabled
     if not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) Spell(death_coil)
 }
@@ -517,7 +532,7 @@ AddFunction UnholyStandardShortCdActions
 
 AddFunction UnholyStandardShortCdPostConditions
 {
-    target.DebuffStacks(festering_wound_debuff) <= 3 and RunicPowerDeficit() > 13 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
+    target.DebuffStacks(festering_wound_debuff) <= 2 and RunicPowerDeficit() > 5 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
 }
 
 AddFunction UnholyStandardCdActions
@@ -526,7 +541,7 @@ AddFunction UnholyStandardCdActions
 
 AddFunction UnholyStandardCdPostConditions
 {
-    target.DebuffStacks(festering_wound_debuff) <= 3 and RunicPowerDeficit() > 13 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 15 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 11 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 15 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
+    target.DebuffStacks(festering_wound_debuff) <= 2 and RunicPowerDeficit() > 5 and Spell(festering_strike) or not BuffPresent(necrosis_buff) and Talent(necrosis_talent) and Rune() < 4 and Spell(death_coil) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(necrosis_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or BuffPresent(unholy_strength_buff) and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(scourge_strike) or Rune() >= 2 and target.DebuffStacks(festering_wound_debuff) >= 1 and RunicPowerDeficit() > 9 and Spell(clawing_shadows) or Talent(shadow_infusion_talent) and Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and not pet.BuffPresent(dark_transformation_buff) and Spell(death_coil) or Talent(dark_arbiter_talent) and SpellCooldown(dark_arbiter) > 10 and Spell(death_coil) or not Talent(shadow_infusion_talent) and not Talent(dark_arbiter_talent) and Spell(death_coil)
 }
 
 ### actions.valkyr
@@ -535,15 +550,15 @@ AddFunction UnholyValkyrMainActions
 {
     #death_coil
     Spell(death_coil)
-    #festering_strike,if=debuff.festering_wound.stack<8&cooldown.apocalypse.remains<5
-    if target.DebuffStacks(festering_wound_debuff) < 8 and SpellCooldown(apocalypse) < 5 Spell(festering_strike)
+    #festering_strike,if=debuff.festering_wound.stack<6&cooldown.apocalypse.remains<3
+    if target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) < 3 Spell(festering_strike)
     #call_action_list,name=aoe,if=active_enemies>=2
     if Enemies(tagged=1) >= 2 UnholyAoeMainActions()
 
     unless Enemies(tagged=1) >= 2 and UnholyAoeMainPostConditions()
     {
-        #festering_strike,if=debuff.festering_wound.stack<=3
-        if target.DebuffStacks(festering_wound_debuff) <= 3 Spell(festering_strike)
+        #festering_strike,if=debuff.festering_wound.stack<=4
+        if target.DebuffStacks(festering_wound_debuff) <= 4 Spell(festering_strike)
         #scourge_strike,if=debuff.festering_wound.up
         if target.DebuffPresent(festering_wound_debuff) Spell(scourge_strike)
         #clawing_shadows,if=debuff.festering_wound.up
@@ -560,10 +575,10 @@ AddFunction UnholyValkyrShortCdActions
 {
     unless Spell(death_coil)
     {
-        #apocalypse,if=debuff.festering_wound.stack=8
-        if target.DebuffStacks(festering_wound_debuff) == 8 Spell(apocalypse)
+        #apocalypse,if=debuff.festering_wound.stack>=6
+        if target.DebuffStacks(festering_wound_debuff) >= 6 Spell(apocalypse)
 
-        unless target.DebuffStacks(festering_wound_debuff) < 8 and SpellCooldown(apocalypse) < 5 and Spell(festering_strike)
+        unless target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) < 3 and Spell(festering_strike)
         {
             #call_action_list,name=aoe,if=active_enemies>=2
             if Enemies(tagged=1) >= 2 UnholyAoeShortCdActions()
@@ -573,12 +588,12 @@ AddFunction UnholyValkyrShortCdActions
 
 AddFunction UnholyValkyrShortCdPostConditions
 {
-    Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 8 and SpellCooldown(apocalypse) < 5 and Spell(festering_strike) or Enemies(tagged=1) >= 2 and UnholyAoeShortCdPostConditions() or target.DebuffStacks(festering_wound_debuff) <= 3 and Spell(festering_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(scourge_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(clawing_shadows)
+    Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) < 3 and Spell(festering_strike) or Enemies(tagged=1) >= 2 and UnholyAoeShortCdPostConditions() or target.DebuffStacks(festering_wound_debuff) <= 4 and Spell(festering_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(scourge_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(clawing_shadows)
 }
 
 AddFunction UnholyValkyrCdActions
 {
-    unless Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) == 8 and Spell(apocalypse) or target.DebuffStacks(festering_wound_debuff) < 8 and SpellCooldown(apocalypse) < 5 and Spell(festering_strike)
+    unless Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) >= 6 and Spell(apocalypse) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) < 3 and Spell(festering_strike)
     {
         #call_action_list,name=aoe,if=active_enemies>=2
         if Enemies(tagged=1) >= 2 UnholyAoeCdActions()
@@ -587,7 +602,7 @@ AddFunction UnholyValkyrCdActions
 
 AddFunction UnholyValkyrCdPostConditions
 {
-    Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) == 8 and Spell(apocalypse) or target.DebuffStacks(festering_wound_debuff) < 8 and SpellCooldown(apocalypse) < 5 and Spell(festering_strike) or Enemies(tagged=1) >= 2 and UnholyAoeCdPostConditions() or target.DebuffStacks(festering_wound_debuff) <= 3 and Spell(festering_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(scourge_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(clawing_shadows)
+    Spell(death_coil) or target.DebuffStacks(festering_wound_debuff) >= 6 and Spell(apocalypse) or target.DebuffStacks(festering_wound_debuff) < 6 and SpellCooldown(apocalypse) < 3 and Spell(festering_strike) or Enemies(tagged=1) >= 2 and UnholyAoeCdPostConditions() or target.DebuffStacks(festering_wound_debuff) <= 4 and Spell(festering_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(scourge_strike) or target.DebuffPresent(festering_wound_debuff) and Spell(clawing_shadows)
 }
 ]]
 
