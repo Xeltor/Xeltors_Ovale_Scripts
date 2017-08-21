@@ -3,8 +3,8 @@ local Ovale = XelOvaleScripts.Ovale
 local OvaleScripts = Ovale.OvaleScripts
 
 do
-	local name = "xeltor_elemental"
-	local desc = "[Xel][7.2.5] Shaman: Elemental"
+	local name = "xeltor_elemental_eg"
+	local desc = "[Xel][7.2.5] Shaman: Elemental Gambling"
 	local code = [[
 Include(ovale_common)
 Include(ovale_interrupt)

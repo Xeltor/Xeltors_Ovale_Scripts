@@ -34,7 +34,7 @@ AddIcon specialization=1 help=main
 	# Interrupt
 	if InCombat() and target.Casting(interrupt) InterruptActions()
 	
-	if target.InRange(chain_lightning) and HasFullControl() and InCombat()
+	if target.InRange(lightning_bolt_elemental) and HasFullControl() and InCombat()
     {
 		# Cooldowns
 		if Boss()
