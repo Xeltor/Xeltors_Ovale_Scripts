@@ -4,7 +4,7 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "xeltor_survival"
-	local desc = "[Xel][7.1.5] Hunter: Survival"
+	local desc = "[Xel][7.2.5] Hunter: Survival"
 	local code = [[
 # Based on SimulationCraft profile "Hunter_SV_T18M".
 #	class=hunter
@@ -18,7 +18,7 @@ Include(ovale_trinkets_wod)
 Include(ovale_hunter_spells)
 
 Define(mend_pet 136)
-	SpellInfo(mend_pet duration=10)
+	SpellInfo(mend_pet cd=10 duration=10)
 	SpellAddBuff(mend_pet mend_pet=1)
 
 # Survival
@@ -66,6 +66,7 @@ AddFunction SurvivalSummonPet
             if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
             if Speed() == 0 Spell(revive_pet)
         }
+		if not pet.IsDead() and pet.HealthPercent() < 75 Spell(mend_pet)
         # if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(ability_hunter_beastcall)
     }
 }
