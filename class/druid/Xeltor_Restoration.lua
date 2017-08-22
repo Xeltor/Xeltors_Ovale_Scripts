@@ -75,7 +75,7 @@ AddFunction Travel
 {
 	if not InCombat() and Speed() > 0
 	{
-		if not Stance(3) Spell(travel_form)
+		if not Stance(3) and not Indoors() Spell(travel_form)
 		# if not Stance(3) and not Stance(druid_cat_form) and not Wet() and Indoors() Spell(cat_form)
 	}
 }
