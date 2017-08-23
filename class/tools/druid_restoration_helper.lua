@@ -16,16 +16,9 @@ AddIcon
 	Texture(spell_nature_resistnature) # Regrowth
 	Texture(inv_relics_idolofrejuvenation) # Swiftmend
 	Texture(ability_druid_flourish) # Wild Growth
-	Texture(spell_nature_wrathv2) # Solar Wrath
-	Texture(spell_arcane_starfire) # Lunar Strike
-	Texture(ability_mage_firestarter) # Sunfire
-	Texture(spell_nature_starfall) # Moonfire
-	Texture(spell_arcane_arcane03) # Starsurge
 	
 	# Buffs
-	Texture(spell_nature_forceofnature) # Moonkin Form
 	Texture(ability_druid_catform) # Cat Form
-	Texture(ability_racial_bearform) # Bear Form
 	Texture(ability_druid_travelform) # Travel Form
 	Texture(spell_druid_ironbark) # Ironbark
 	
@@ -54,6 +47,22 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	# Guardian Affinity
+	Texture(ability_racial_bearform) # Bear Form
+	Texture(ability_druid_mangle2) # Mangle
+	Texture(spell_druid_thrash) # Thrash
+	Texture(spell_nature_starfall) # Moonfire
+	Texture(ability_druid_ironfur) # Ironfur
+	Texture(ability_bullrush) # Frenzied Regeneration
+	
+	# Balance Affinity
+	Texture(spell_nature_forceofnature) # Moonkin Form
+	Texture(spell_nature_wrathv2) # Solar Wrath
+	Texture(spell_arcane_starfire) # Lunar Strike
+	Texture(ability_mage_firestarter) # Sunfire
+	Texture(spell_nature_starfall) # Moonfire
+	Texture(spell_arcane_arcane03) # Starsurge
 }
 ]]
 

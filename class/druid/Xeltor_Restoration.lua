@@ -74,14 +74,14 @@ Define(rebirth 20484)
 Define(innervate 29166)
 	SpellInfo(innervate cd=300)
 	
-# Moonkin stuff
+# Balance Affinity
 Define(moonkin_form 24858)
 	SpellInfo(moonkin_form to_stance=druid_moonkin_form)
 	SpellInfo(moonkin_form unusable=1 if_stance=druid_moonkin_form)
 Define(moonfire 8921)
 	SpellAddBuff(moonfire moonfire_debuff=1)
 Define(moonfire_debuff 164812)
-	SpellInfo(moonfire_debuff duration=16)
+	SpellInfo(moonfire_debuff duration=20)
 Define(sunfire 93402)
 	SpellAddTargetDebuff(sunfire sunfire_debuff=1)
 Define(sunfire_debuff 164815)
@@ -92,6 +92,30 @@ Define(lunar_strike 197628)
 Define(solar_empowerment_buff 164545)
 Define(solar_wrath 190984)
 	SpellAddBuff(solar_wrath solar_empowerment_buff=-1)
+
+# Feral Affinity
+
+
+# Guardian Affinity
+Define(bear_form 5487)
+	SpellInfo(bear_form to_stance=druid_bear_form)
+	SpellInfo(bear_form unusable=1 if_stance=druid_bear_form)
+Define(mangle 33917)
+	SpellInfo(mangle rage=-5 cd=6 cd_haste=melee)
+Define(thrash_bear 77758) # Applies the stacking debuff pulverize uses now
+	SpellInfo(thrash_bear rage=-4 cd=6 cd_haste=melee stance=druid_bear_form)
+	SpellAddTargetDebuff(thrash_bear thrash_bear_debuff=1)
+Define(thrash_bear_debuff 192090)
+	SpellInfo(thrash_bear_debuff duration=15 max_stacks=3 tick=3)
+Define(ironfur 192081)
+	SpellInfo(ironfur rage=45 cd=0.5 offgcd=1)
+	SpellAddBuff(ironfur ironfur_buff=1)
+Define(frenzied_regeneration 22842)
+	SpellInfo(frenzied_regeneration cd=24 offgcd=1 cd_haste=melee)
+	SpellAddBuff(frenzied_regeneration frenzied_regeneration_buff=1)
+	SpellRequire(frenzied_regeneration unusable 1=buff,frenzied_regeneration_buff)
+Define(frenzied_regeneration_buff 22842)
+	SpellInfo(frenzied_regeneration_buff duration=3)
 
 # Talents
 Define(prosperity_talent 1)
@@ -105,17 +129,23 @@ AddIcon specialization=4 help=main
 	}
 	
 	# Ress dead ally
-	if target.IsDead() and target.IsFriend() and InCombat() Spell(rebirth)
-
-	if target.Present() and target.Exists() and target.IsFriend() and target.InRange(lifebloom) and not { mounted() or Stance(3) }
+	if target.IsDead() and target.IsFriend() and InCombat() and Spell(rebirth) Spell(rebirth)
+	
+	if target.Present() and target.Exists() and target.IsFriend() and target.InRange(lifebloom) and { InCombat() or target.HealthPercent() < 90 } and not { mounted() or Stance(3) }
 	{
 		Cooldowns()
 		
 		Rotation()
 	}
 	
+	if target.InRange(mangle) and HasFullControl() and target.Present() and not target.IsFriend()
+	{
+		if BuffPresent(bear_form) or CheckBoxOn(solo) Guardian_Affinity()
+	}
+	
 	Travel()
 }
+AddCheckBox(solo "Solo")
 
 # Travel!
 AddFunction Travel
@@ -169,6 +199,17 @@ AddFunction Rotation
 	# Use Wild Growth when at least 4 members of the group are damaged.
 	if { UnitInRaid() and BuffCountOnAny(cultivation_buff) >= 6 and Speed() == 0 } or { not UnitInRaid() and BuffCountOnAny(cultivation_buff) >= 4 and Speed() == 0 } Spell(wild_growth)
 	if target.HealthPercent() <= 85 and Speed() == 0 Spell(healing_touch)
+}
+
+# Guardian Affinity
+AddFunction Guardian_Affinity
+{
+	if not BuffPresent(bear_form) Spell(bear_form)
+	if IncomingDamage(5) / MaxHealth() >= 0.2 or Health() <= MaxHealth() * 0.65 Spell(frenzied_regeneration)
+	if Rage() > 55 Spell(ironfur)
+	if target.DebuffExpires(moonfire_debuff) Spell(moonfire)
+	Spell(thrash_bear)
+	Spell(mangle)
 }
 ]]
 	OvaleScripts:RegisterScript("DRUID", "restoration", name, desc, code, "script")
