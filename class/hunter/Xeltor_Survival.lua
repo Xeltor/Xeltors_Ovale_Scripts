@@ -27,7 +27,7 @@ AddIcon specialization=3 help=main
 	# Silence
 	if InCombat() and target.Casting(interrupt) InterruptActions()
 	
-	if InCombat() and HasFullControl() and target.Present() and target.InRange(raptor_strike)
+	if HasFullControl() and target.Present() and target.InRange(raptor_strike)
 	{
 		# Pet we needs it.
 		SurvivalSummonPet()

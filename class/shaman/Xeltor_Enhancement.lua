@@ -14,6 +14,9 @@ Include(ovale_shaman_spells)
 
 Define(ghost_wolf 2645)
 Define(ghost_wolf_buff 2645)
+Define(rainfall 215864)
+	SpellInfo(rainfall cd=10)
+Define(rainfall_buff 215864)
 
 # Enhancement
 AddIcon specialization=2 help=main
@@ -21,8 +24,10 @@ AddIcon specialization=2 help=main
 	# Interrupt
 	if InCombat() and target.Casting(interrupt) InterruptActions()
 	
-	if target.InRange(rockbiter) and HasFullControl() and InCombat()
+	if target.InRange(rockbiter) and HasFullControl()
     {
+		if InCombat() and Spell(rainfall) and not BuffPresent(rainfall_buff) Spell(rainfall)
+	
 		# Cooldowns
 		if Boss()
 		{
