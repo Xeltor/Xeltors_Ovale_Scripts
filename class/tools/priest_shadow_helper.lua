@@ -4,19 +4,19 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "Shadowhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Shadow"
+	local desc = "[Xel][7.x] Spellhelper: Shadow"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
-	Texture(spell_shadow_unholyfrenzy) # Mind Blast
 	Texture(spell_shadow_shadowwordpain) # Shadow Word: Pain
 	Texture(spell_holy_stoicism) # Vampiric Touch
+	Texture(spell_shadow_unholyfrenzy) # Mind Blast
 	Texture(spell_shadow_siphonmana) # Mind Flay
-	Texture(ability_ironmaidens_convulsiveshadows) # Void Bolt (Replaces Void Eruption)
 	Texture(spell_shadow_demonicfortitude) # Shadow Word: Death
 	Texture(228260) # Void Eruption
+	Texture(ability_ironmaidens_convulsiveshadows) # Void Bolt (Replaces Void Eruption)
 	Texture(ability_priest_silence) # Silence
 
 	# Buffs
@@ -30,10 +30,8 @@ AddIcon
 	Texture(spell_mage_presenceofmind) # Shadow Word: Void (T1)
 	Texture(spell_shadow_mindbomb) # Mind Bomb (T3)
 	Texture(spell_holy_powerinfusion) # Power Infusion (T6)
-	Texture(spell_shadow_shadowfury) # Shadow Crash (T6)
 	Texture(spell_shadow_soulleech_3) # Mindbender (T6) (Replaces Shadowfiend)
-	Texture(inv_enchant_voidcrystal) # Legacy of the Void (T7)
-	Texture(spell_priest_mindspike) # Mind Spike (T7) (Replaces Mind Flay)
+	Texture(spell_shadow_shadowfury) # Shadow Crash (T7)
 	Texture(achievement_boss_generalvezax_01) # Surrender to Madness (T7)
 
 	# Racials
@@ -50,12 +48,6 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
 
 
