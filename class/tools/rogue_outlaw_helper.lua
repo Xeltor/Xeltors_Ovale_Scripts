@@ -13,6 +13,7 @@ AddIcon
 	Texture(ability_rogue_sabreslash) # Saber Slash
 	Texture(ability_rogue_ambush) # Ambush (Stealth only)
 	Texture(ability_rogue_pistolshot) # Pistol Shot
+	Texture(inv_weapon_rifle_07) # Blunderbuss (Replaces Pistol Shot)
 	Texture(inv_weapon_rifle_01) # Between the Eyes
 	Texture(ability_rogue_waylay) # Run Through
 	Texture(ability_kick) # Kick
