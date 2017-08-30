@@ -7,7 +7,7 @@ do
 	local desc = "[Xel][7.2.5] Shaman: Enhancement"
 	local code = [[
 Include(ovale_common)
-Include(ovale_interrupt)
+
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_shaman_spells)

@@ -12,7 +12,7 @@ do
 #	talents=1103021
 
 Include(ovale_common)
-Include(ovale_interrupt)
+
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_hunter_spells)

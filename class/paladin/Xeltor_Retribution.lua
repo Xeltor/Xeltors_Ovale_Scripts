@@ -7,7 +7,7 @@ do
 	local desc = "[Xel][7.1] Paladin: Retribution"
 	local code = [[
 Include(ovale_common)
-Include(ovale_interrupt)
+
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_paladin_spells)

@@ -13,7 +13,7 @@ do
 #	glyphs=focused_shield/divine_protection/final_wrath
 
 Include(ovale_common)
-Include(ovale_interrupt)
+
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_paladin_spells)

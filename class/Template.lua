@@ -1,5 +1,5 @@
 Include(ovale_common)
-Include(ovale_interrupt)
+
 
 AddIcon specialization=1 help=main
 {

@@ -8,7 +8,7 @@ do
 	local code = [[
 # Include Ovale Defaults (racials & trinkets).
 Include(ovale_common)
-Include(ovale_interrupt)
+
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_deathknight_spells)

@@ -15,7 +15,7 @@ Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_druid_spells)
-Include(ovale_interrupt)
+
 
 Define(travel_form 783)
 Define(travel_form_buff 783)
