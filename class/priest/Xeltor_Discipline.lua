@@ -66,7 +66,7 @@ Define(lights_wrath 207946)
 
 AddIcon specialization=1 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if HasFullControl()
 	{

@@ -33,7 +33,7 @@ AddIcon specialization=3 help=main
 		if not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
 	}
 	
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	if HealthPercent() <= 40 and not Boss() Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()

@@ -35,7 +35,7 @@ AddIcon specialization=1 help=main
 	if InCombat() and HasFullControl() and target.Present() and target.InRange(cobra_shot)
 	{
 		# Silence
-		if InCombat() and target.Casting(interrupt) InterruptActions()
+		if InCombat() InterruptActions()
 		
 		# Survival
 		HunterTankStuff()

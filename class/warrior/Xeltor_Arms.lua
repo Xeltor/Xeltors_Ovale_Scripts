@@ -20,7 +20,7 @@ Include(ovale_warrior_spells)
 # Arms
 AddIcon specialization=1 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 
 	if target.InRange(mortal_strike) and HasFullControl()
 	{

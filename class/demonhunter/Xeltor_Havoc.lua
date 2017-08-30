@@ -15,7 +15,7 @@ Include(ovale_demonhunter_spells)
 
 AddIcon specialization=1 help=main
 {
-	if InCombat() and { target.Casting(interrupt) or not IsBossFight() } HavocInterruptActions()
+	if InCombat() HavocInterruptActions()
 	
 	if target.InRange(chaos_strike) and HasFullControl()
 	{

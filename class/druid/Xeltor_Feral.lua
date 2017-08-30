@@ -42,7 +42,7 @@ AddIcon specialization=2 help=main
 	}
 	
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) and not mounted() and not BuffPresent(travel_form) InterruptActions()
+	if InCombat() and not mounted() and not BuffPresent(travel_form) InterruptActions()
 	
 	# Rotation
 	if target.InRange(rake) and HasFullControl() and target.Present()

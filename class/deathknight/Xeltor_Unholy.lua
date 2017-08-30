@@ -22,7 +22,7 @@ Define(virulent_plague_debuff 191587)
 AddIcon specialization=3 help=main
 {
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
     if target.InRange(festering_strike) and HasFullControl()
     {

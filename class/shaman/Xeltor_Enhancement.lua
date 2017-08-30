@@ -22,7 +22,7 @@ Define(rainfall_buff 215864)
 AddIcon specialization=2 help=main
 {
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(rockbiter) and HasFullControl()
     {

@@ -39,7 +39,7 @@ AddIcon specialization=1 help=main
 		BloodDefaultShortCDActions()
 	}
 		
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(heart_strike) and HasFullControl()
     {

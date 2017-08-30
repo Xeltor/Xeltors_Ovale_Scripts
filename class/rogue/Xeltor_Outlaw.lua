@@ -28,7 +28,7 @@ AddIcon specialization=outlaw help=main
 		if not Talent(slice_and_dice_talent) and not ss_useable() and { BuffRemaining(roll_the_bones_buff) <= 3 or rtb_reroll() } Spell(roll_the_bones)
 	}
 	
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	if HealthPercent() <= 40 and not Boss() Spell(crimson_vial)
 	
 	if target.InRange(saber_slash) and HasFullControl()

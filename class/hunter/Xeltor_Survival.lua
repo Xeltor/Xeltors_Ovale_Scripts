@@ -25,7 +25,7 @@ Define(mend_pet 136)
 AddIcon specialization=3 help=main
 {
 	# Silence
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if HasFullControl() and target.Present() and target.InRange(raptor_strike)
 	{

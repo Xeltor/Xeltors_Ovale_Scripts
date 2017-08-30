@@ -40,7 +40,7 @@ AddIcon specialization=3 help=main
 	}
 	
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	# Rotation
 	if target.InRange(mangle) and HasFullControl() and target.Present()

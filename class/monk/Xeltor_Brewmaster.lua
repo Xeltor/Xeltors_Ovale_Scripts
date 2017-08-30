@@ -18,7 +18,7 @@ Define(leg_sweep 119381)
 # Brewmaster
 AddIcon specialization=1 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(tiger_palm) and HasFullControl()
 	{

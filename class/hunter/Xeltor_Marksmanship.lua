@@ -25,7 +25,7 @@ AddIcon specialization=2 help=main
 	if InCombat() and HasFullControl() and target.Present() and target.InRange(arcane_shot)
 	{
 		# Silence
-		if InCombat() and target.Casting(interrupt) InterruptActions()
+		if InCombat() InterruptActions()
 		
 		# Cooldowns
 		if Boss()

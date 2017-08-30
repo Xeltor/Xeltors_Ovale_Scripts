@@ -15,7 +15,7 @@ Include(ovale_warrior_spells)
 # Fury
 AddIcon specialization=2 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
     if target.InRange(rampage) and HasFullControl()
 	{

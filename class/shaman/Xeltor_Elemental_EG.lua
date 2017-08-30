@@ -23,7 +23,7 @@ AddIcon specialization=1 help=main
 	}
 	
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(lightning_bolt_elemental) and HasFullControl() and InCombat()
     {

@@ -14,7 +14,7 @@ Include(ovale_priest_spells)
 
 AddIcon specialization=3 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if InCombat() and HasFullControl() and target.InRange(mind_blast)
 	{

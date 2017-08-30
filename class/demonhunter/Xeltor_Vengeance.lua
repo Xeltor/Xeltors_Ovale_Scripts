@@ -15,7 +15,7 @@ Include(ovale_demonhunter_spells)
 AddIcon specialization=2 help=main
 {
 	# Interrupt
-	if InCombat() and { target.Casting(interrupt) or not IsBossFight() } InterruptActions()
+	if InCombat() InterruptActions()
 	
     if target.InRange(shear) and HasFullControl()
     {
@@ -40,7 +40,7 @@ AddFunction Boss
 # Common functions.
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.Casting()
+	if not target.IsFriend() and target.Casting() and target.IsInterruptible()
 	{
 		if target.InRange(consume_magic) and target.IsInterruptible() Spell(consume_magic)
 		if target.InRange(fel_eruption) and not target.Classification(worldboss) Spell(fel_eruption)

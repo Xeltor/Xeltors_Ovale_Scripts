@@ -18,7 +18,7 @@ Include(ovale_warrior_spells)
 
 AddIcon specialization=3 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(shield_slam) and HasFullControl()
 	{

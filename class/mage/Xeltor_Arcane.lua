@@ -17,7 +17,7 @@ Define(slipstream_talent 5)
 # Arcane
 AddIcon specialization=1 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if InCombat() and target.InRange(arcane_blast) and HasFullControl()
 	{

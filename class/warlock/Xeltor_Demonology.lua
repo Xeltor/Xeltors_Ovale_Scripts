@@ -41,7 +41,7 @@ AddIcon specialization=2 help=main
 	if not mounted() PetStuff()
 
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if InCombat() and target.InRange(shadow_bolt) and HasFullControl()
     {

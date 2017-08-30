@@ -32,7 +32,7 @@ AddIcon specialization=1 help=main
 	}
 	
 	if HealthPercent() < 70 and { not Boss() or not InCombat() } Spell(crimson_vial)
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(mutilate) and HasFullControl()
 	{

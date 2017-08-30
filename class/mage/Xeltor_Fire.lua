@@ -28,7 +28,7 @@ Define(hypothermia_debuff 41425)
 
 AddIcon specialization=2 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	#cold_snap,if=health.pct<30
 	if HealthPercent() < 30 and not mounted() Spell(cold_snap)

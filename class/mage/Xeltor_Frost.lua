@@ -22,7 +22,7 @@ Define(ice_block_buff 45438)
 
 AddIcon specialization=3 help=main
 {
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if BuffExpires(ice_barrier) and IncomingDamage(5) > 0 and not mounted() and not { target.Classification(worldboss) or BuffPresent(burst_haste_buff any=1) } Spell(ice_barrier)
 	

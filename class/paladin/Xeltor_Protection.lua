@@ -37,7 +37,7 @@ AddIcon specialization=2 help=main
 	}
 	
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(hammer_of_the_righteous) and HasFullControl()
 	{

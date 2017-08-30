@@ -22,7 +22,7 @@ Include(ovale_deathknight_spells)
 AddIcon specialization=2 help=main
 {
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
     if target.InRange(frost_strike) and HasFullControl()
     {

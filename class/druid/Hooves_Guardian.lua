@@ -60,7 +60,7 @@ AddIcon specialization=3 help=main
 		GuardianDefaultMainActions()
 	}
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 
 	if InCombat() and target.Present() and not target.IsFriend() and not target.InRange(mangle) and target.InRange(wild_charge) and { TimeInCombat() < 6 or Falling() } Spell(wild_charge)
 	Travel()

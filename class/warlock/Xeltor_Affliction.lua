@@ -28,7 +28,7 @@ AddIcon specialization=1 help=main
 	if not mounted() PetStuff()
 
 	# Interrupt
-	if InCombat() and target.Casting(interrupt) InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if InCombat() and target.InRange(agony) and HasFullControl()
     {
