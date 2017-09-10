@@ -145,6 +145,7 @@ AddIcon specialization=4 help=main
 	
 	Travel()
 }
+AddCheckBox(hard "Heal harder")
 AddCheckBox(solo "Solo")
 
 # Travel!
@@ -165,7 +166,7 @@ AddFunction HasFocus
 AddFunction Cooldowns 
 {
 	# We are on a healing frenzy
-	if { UnitInRaid() and BuffCountOnAny(cultivation_buff) >= 6 and Speed() == 0 } or { not UnitInRaid() and BuffCountOnAny(cultivation_buff) >= 4 and Speed() == 0 } 
+	if { UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } 
 	{
 		Spell(berserking)
 		Spell(innervate)
@@ -185,8 +186,11 @@ AddFunction Rotation
 {
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() <= 25 Spell(swiftmend)
+	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
+	# Use Wild Growth when at least 4 members of the group are damaged.
+	if { UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } Spell(wild_growth)
 	# Use Regrowth as an emergency heal.
-	if target.HealthPercent() <= 40 and Speed() == 0 Spell(regrowth_restoration)
+	if target.HealthPercent() <= 60 and Speed() == 0 Spell(regrowth_restoration)
 	# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
 	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
 	# Use Clearcasting procs on one of the tanks.
@@ -195,9 +199,6 @@ AddFunction Rotation
 	if target.BuffRemains(rejuvenation_buff) <= 3.5 or not target.BuffPresent(rejuvenation_buff) or { target.BuffPresent(cultivation_buff) and not target.BuffPresent(rejuvenation_germination) and Talent(germination_talent) } Spell(rejuvenation)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() <= 40 Spell(swiftmend)
-	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
-	# Use Wild Growth when at least 4 members of the group are damaged.
-	if { UnitInRaid() and BuffCountOnAny(cultivation_buff) >= 6 and Speed() == 0 } or { not UnitInRaid() and BuffCountOnAny(cultivation_buff) >= 4 and Speed() == 0 } Spell(wild_growth)
 	if target.HealthPercent() <= 85 and Speed() == 0 Spell(healing_touch)
 }
 

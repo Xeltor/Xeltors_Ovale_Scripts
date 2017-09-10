@@ -16,6 +16,7 @@
 	<Script file="mage_fire_helper.lua" />
 	<Script file="mage_frost_helper.lua" />
 	<Script file="monk_brewmaster_helper.lua" />
+	<Script file="monk_mistweaver_helper.lua" />
 	<Script file="monk_windwalker_helper.lua" />
 	<Script file="paladin_protection_helper.lua" />
 	<Script file="paladin_retribution_helper.lua" />

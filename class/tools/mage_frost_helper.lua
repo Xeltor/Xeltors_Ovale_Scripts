@@ -13,32 +13,30 @@ AddIcon
 	Texture(spell_frost_frostbolt02) # Frostbolt
 	Texture(spell_frost_frostblast) # Ice Lance
 	Texture(ability_warlock_burningembersblue) # Flurry
-	Texture(spell_frost_glacier) # Cone of Cold
 	Texture(spell_frost_frozenorb) # Frozen Orb
-	Texture(spell_frost_frostnova) # Frost Nova
-	Texture(spell_frost_iceshock) # Counterspell
+	Texture(spell_frost_icestorm) # Blizzard
 
-	# Pet skills (Needed in the rotation)
+	# Pet skills (For non lonely winter rotation)
 	Texture(ability_vehicle_sonicshockwave) # Water Jet (DO NOT SET TO AUTOCAST)
 	
 	# Buffs
 	Texture(spell_frost_coldhearted) # Icy Veins
 	Texture(spell_ice_lament) # Ice Barrier
+	Texture(ability_mage_timewarp) # Time Warp
 
 	# Artifact
 	Texture(artifactability_frostmage_ebonbolt) # Ebonbolt
 
 	# Talents
-	Texture(spell_frost_chillingblast) # Ray of Frost (T1)
+	Texture(ability_mage_rayoffrost) # Ray of Frost (T1)
 	Texture(spell_arcane_massdispel) # Shimmer (T2)
+	Texture(spell_mage_iceflows) # Ice Floes (T2)
 	Texture(spell_magic_lesserinvisibilty) # Mirror Image (T3)
 	Texture(spell_mage_runeofpower) # Rune of Power (T3)
 	Texture(spell_mage_icenova) # Ice Nova (T4)
 	Texture(ability_mage_coldasice) # Frozen Touch (T4)
-	Texture(spell_mage_iceflows) # Ice Floes (T5)
-	Texture(113724) # Ring of Frost (T5)
 	Texture(spell_mage_frostbomb) # Frost Bomb (T6)
-	Texture(spell_frost_frostbolt) # Glacial Spike (T7)
+	Texture(ability_mage_glacialspike) # Glacial Spike (T7)
 	Texture(spell_mage_cometstorm) # Comet Storm (T7)
 
 	# Racials

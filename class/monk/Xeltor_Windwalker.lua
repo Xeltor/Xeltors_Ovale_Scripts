@@ -21,7 +21,7 @@ AddIcon specialization=3 help=main
     # if not mounted() and not {BuffPresent(critical_strike_buff any=1) or BuffPresent(str_agi_int_buff any=1)} Spell(legacy_of_the_white_tiger)
     
 	#spear_hand_strike
-	if InCombat() and { target.Casting(interrupt) or not IsBossFight() } InterruptActions()
+	if InCombat() InterruptActions()
 	
 	if target.InRange(tiger_palm) and HasFullControl()
     {
