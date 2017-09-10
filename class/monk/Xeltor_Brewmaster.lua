@@ -25,7 +25,7 @@ AddIcon specialization=1 help=main
 		if Boss() BrewmasterDefaultCdActions()
 		BrewmasterDefaultShortCdActions()
 		if Talent(blackout_combo_talent) BrewmasterBlackoutComboMainActions()
-		unless Talent(blackout_combo_talent) 
+		unless Talent(blackout_combo_talent) W
 		{
 			BrewmasterDefaultMainActions()
 		}
@@ -200,13 +200,13 @@ AddFunction BrewmasterDefaultCdActions
 {
 	# BrewmasterInterruptActions()
 	# if CheckBoxOn(opt_legendary_ring_tank) Item(legendary_ring_bonus_armor usable=1)
-	if not PetPresent(name=Niuzao) Spell(invoke_niuzao)
+	#if not PetPresent(name=Niuzao) Spell(invoke_niuzao)
 	# Item(Trinket0Slot usable=1 text=13)
 	# Item(Trinket1Slot usable=1 text=14)
-	if (HasEquippedItem(fundamental_observation)) Spell(zen_meditation)
-	Spell(fortifying_brew)
-	Spell(zen_meditation)
-	Spell(dampen_harm)
+	#if (HasEquippedItem(fundamental_observation)) Spell(zen_meditation)
+	#Spell(fortifying_brew)
+	#Spell(zen_meditation)
+	#Spell(dampen_harm)
 	# Item(unbending_potion usable=1)
 }
 ]]
