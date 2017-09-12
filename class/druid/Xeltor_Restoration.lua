@@ -58,6 +58,8 @@ Define(cenarion_ward_buff 102351)
 Define(regrowth_restoration 8936)
 	SpellAddTargetBuff(regrowth_restoration regrowth_buff=1)
 	SpellAddBuff(regrowth_restoration clearcasting_restoration_buff=0)
+Define(regrowth_buff 8936)
+	SpellInfo(regrowth_buff duration=12)
 Define(renewal 108238)
 	SpellInfo(renewal cd=120 gcd=0 offgcd=1)
 Define(rejuvenation 774)
@@ -189,16 +191,17 @@ AddFunction Rotation
 	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
 	# Use Wild Growth when at least 4 members of the group are damaged.
 	if { UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } Spell(wild_growth)
-	# Use Regrowth as an emergency heal.
-	if target.HealthPercent() <= 60 and Speed() == 0 Spell(regrowth_restoration)
 	# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
 	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
+	# Use Regrowth as an emergency heal.
+	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and Speed() == 0 Spell(regrowth_restoration)
 	# Use Clearcasting procs on one of the tanks.
 	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and target.IsFocus() and Speed() == 0 } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and Speed() == 0 and target.HealthPercent() <= 80 } Spell(regrowth_restoration)
 	# Keep Rejuvenation on the tank and on members of the group that just took damage or are about to take damage. Keep up both Rejuvenations on targets on which the damage is too high for a single one.
 	if target.BuffRemains(rejuvenation_buff) <= 3.5 or not target.BuffPresent(rejuvenation_buff) or { target.BuffPresent(cultivation_buff) and not target.BuffPresent(rejuvenation_germination) and Talent(germination_talent) } Spell(rejuvenation)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() <= 40 Spell(swiftmend)
+	if target.HealthPercent() <= 60 and Speed() == 0 Spell(regrowth_restoration)
 	if target.HealthPercent() <= 85 and Speed() == 0 Spell(healing_touch)
 }
 
