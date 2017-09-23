@@ -71,7 +71,7 @@ AddFunction InterruptActions
 
 AddFunction PetStuff
 {
-	if HealthPercent() > 50 and pet.HealthPercent() < 50 and pet.Present() and pet.Exists() Spell(health_funnel)
+	if pet.HealthPercent() < 50 and pet.Present() and pet.Exists() Spell(health_funnel)
 }
 
 AddFunction NotMoving
