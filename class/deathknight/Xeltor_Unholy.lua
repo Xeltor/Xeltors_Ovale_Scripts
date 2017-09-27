@@ -41,6 +41,31 @@ AddIcon specialization=3 help=main
 		# Rotation
 		UnholyDefaultMainActions()
 	}
+	
+	# Range rotation.
+	if InCombat() and target.InRange(outbreak) and not target.InRange(festering_strike)
+	{
+		if not pet.Present() Spell(raise_dead)
+		
+		# Cooldown
+		if Boss()
+		{
+			UnholyDefaultCdActions()
+		}
+
+		# Short cooldown
+		UnholyDefaultShortCdActions()
+		
+		if not target.DebuffPresent(virulent_plague_debuff) Spell(outbreak)
+		#death_coil,if=runic_power.deficit<10
+		if RunicPowerDeficit() < 10 Spell(death_coil)
+		#death_coil,if=!talent.dark_arbiter.enabled&buff.sudden_doom.up&!buff.necrosis.up&rune<=3
+		if not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 Spell(death_coil)
+		#death_coil,if=talent.dark_arbiter.enabled&buff.sudden_doom.up&cooldown.dark_arbiter.remains>5&rune<=3
+		if Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 Spell(death_coil)
+		#clawing_shadows,if=debuff.festering_wound.up
+        if target.DebuffPresent(festering_wound_debuff) Spell(clawing_shadows)
+	}
 }
 
 AddFunction Boss
