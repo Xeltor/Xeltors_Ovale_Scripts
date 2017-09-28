@@ -14,11 +14,11 @@ Include(ovale_warlock_spells)
 Define(health_funnel 755)
 Define(spell_lock_fh 19647)
 	SpellInfo(spell_lock_fh cd=24)
+Define(legion_strike 30213)
+Define(drain_life 234153)
 
 AddIcon specialization=2 help=main
 {
-	if not mounted() PetStuff()
-
 	# Interrupt
 	if InCombat() InterruptActions()
 	
@@ -26,17 +26,17 @@ AddIcon specialization=2 help=main
     {
 		#life_tap
 		if ManaPercent() <= 30 Spell(life_tap)
+		if pet.CreatureFamily(Voidwalker) or pet.CreatureFamily(Voidlord) PetStuff()
 		
 		# Cooldowns
-		if Boss()
-		{
-			if NotMoving() DemonologyDefaultCdActions()
-		}
+		if Boss() and NotMoving() DemonologyDefaultCdActions()
 		
 		# Short Cooldowns
 		if NotMoving() DemonologyDefaultShortCdActions()
 		
 		# Default rotation
+		# Pet skill fixes.
+		if pet.CreatureFamily(Felguard) and pet.BuffRemains(demonic_empowerment) >= 6 and target.Distance() - pet.Distance() <= 8 Spell(felguard_felstorm)
 		if NotMoving() DemonologyDefaultMainActions()
 		
 		# AoE on the move :D
@@ -53,7 +53,7 @@ AddFunction InterruptActions
 {
 	if not target.IsFriend() and target.IsInterruptible()
 	{
-		if target.InRange(spell_lock_fh) Spell(spell_lock_fh)
+		if pet.CreatureFamily(Felhunter) and target.Distance() - pet.Distance() <= 40 Spell(spell_lock_fh)
 	}
 }
 
@@ -79,7 +79,8 @@ AddFunction no_de1
 
 AddFunction PetStuff
 {
-	# if HealthPercent() > 50 and pet.HealthPercent() >= 1 and pet.HealthPercent() < 25 and pet.Present() and pet.Exists() and target.Exists() and target.Present() and not target.IsFriend() Spell(health_funnel)
+	if pet.Health() < pet.HealthMissing() and pet.Present() and pet.Exists() and Speed() == 0 Spell(health_funnel)
+	if HealthPercent() < 50 and target.Present() and not target.IsFriend() and Speed() == 0 Spell(drain_life)
 }
 
 AddFunction NotMoving
@@ -109,11 +110,11 @@ AddFunction DemonologyDefaultMainActions
     #shadow_bolt,if=buff.shadowy_inspiration.remains&soul_shard<5&!prev_gcd.1.doom&!variable.no_de2
     if BuffPresent(shadowy_inspiration_buff) and SoulShards() < 5 and not PreviousGCDSpell(doom) and not no_de2() Spell(shadow_bolt)
     #summon_darkglare,if=prev_gcd.1.hand_of_guldan|prev_gcd.1.call_dreadstalkers|talent.power_trip.enabled
-    if PreviousGCDSpell(hand_of_guldan) or PreviousGCDSpell(call_dreadstalkers) or Talent(power_trip_talent) Spell(summon_darkglare)
+    if { PreviousGCDSpell(hand_of_guldan) or PreviousGCDSpell(call_dreadstalkers) or Talent(power_trip_talent) } and DebuffCountOnAny(doom) >= 1 Spell(summon_darkglare)
     #summon_darkglare,if=cooldown.call_dreadstalkers.remains>5&soul_shard<3
-    if SpellCooldown(call_dreadstalkers) > 5 and SoulShards() < 3 Spell(summon_darkglare)
+    if SpellCooldown(call_dreadstalkers) > 5 and SoulShards() < 3 and DebuffCountOnAny(doom) >= 1 Spell(summon_darkglare)
     #summon_darkglare,if=cooldown.call_dreadstalkers.remains<=action.summon_darkglare.cast_time&(soul_shard>=3|soul_shard>=1&buff.demonic_calling.react)
-    if SpellCooldown(call_dreadstalkers) <= CastTime(summon_darkglare) and { SoulShards() >= 3 or SoulShards() >= 1 and BuffPresent(demonic_calling_buff) } Spell(summon_darkglare)
+    if SpellCooldown(call_dreadstalkers) <= CastTime(summon_darkglare) and { SoulShards() >= 3 or SoulShards() >= 1 and BuffPresent(demonic_calling_buff) } and DebuffCountOnAny(doom) >= 1 Spell(summon_darkglare)
     #call_dreadstalkers,if=talent.summon_darkglare.enabled&(spell_targets.implosion<3|!talent.implosion.enabled)&(cooldown.summon_darkglare.remains>2|prev_gcd.1.summon_darkglare|cooldown.summon_darkglare.remains<=action.call_dreadstalkers.cast_time&soul_shard>=3|cooldown.summon_darkglare.remains<=action.call_dreadstalkers.cast_time&soul_shard>=1&buff.demonic_calling.react)
     if Talent(summon_darkglare_talent) and { Enemies(tagged=1) < 3 or not Talent(implosion_talent) } and { SpellCooldown(summon_darkglare) > 2 or PreviousGCDSpell(summon_darkglare) or SpellCooldown(summon_darkglare) <= CastTime(call_dreadstalkers) and SoulShards() >= 3 or SpellCooldown(summon_darkglare) <= CastTime(call_dreadstalkers) and SoulShards() >= 1 and BuffPresent(demonic_calling_buff) } Spell(call_dreadstalkers)
     #hand_of_guldan,if=soul_shard>=4&(((!(variable.no_de1|prev_gcd.1.hand_of_guldan)&(pet_count>=13&!talent.shadowy_inspiration.enabled|pet_count>=6&talent.shadowy_inspiration.enabled))|!variable.no_de2|soul_shard=5)&talent.power_trip.enabled)
@@ -121,9 +122,9 @@ AddFunction DemonologyDefaultMainActions
     #hand_of_guldan,if=(soul_shard>=3&prev_gcd.1.call_dreadstalkers&!artifact.thalkiels_ascendance.rank)|soul_shard>=5|(soul_shard>=4&cooldown.summon_darkglare.remains>2)
     if SoulShards() >= 3 and PreviousGCDSpell(call_dreadstalkers) and not ArtifactTraitRank(thalkiels_ascendance) or SoulShards() >= 5 or SoulShards() >= 4 and SpellCooldown(summon_darkglare) > 2 Spell(hand_of_guldan)
     #demonic_empowerment,if=(((talent.power_trip.enabled&(!talent.implosion.enabled|spell_targets.demonwrath<=1))|!talent.implosion.enabled|(talent.implosion.enabled&!talent.soul_conduit.enabled&spell_targets.demonwrath<=3))&(wild_imp_no_de>3|prev_gcd.1.hand_of_guldan))|(prev_gcd.1.hand_of_guldan&wild_imp_no_de=0&wild_imp_remaining_duration<=0)|(prev_gcd.1.implosion&wild_imp_no_de>0)
-    if { Talent(power_trip_talent) and { not Talent(implosion_talent) or Enemies(tagged=1) <= 1 } or not Talent(implosion_talent) or Talent(implosion_talent) and not Talent(soul_conduit_talent) and Enemies(tagged=1) <= 3 } and { NotDeDemons(wild_imp) > 3 or PreviousGCDSpell(hand_of_guldan) } or PreviousGCDSpell(hand_of_guldan) and NotDeDemons(wild_imp) == 0 and DemonDuration(wild_imp) <= 0 or PreviousGCDSpell(implosion) and NotDeDemons(wild_imp) > 0 Spell(demonic_empowerment)
+    if { { Talent(power_trip_talent) and { not Talent(implosion_talent) or Enemies(tagged=1) <= 1 } or not Talent(implosion_talent) or Talent(implosion_talent) and not Talent(soul_conduit_talent) and Enemies(tagged=1) <= 3 } and { NotDeDemons(wild_imp) > 3 or PreviousGCDSpell(hand_of_guldan) } or PreviousGCDSpell(hand_of_guldan) and NotDeDemons(wild_imp) == 0 and DemonDuration(wild_imp) <= 0 or PreviousGCDSpell(implosion) and NotDeDemons(wild_imp) > 0 } and not PreviousGCDSpell(demonic_empowerment) Spell(demonic_empowerment)
     #demonic_empowerment,if=variable.no_de1|prev_gcd.1.hand_of_guldan
-    if no_de1() or PreviousGCDSpell(hand_of_guldan) Spell(demonic_empowerment)
+    if { no_de1() or PreviousGCDSpell(hand_of_guldan) } and not PreviousGCDSpell(demonic_empowerment) Spell(demonic_empowerment)
     #shadowflame,if=charges=2&spell_targets.demonwrath<5
     if Charges(shadowflame) == 2 and Enemies(tagged=1) < 5 Spell(shadowflame)
     #life_tap,if=mana.pct<=15|(mana.pct<=65&((cooldown.call_dreadstalkers.remains<=0.75&soul_shard>=2)|((cooldown.call_dreadstalkers.remains<gcd*2)&(cooldown.summon_doomguard.remains<=0.75|cooldown.service_pet.remains<=0.75)&soul_shard>=3)))

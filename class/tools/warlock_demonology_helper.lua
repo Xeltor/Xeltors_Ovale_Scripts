@@ -4,7 +4,7 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "WLKDEMOhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Demonology"
+	local desc = "[Xel][7.x] Spellhelper: Demonology"
 	local code = [[
 AddIcon
 {
@@ -14,14 +14,20 @@ AddIcon
 	Texture(ability_warlock_handofguldan) # Hand of Gul'dan
 	Texture(spell_shadow_auraofdarkness) # Doom
 	Texture(spell_shadow_burningspirit) # Life Tap
-	Texture(ability_warrior_bladestorm) # Felstorm (PET)
+	Texture(ability_warrior_bladestorm) # Felstorm (command demon)
+	Texture(spell_shadow_mindrot) # Spell Lock (command demon)
+	Texture(spell_shadow_lifedrain02) # Drain Life (Used with Voidwalker / Voidlord)
+	
+	# Artifact
+	Texture(inv_offhand_1h_artifactskulloferedar_d_01) # Tha'kiel's Consumption
 
 	# Buffs
 	Texture(spell_warlock_demonicempowerment) # Demonic Empowerment
 	Texture(spell_warlock_demonwrath) # Demonwrath
 	Texture(spell_warlock_calldreadstalkers) # Call Dreadstalkers
 	Texture(warlock_summon_doomguard) # Summon Doomguard
-	Texture(spell_shadow_lifedrain) # Health Funnel
+	Texture(spell_shadow_summoninfernal) # Summon Infernal
+	Texture(spell_shadow_lifedrain) # Health Funnel (Used with Voidwalker / Voidlord)
 
 	# Talents
 	Texture(ability_warlock_shadowflame) # Shadowflame (T1)
@@ -31,7 +37,7 @@ AddIcon
 	Texture(spell_warlock_demonsoul) # Soul Harvest (T4)
 	Texture(spell_shadow_summonfelguard) # Grimoire: Felguard (T6)
 	Texture(achievement_boss_durumu) # Summon Darkglare (T7)
-	Texture(spell_warlock_demonbolt) # Demonbolt (T7)
+	Texture(spell_warlock_demonbolt) # Demonbolt (T7) (Replaces Shadow Bolt)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -47,12 +53,6 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
 ]]
 
