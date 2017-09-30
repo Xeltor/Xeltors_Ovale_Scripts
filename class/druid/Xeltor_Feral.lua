@@ -85,6 +85,12 @@ AddFunction InterruptActions
 	}
 }
 
+AddFunction use_thrash
+{
+    if HasEquippedItem(luffa_wrappings) 1
+    0
+}
+
 ### actions.default
 
 AddFunction FeralDefaultMainActions
