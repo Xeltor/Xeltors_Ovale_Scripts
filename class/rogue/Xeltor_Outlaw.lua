@@ -18,7 +18,7 @@ Define(crimson_vial 185311)
 # Outlaw
 AddIcon specialization=outlaw help=main
 {
-	# PvE Stuff
+	# Precombat
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
 		if BuffExpires(stealthed_buff any=1) Spell(stealth)
@@ -34,10 +34,7 @@ AddIcon specialization=outlaw help=main
 	if target.InRange(saber_slash) and HasFullControl()
 	{
 		# Cooldowns
-		if Boss() 
-		{
-			OutlawDefaultCdActions()
-		}
+		if Boss() OutlawDefaultCdActions()
 		
 		# Short Cooldowns
 		OutlawDefaultShortCdActions()
@@ -50,11 +47,6 @@ AddIcon specialization=outlaw help=main
 AddFunction Boss
 {
 	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
-AddFunction position_front
-{
-	target.istargetingplayer()
 }
 
 AddFunction InterruptActions
