@@ -54,8 +54,9 @@ AddIcon specialization=2 help=main
 		FeralDefaultMainActions()
 	}
 	if InCombat() and target.Present() and not target.IsFriend() and not target.InRange(rake) and target.InRange(wild_charge) and { TimeInCombat() < 6 or Falling() } Spell(wild_charge)
-	Travel()
+	if CheckBoxOn(travers) Travel()
 }
+AddCheckBox(travers "Auto-travel")
 
 AddFunction Boss
 {
@@ -107,7 +108,7 @@ AddFunction FeralDefaultMainActions
         #savage_roar,if=!buff.savage_roar.up
         if not BuffPresent(savage_roar_buff) Spell(savage_roar)
         #regrowth,if=(talent.sabertooth.enabled|buff.predatory_swiftness.up)&talent.bloodtalons.enabled&buff.bloodtalons.down&combo_points=5
-        if { Talent(sabertooth_talent) or BuffPresent(predatory_swiftness_buff) } and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and ComboPoints() == 5 Spell(regrowth)
+        if BuffPresent(predatory_swiftness_buff) and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and ComboPoints() == 5 Spell(regrowth)
         #rip,if=combo_points=5
         if ComboPoints() == 5 Spell(rip)
         #thrash_cat,if=!ticking&variable.use_thrash>0
@@ -287,7 +288,7 @@ AddFunction FeralSingleTargetMainActions
     unless FeralCooldownsMainPostConditions()
     {
         #regrowth,if=combo_points=5&talent.bloodtalons.enabled&buff.bloodtalons.down&(!buff.incarnation.up|dot.rip.remains<8|dot.rake.remains<5)
-        if ComboPoints() == 5 and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and { not BuffPresent(incarnation_king_of_the_jungle_buff) or target.DebuffRemaining(rip_debuff) < 8 or target.DebuffRemaining(rake_debuff) < 5 } Spell(regrowth)
+        # if ComboPoints() == 5 and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and { not BuffPresent(incarnation_king_of_the_jungle_buff) or target.DebuffRemaining(rip_debuff) < 8 or target.DebuffRemaining(rake_debuff) < 5 } Spell(regrowth)
         #run_action_list,name=st_finishers,if=combo_points>4
         if ComboPoints() > 4 FeralStFinishersMainActions()
 
@@ -316,7 +317,7 @@ AddFunction FeralSingleTargetShortCdActions
             #call_action_list,name=cooldowns
             FeralCooldownsShortCdActions()
 
-            unless FeralCooldownsShortCdPostConditions() or ComboPoints() == 5 and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and { not BuffPresent(incarnation_king_of_the_jungle_buff) or target.DebuffRemaining(rip_debuff) < 8 or target.DebuffRemaining(rake_debuff) < 5 } and Spell(regrowth)
+            unless FeralCooldownsShortCdPostConditions()
             {
                 #run_action_list,name=st_finishers,if=combo_points>4
                 if ComboPoints() > 4 FeralStFinishersShortCdActions()
@@ -333,7 +334,7 @@ AddFunction FeralSingleTargetShortCdActions
 
 AddFunction FeralSingleTargetShortCdPostConditions
 {
-    not BuffPresent(cat_form_buff) and Spell(cat_form) or { BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff) } and Spell(rake) or FeralCooldownsShortCdPostConditions() or ComboPoints() == 5 and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and { not BuffPresent(incarnation_king_of_the_jungle_buff) or target.DebuffRemaining(rip_debuff) < 8 or target.DebuffRemaining(rake_debuff) < 5 } and Spell(regrowth) or ComboPoints() > 4 and FeralStFinishersShortCdPostConditions() or FeralStGeneratorsShortCdPostConditions()
+    not BuffPresent(cat_form_buff) and Spell(cat_form) or { BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff) } and Spell(rake) or FeralCooldownsShortCdPostConditions() or ComboPoints() > 4 and FeralStFinishersShortCdPostConditions() or FeralStGeneratorsShortCdPostConditions()
 }
 
 AddFunction FeralSingleTargetCdActions
@@ -343,7 +344,7 @@ AddFunction FeralSingleTargetCdActions
         #call_action_list,name=cooldowns
         FeralCooldownsCdActions()
 
-        unless FeralCooldownsCdPostConditions() or ComboPoints() == 5 and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and { not BuffPresent(incarnation_king_of_the_jungle_buff) or target.DebuffRemaining(rip_debuff) < 8 or target.DebuffRemaining(rake_debuff) < 5 } and Spell(regrowth)
+        unless FeralCooldownsCdPostConditions()
         {
             #run_action_list,name=st_finishers,if=combo_points>4
             if ComboPoints() > 4 FeralStFinishersCdActions()
@@ -359,7 +360,7 @@ AddFunction FeralSingleTargetCdActions
 
 AddFunction FeralSingleTargetCdPostConditions
 {
-    not BuffPresent(cat_form_buff) and Spell(cat_form) or { BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff) } and Spell(rake) or FeralCooldownsCdPostConditions() or ComboPoints() == 5 and Talent(bloodtalons_talent) and BuffExpires(bloodtalons_buff) and { not BuffPresent(incarnation_king_of_the_jungle_buff) or target.DebuffRemaining(rip_debuff) < 8 or target.DebuffRemaining(rake_debuff) < 5 } and Spell(regrowth) or ComboPoints() > 4 and FeralStFinishersCdPostConditions() or FeralStGeneratorsCdPostConditions()
+    not BuffPresent(cat_form_buff) and Spell(cat_form) or { BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff) } and Spell(rake) or FeralCooldownsCdPostConditions() or ComboPoints() > 4 and FeralStFinishersCdPostConditions() or FeralStGeneratorsCdPostConditions()
 }
 
 ### actions.st_finishers

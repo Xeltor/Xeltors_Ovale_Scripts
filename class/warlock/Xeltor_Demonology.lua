@@ -185,9 +185,9 @@ AddFunction DemonologyDefaultCdActions
             #summon_infernal,if=!talent.grimoire_of_supremacy.enabled&spell_targets.infernal_awakening>2
             if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
             #summon_doomguard,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal=1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-            if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
+            # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
             #summon_infernal,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-            if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
+            # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
 
             unless BuffPresent(shadowy_inspiration_buff) and SoulShards() < 5 and not PreviousGCDSpell(doom) and not no_de2() and Spell(shadow_bolt) or { PreviousGCDSpell(hand_of_guldan) or PreviousGCDSpell(call_dreadstalkers) or Talent(power_trip_talent) } and Spell(summon_darkglare) or SpellCooldown(call_dreadstalkers) > 5 and SoulShards() < 3 and Spell(summon_darkglare) or SpellCooldown(call_dreadstalkers) <= CastTime(summon_darkglare) and { SoulShards() >= 3 or SoulShards() >= 1 and BuffPresent(demonic_calling_buff) } and Spell(summon_darkglare) or Talent(summon_darkglare_talent) and { Enemies(tagged=1) < 3 or not Talent(implosion_talent) } and { SpellCooldown(summon_darkglare) > 2 or PreviousGCDSpell(summon_darkglare) or SpellCooldown(summon_darkglare) <= CastTime(call_dreadstalkers) and SoulShards() >= 3 or SpellCooldown(summon_darkglare) <= CastTime(call_dreadstalkers) and SoulShards() >= 1 and BuffPresent(demonic_calling_buff) } and Spell(call_dreadstalkers) or SoulShards() >= 4 and { not { no_de1() or PreviousGCDSpell(hand_of_guldan) } and { pet_count() >= 13 and not Talent(shadowy_inspiration_talent) or pet_count() >= 6 and Talent(shadowy_inspiration_talent) } or not no_de2() or SoulShards() == 5 } and Talent(power_trip_talent) and Spell(hand_of_guldan) or { SoulShards() >= 3 and PreviousGCDSpell(call_dreadstalkers) and not ArtifactTraitRank(thalkiels_ascendance) or SoulShards() >= 5 or SoulShards() >= 4 and SpellCooldown(summon_darkglare) > 2 } and Spell(hand_of_guldan) or { { Talent(power_trip_talent) and { not Talent(implosion_talent) or Enemies(tagged=1) <= 1 } or not Talent(implosion_talent) or Talent(implosion_talent) and not Talent(soul_conduit_talent) and Enemies(tagged=1) <= 3 } and { NotDeDemons(wild_imp) > 3 or PreviousGCDSpell(hand_of_guldan) } or PreviousGCDSpell(hand_of_guldan) and NotDeDemons(wild_imp) == 0 and DemonDuration(wild_imp) <= 0 or PreviousGCDSpell(implosion) and NotDeDemons(wild_imp) > 0 } and Spell(demonic_empowerment) or { no_de1() or PreviousGCDSpell(hand_of_guldan) } and Spell(demonic_empowerment)
             {
@@ -246,11 +246,11 @@ AddFunction DemonologyPrecombatCdActions
     unless not Talent(grimoire_of_supremacy_talent) and { not Talent(grimoire_of_sacrifice_talent) or BuffExpires(demonic_power_buff) } and not pet.Present() and Spell(summon_felguard)
     {
         #summon_infernal,if=talent.grimoire_of_supremacy.enabled&artifact.lord_of_flames.rank>0
-        if Talent(grimoire_of_supremacy_talent) and ArtifactTraitRank(lord_of_flames) > 0 Spell(summon_infernal)
+        # if Talent(grimoire_of_supremacy_talent) and ArtifactTraitRank(lord_of_flames) > 0 Spell(summon_infernal)
         #summon_infernal,if=talent.grimoire_of_supremacy.enabled&active_enemies>1
-        if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 Spell(summon_infernal)
+        # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 Spell(summon_infernal)
         #summon_doomguard,if=talent.grimoire_of_supremacy.enabled&active_enemies=1&artifact.lord_of_flames.rank=0
-        if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and ArtifactTraitRank(lord_of_flames) == 0 Spell(summon_doomguard)
+        # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and ArtifactTraitRank(lord_of_flames) == 0 Spell(summon_doomguard)
         #snapshot_stats
         #potion
         # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
