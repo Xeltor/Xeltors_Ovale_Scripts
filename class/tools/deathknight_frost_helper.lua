@@ -4,7 +4,7 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "DKFhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Frost"
+	local desc = "[Xel][7.x] Spellhelper: Frost"
 	local code = [[
 AddIcon
 {
@@ -13,6 +13,7 @@ AddIcon
 	Texture(spell_deathknight_classicon) # Obliterate
 	Texture(spell_deathknight_empowerruneblade2) # Frost STrike
 	Texture(spell_frost_arcticwinds) # Howling Blast
+	Texture(spell_frost_chainsofice) # Chains of Ice
 	Texture(ability_deathknight_remorselesswinters2) # Remorseless Winter
 	Texture(spell_deathknight_mindfreeze) # Mind Freeze
 	Texture(spell_deathknight_butcher2) # Death Strike
@@ -23,16 +24,16 @@ AddIcon
 	Texture(inv_sword_62) # Empower Rune Weapon
 	
 	# Artifact
-	Texture(inv_sword_160) # Crystalline Swords
+	Texture(achievement_boss_sindragosa) # Sindragosa's Fury
 
 	# Talents
 	Texture(inv_misc_horn_02) # Horn of Winter (T2)
-	Texture(ability_deathknight_hungeringruneblade) # Hungering Rune Weapon (T3)
+	Texture(ability_hunter_glacialtrap) # Glacial Advance (T3)
 	Texture(spell_frost_chillingblast) # Blinding Sleet (T4)
 	Texture(inv_misc_2h_farmscythe_a_01) # Frostscythe (T6)
 	Texture(inv_axe_114) # Obliteration (T7)
 	Texture(spell_deathknight_breathofsindragosa) # Breath of Sindragosa(T7)
-	Texture(ability_hunter_glacialtrap) # Glacial Advance (T7)
+	Texture(ability_deathknight_hungeringruneblade) # Hungering Rune Weapon (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -47,12 +48,6 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
 ]]
 

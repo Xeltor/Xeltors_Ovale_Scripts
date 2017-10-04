@@ -4,7 +4,7 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "xeltor_enhancement"
-	local desc = "[Xel][7.2.5] Shaman: Enhancement"
+	local desc = "[Xel][7.3] Shaman: Enhancement"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -58,10 +58,10 @@ AddFunction InterruptActions
 	if not target.IsFriend() and target.IsInterruptible()
 	{
 		if target.InRange(wind_shear) and target.IsInterruptible() Spell(wind_shear)
-		if target.Distance(less 5) and not target.Classification(worldboss) Spell(sundering)
-		# if not target.Classification(worldboss) and target.RemainingCastTime() > 2 Spell(lightning_surge_totem)
-		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
-		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
+        if target.Distance(less 5) and not target.Classification(worldboss) Spell(sundering)
+        # if not target.Classification(worldboss) and target.RemainingCastTime() > 2 Spell(lightning_surge_totem)
+        if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
+        if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
 	}
 }
 
