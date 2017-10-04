@@ -226,7 +226,7 @@ AddFunction OutlawBfMainPostConditions
 AddFunction OutlawBfShortCdActions
 {
     #cancel_buff,name=blade_flurry,if=spell_targets.blade_flurry<2&buff.blade_flurry.up
-    if Enemies(tagged=1) < 2 and BuffPresent(blade_flurry_buff) and BuffPresent(blade_flurry_buff) Texture(blade_flurry)
+    if Enemies(tagged=1) < 2 and BuffPresent(blade_flurry_buff) and Boss() Texture(blade_flurry)
     #cancel_buff,name=blade_flurry,if=equipped.shivarran_symmetry&cooldown.blade_flurry.up&buff.blade_flurry.up&spell_targets.blade_flurry>=2
     if HasEquippedItem(shivarran_symmetry) and not SpellCooldown(blade_flurry) > 0 and BuffPresent(blade_flurry_buff) and Enemies(tagged=1) >= 2 and BuffPresent(blade_flurry_buff) Texture(blade_flurry)
     #blade_flurry,if=spell_targets.blade_flurry>=2&!buff.blade_flurry.up
