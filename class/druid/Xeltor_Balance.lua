@@ -28,14 +28,14 @@ AddIcon specialization=1 help=main
 		# Cooldowns
 		if Boss()
 		{
-			BalanceDefaultCdActions()
+			if CanMove() > 0 or Speed() == 0 BalanceDefaultCdActions()
 		}
 		
 		# Short Cooldowns
-		BalanceDefaultShortCdActions()
+		if CanMove() > 0 or Speed() == 0 BalanceDefaultShortCdActions()
 		
 		# Default Actions
-		BalanceDefaultMainActions()
+		if CanMove() > 0 or Speed() == 0 BalanceDefaultMainActions()
 	}
 }
 

@@ -17,7 +17,7 @@ AddIcon specialization=2 help=main
 	# Interrupt
 	if InCombat() InterruptActions()
 	
-    if target.InRange(frost_strike) and HasFullControl()
+    if target.InRange(obliterate) and HasFullControl()
     {
 		# Custom - DO NOT REMOVE
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
@@ -35,7 +35,7 @@ AddIcon specialization=2 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
 }
 
 # Common functions.

@@ -18,7 +18,7 @@ AddIcon specialization=3 help=main
 	
 	if InCombat() and HasFullControl() and target.InRange(mind_blast)
 	{
-		if Speed() == 0
+		if Speed() == 0 or CanMove() > 0
 		{
 			ShadowDefaultCdActions()
 			ShadowDefaultShortCdActions()
