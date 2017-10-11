@@ -22,15 +22,15 @@ AddIcon specialization=3 help=main
 	
 	if InCombat() and target.InRange(frostbolt) and HasFullControl()
 	{
-		if BuffExpires(ice_floes_buff) and not NotMoving() Spell(ice_floes)
+		if BuffExpires(ice_floes_buff) and not { Speed() == 0 or CanMove() > 0 } Spell(ice_floes)
 		
 		# Cooldowns
 		if Boss()
 		{
-			if NotMoving() FrostDefaultCdActions()
+			if Speed() == 0 or CanMove() > 0 FrostDefaultCdActions()
 		}
-		if NotMoving() FrostDefaultShortCdActions()
-		if NotMoving() FrostDefaultMainActions()
+		if Speed() == 0 or CanMove() > 0 FrostDefaultShortCdActions()
+		if Speed() == 0 or CanMove() > 0 FrostDefaultMainActions()
 		#ice_lance,moving=1
 		if Speed() > 0 Spell(ice_lance)
 	}
@@ -52,11 +52,6 @@ AddFunction InterruptActions
 			if target.InRange(quaking_palm) Spell(quaking_palm)
 		}
 	}
-}
-
-AddFunction NotMoving
-{
-	{ Speed() == 0 or BuffPresent(ice_floes_buff) }
 }
 
 AddFunction time_until_fof
