@@ -18,25 +18,20 @@ AddIcon specialization=3 help=main
 		# Cooldowns
 		if Boss()
 		{
-			if NotMoving() DestructionDefaultCdActions()
+			if Speed() == 0 or CanMove() > 0 DestructionDefaultCdActions()
 		}
 		
 		# Short Cooldowns
-		if NotMoving() DestructionDefaultShortCdActions()
+		if Speed() == 0 or CanMove() > 0 DestructionDefaultShortCdActions()
 		
 		# Default rotation
-		if NotMoving() DestructionDefaultMainActions()
+		if Speed() == 0 or CanMove() > 0 DestructionDefaultMainActions()
 	}
 }
 
 AddFunction Boss
 {
 	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
-AddFunction NotMoving
-{
-	{ Speed() == 0 }
 }
 
 ### actions.default

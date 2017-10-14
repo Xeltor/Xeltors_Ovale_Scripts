@@ -38,14 +38,14 @@ AddIcon specialization=1 help=main
 		# Cooldowns
 		if Boss()
 		{
-			if NotMoving() AfflictionDefaultCdActions()
+			if Speed() == 0 or CanMove() > 0 AfflictionDefaultCdActions()
 		}
 		
 		# Short Cooldowns
-		if NotMoving() AfflictionDefaultShortCdActions()
+		if Speed() == 0 or CanMove() > 0 AfflictionDefaultShortCdActions()
 		
 		# Default rotation
-		if NotMoving() AfflictionDefaultMainActions()
+		if Speed() == 0 or CanMove() > 0 AfflictionDefaultMainActions()
 		
 		#agony,if=remains<=tick_time+gcd
 		if target.DebuffRemaining(agony_debuff) <= target.TickTime(agony_debuff) + GCD() Spell(agony)
@@ -72,11 +72,6 @@ AddFunction InterruptActions
 AddFunction PetStuff
 {
 	if pet.HealthPercent() < 50 and pet.Present() and pet.Exists() Spell(health_funnel)
-}
-
-AddFunction NotMoving
-{
-	{ Speed() == 0 }
 }
 
 ### actions.default

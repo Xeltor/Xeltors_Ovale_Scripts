@@ -37,17 +37,17 @@ AddIcon specialization=2 help=main
 	
 	if InCombat() and target.InRange(fireball) and HasFullControl()
 	{
-		if BuffExpires(ice_floes_buff) and not NotMoving() Spell(ice_floes)
+		if BuffExpires(ice_floes_buff) and not { Speed() == 0 or CanMove() > 0 } Spell(ice_floes)
 		
 		# Cooldowns
 		if Boss()
 		{
-			if NotMoving() FireDefaultCdActions()
+			if Speed() == 0 or CanMove() > 0 FireDefaultCdActions()
 		}
 		
-		if NotMoving() FireDefaultShortCdActions()
+		if Speed() == 0 or CanMove() > 0 FireDefaultShortCdActions()
 		if target.Distance(less 8) and not BuffPresent(ice_barrier) and target.istargetingplayer() Spell(dragons_breath)
-		if NotMoving() FireDefaultMainActions()
+		if Speed() == 0 or CanMove() > 0 FireDefaultMainActions()
 		
 		#scorch,moving=1
 		if Speed() > 0 and BuffPresent(hot_streak_buff) Spell(pyroblast)

@@ -29,18 +29,18 @@ AddIcon specialization=2 help=main
 		if pet.CreatureFamily(Voidwalker) or pet.CreatureFamily(Voidlord) PetStuff()
 		
 		# Cooldowns
-		if Boss() and NotMoving() DemonologyDefaultCdActions()
+		if Boss() and Speed() == 0 or CanMove() > 0 DemonologyDefaultCdActions()
 		
 		# Short Cooldowns
-		if NotMoving() DemonologyDefaultShortCdActions()
+		if Speed() == 0 or CanMove() > 0 DemonologyDefaultShortCdActions()
 		
 		# Default rotation
 		# Pet skill fixes.
 		if pet.CreatureFamily(Felguard) and pet.BuffRemains(demonic_empowerment) >= 6 and target.Distance() - pet.Distance() <= 8 Spell(felguard_felstorm)
-		if NotMoving() DemonologyDefaultMainActions()
+		if Speed() == 0 or CanMove() > 0 DemonologyDefaultMainActions()
 		
 		# AoE on the move :D
-		if Pet.Present() and not NotMoving() Spell(demonwrath)
+		if Pet.Present() and not { Speed() == 0 or CanMove() > 0 } Spell(demonwrath)
 	}
 }
 
@@ -81,11 +81,6 @@ AddFunction PetStuff
 {
 	if pet.Health() < pet.HealthMissing() and pet.Present() and pet.Exists() and Speed() == 0 Spell(health_funnel)
 	if HealthPercent() < 50 and target.Present() and not target.IsFriend() and Speed() == 0 Spell(drain_life)
-}
-
-AddFunction NotMoving
-{
-	{ Speed() == 0 }
 }
 
 ### actions.default

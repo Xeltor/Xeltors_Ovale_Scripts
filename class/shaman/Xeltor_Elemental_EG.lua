@@ -4,10 +4,9 @@ local OvaleScripts = Ovale.OvaleScripts
 
 do
 	local name = "xeltor_elemental_eg"
-	local desc = "[Xel][7.2.5] Shaman: Elemental Gambling"
+	local desc = "[Xel][7.3] Shaman: Elemental Gambling"
 	local code = [[
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_shaman_spells)
@@ -30,14 +29,14 @@ AddIcon specialization=1 help=main
 		# Cooldowns
 		if Boss()
 		{
-			if Speed() == 0 ElementalDefaultCdActions()
+			if Speed() == 0 or CanMove() > 0 ElementalDefaultCdActions()
 		}
 		
 		# Short Cooldowns
-		if Speed() == 0 ElementalDefaultShortCdActions()
+		if Speed() == 0 or CanMove() > 0 ElementalDefaultShortCdActions()
 		
 		# Default rotation
-		if Speed() == 0 ElementalDefaultMainActions()
+		if Speed() == 0 or CanMove() > 0 ElementalDefaultMainActions()
 		
 		#flame_shock,moving=1,target_if=refreshable
 		if Speed() > 0 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
