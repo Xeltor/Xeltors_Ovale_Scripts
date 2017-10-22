@@ -6,18 +6,10 @@ do
 	local name = "xeltor_affliction"
 	local desc = "[Xel][7.3] Warlock: Affliction"
 	local code = [[
-# Based on SimulationCraft profile "Warlock_Affliction_T18M".
-#	class=warlock
-#	spec=affliction
-#	talents=2203011
-#	pet=felhunter
-
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_warlock_spells)
-
 
 Define(health_funnel 755)
 Define(spell_lock_fh 19647)
@@ -25,8 +17,6 @@ Define(spell_lock_fh 19647)
 
 AddIcon specialization=1 help=main
 {
-	if not mounted() PetStuff()
-
 	# Interrupt
 	if InCombat() InterruptActions()
 	
@@ -34,6 +24,7 @@ AddIcon specialization=1 help=main
     {
 		#life_tap
 		if ManaPercent() < 25 Spell(life_tap)
+		if pet.CreatureFamily(Voidwalker) or pet.CreatureFamily(Voidlord) or pet.CreatureFamily(Infernal) PetStuff()
 		
 		# Cooldowns
 		if Boss()
@@ -71,7 +62,7 @@ AddFunction InterruptActions
 
 AddFunction PetStuff
 {
-	if pet.HealthPercent() < 50 and pet.Present() and pet.Exists() Spell(health_funnel)
+	if pet.Health() < pet.HealthMissing() and pet.Present() and pet.Exists() and Speed() == 0 Spell(health_funnel)
 }
 
 ### actions.default
@@ -179,9 +170,9 @@ AddFunction AfflictionDefaultCdActions
 		#summon_infernal,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>2
 		if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
 		#summon_doomguard,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal=1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-		if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
+		# if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
 		#summon_infernal,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-		if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
+		# if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
 		#berserking,if=prev_gcd.1.unstable_affliction|buff.soul_harvest.remains>=10
 		if PreviousGCDSpell(unstable_affliction) or BuffRemaining(soul_harvest_buff) >= 10 Spell(berserking)
 		#blood_fury
@@ -236,11 +227,11 @@ AddFunction AfflictionPrecombatCdActions
 	unless not Talent(grimoire_of_supremacy_talent) and { not Talent(grimoire_of_sacrifice_talent) or BuffExpires(demonic_power_buff) } and not pet.Present() and Spell(summon_felhunter)
 	{
 		#summon_infernal,if=talent.grimoire_of_supremacy.enabled&artifact.lord_of_flames.rank>0
-		if Talent(grimoire_of_supremacy_talent) and ArtifactTraitRank(lord_of_flames) > 0 Spell(summon_infernal)
+		# if Talent(grimoire_of_supremacy_talent) and ArtifactTraitRank(lord_of_flames) > 0 Spell(summon_infernal)
 		#summon_infernal,if=talent.grimoire_of_supremacy.enabled&active_enemies>1
-		if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 Spell(summon_infernal)
+		# if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 Spell(summon_infernal)
 		#summon_doomguard,if=talent.grimoire_of_supremacy.enabled&active_enemies=1&artifact.lord_of_flames.rank=0
-		if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and ArtifactTraitRank(lord_of_flames) == 0 Spell(summon_doomguard)
+		# if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and ArtifactTraitRank(lord_of_flames) == 0 Spell(summon_doomguard)
 
 		unless Talent(empowered_life_tap_talent) and not BuffPresent(empowered_life_tap_buff) and Spell(life_tap)
 		{
