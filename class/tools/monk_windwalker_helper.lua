@@ -1,6 +1,5 @@
-local _, XelOvaleScripts = ...
-local Ovale = XelOvaleScripts.Ovale
-local OvaleScripts = Ovale.OvaleScripts
+local __Scripts = LibStub:GetLibrary("ovale/Scripts")
+local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "MWWhelp"
