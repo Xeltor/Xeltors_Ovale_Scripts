@@ -74,7 +74,7 @@ findwowagain:
             End If
         End If
 
-        Dim folders As New DirectoryInfo(wowdir.ToString + "interface\addons\Ovale\scripts")
+        Dim folders As New DirectoryInfo(wowdir.ToString + "interface\addons\Ovale\dist\scripts")
 
         Dim files = From chkFile In folders.EnumerateFiles()
 
@@ -306,8 +306,8 @@ findwowagain:
     Private Sub playerclass_SelectedIndexChanged(sender As Object, e As EventArgs) Handles playerclass.SelectedIndexChanged
         If playerclass.SelectedItem.ToString <> "" Then
 
-            LoadSkills(wowdir.ToString + "interface\addons\Ovale\scripts\ovale_" + playerclass.SelectedItem.ToString + "_spells.lua", True)
-            LoadSkills(wowdir.ToString + "interface\addons\Ovale\scripts\ovale_common.lua")
+            LoadSkills(wowdir.ToString + "interface\addons\Ovale\dist\scripts\ovale_" + playerclass.SelectedItem.ToString + "_spells.lua", True)
+            LoadSkills(wowdir.ToString + "interface\addons\Ovale\dist\scripts\ovale_common.lua")
 
             skillname.Enabled = True
         Else
