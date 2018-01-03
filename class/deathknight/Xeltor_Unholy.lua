@@ -3,11 +3,10 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_unholy"
-	local desc = "[Xel][7.2.5] Death Knight: Unholy"
+	local desc = "[Xel][7.3] Death Knight: Unholy"
 	local code = [[
 # Include Ovale Defaults (racials & trinkets).
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_deathknight_spells)
