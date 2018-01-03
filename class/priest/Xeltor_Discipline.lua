@@ -92,7 +92,7 @@ AddFunction InterruptActions
 AddFunction DisciplineDefaultMainActions
 {
 	# Healing rotation.
-	if target.IsFriend() and target.Exists() and target.Present() and target.InRange(penance)
+	if mouseover.Present() and mouseover.IsFriend()
 	{
 		DisciplineHealing()
 	}
@@ -107,17 +107,17 @@ AddFunction DisciplineDefaultMainActions
 AddFunction DisciplineHealing
 {
 	# Pain suppression.
-	if target.HealthPercent() <= 25 Spell(pain_suppression)
+	if mouseover.HealthPercent() <= 25 Spell(pain_suppression)
 
 	# Atonement.
-	if target.BuffDuration(atonement_buff) <= CastTime(power_word_radiance) and CheckBoxOn(grouped) and Speed() == 0 Spell(power_word_radiance)
-	if target.BuffDuration(atonement_buff) <= GCD() + 1 or target.BuffExpires(power_word_shield_buff) Spell(power_word_shield)
+	if mouseover.BuffDuration(atonement_buff) <= CastTime(power_word_radiance) and CheckBoxOn(grouped) and Speed() == 0 Spell(power_word_radiance)
+	if mouseover.BuffDuration(atonement_buff) <= GCD() + 1 or mouseover.BuffExpires(power_word_shield_buff) Spell(power_word_shield)
 	
 	# Healing.
-	if target.HealthPercent() < 60
+	if mouseover.HealthPercent() < 60
 	{
 		if Speed() == 0 Spell(power_infusion)
-		ArtifactStuff()
+		if BuffCountOnAny(atonement_buff) >= 6 and Speed() == 0 Spell(lights_wrath)
 		if BuffCountOnAny(atonement_buff) >= 6 and Speed() == 0 Spell(shadow_mend)
 		Spell(plea)
 	}
@@ -152,14 +152,9 @@ AddFunction DisciplineDPS
 	# Power Word: Solace
 	Spell(power_word_solace)
 	# Artifact
-	ArtifactStuff()
+	if BuffCountOnAny(atonement_buff) >= 6 and Speed() == 0 and target.HealthPercent() < 60 Spell(lights_wrath)
 	# Smite filler.
 	if Speed() == 0 Spell(smite)
-}
-
-AddFunction ArtifactStuff
-{
-	if BuffCountOnAny(atonement_buff) >= 6 and Speed() == 0 and target.HealthPercent() < 60 Spell(lights_wrath)
 }
 ]]
 

@@ -189,6 +189,8 @@ AddFunction AfflictionHauntMainActions
  if ManaPercent() <= 10 Spell(life_tap)
  #life_tap,if=prev_gcd.1.life_tap&buff.active_uas.stack=0&mana.pct<50
  if PreviousGCDSpell(life_tap) and target.DebuffStacks(unstable_affliction_debuff) == 0 and ManaPercent() < 50 Spell(life_tap)
+ #agony,safety
+ if target.DebuffRemaining(agony_debuff) <= target.CastTime(drain_soul) + GCD() Spell(agony)
  #drain_soul,chain=1,interrupt=1
  Spell(drain_soul)
  #life_tap,moving=1,if=mana.pct<80
