@@ -13,6 +13,8 @@ Include(ovale_warlock_spells)
 Define(health_funnel 755)
 Define(spell_lock_fh 19647)
 	SpellInfo(spell_lock_fh cd=24)
+Define(shadow_lock_dg 171138)
+	SpellInfo(shadow_lock_dg cd=24)
 
 AddIcon specialization=1 help=main
 {
@@ -55,13 +57,16 @@ AddFunction InterruptActions
 {
 	if not target.IsFriend() and target.IsInterruptible()
 	{
-		if target.InRange(spell_lock_fh) Spell(spell_lock_fh)
+		# Felhunter Spell Lock
+		if target.Distance() - pet.Distance() <= 40 and pet.CreatureFamily(Felhunter) Spell(spell_lock_fh)
+		# Doomguard Shadow Lock
+		if target.Distance() - pet.Distance() <= 40 and pet.CreatureFamily(Doomguard) Spell(shadow_lock_dg)
 	}
 }
 
 AddFunction PetStuff
 {
-	if pet.Health() < pet.HealthMissing() and pet.Present() and pet.Exists() and Speed() == 0 Spell(health_funnel)
+	if pet.Health() < pet.MaxHealth() / 2 and pet.Present() and Speed() == 0 Spell(health_funnel)
 }
 
 ### actions.default
