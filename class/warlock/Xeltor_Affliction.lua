@@ -232,13 +232,13 @@ AddFunction AfflictionHauntCdActions
  unless not BuffPresent(deadwind_harvester_buff) and TimeInCombat() > 5 and { BuffStacks(tormented_souls_buff) >= 5 or target.TimeToDie() <= BuffStacks(tormented_souls_buff) * { 5 + 1.5 * HasEquippedItem(144364) } + BuffRemaining(deadwind_harvester_buff) * { 5 + 1.5 * HasEquippedItem(144364) } / 12 * { 5 + 1.5 * HasEquippedItem(144364) } } and Spell(reap_souls) or target.DebuffPresent(haunt_debuff) and not BuffPresent(deadwind_harvester_buff) and Spell(reap_souls) or Enemies(tagged=1) > 1 and not BuffPresent(deadwind_harvester_buff) and TimeInCombat() > 5 and SoulShards() > 0 and { Talent(sow_the_seeds_talent) and Enemies(tagged=1) >= 3 or Enemies(tagged=1) >= 5 } and Spell(reap_souls) or target.DebuffRemaining(agony_debuff) <= target.TickTime(agony_debuff) + GCD() and Spell(agony) or target.TimeToDie() <= GCD() * 2 and SoulShards() < 5 and Spell(drain_soul) or target.DebuffRemaining(corruption_debuff) and target.DebuffRemaining(agony_debuff) and Spell(service_felhunter)
  {
   #summon_doomguard,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal<=2&(target.time_to_die>180|target.health.pct<=20|target.time_to_die<30)
-  if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) <= 2 and { target.TimeToDie() > 180 or target.HealthPercent() <= 20 or target.TimeToDie() < 30 } Spell(summon_doomguard)
+  if not Talent(grimoire_of_supremacy_talent) and not Talent(grimoire_of_sacrifice_talent) and Enemies(tagged=1) <= 2 and { target.TimeToDie() > 180 or target.HealthPercent() <= 20 or target.TimeToDie() < 30 } Spell(summon_doomguard)
   #summon_infernal,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>2
-  if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
+  if not Talent(grimoire_of_supremacy_talent) and not Talent(grimoire_of_sacrifice_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
   #summon_doomguard,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal=1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
   #summon_infernal,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
   #berserking,if=prev_gcd.1.unstable_affliction|buff.soul_harvest.remains>=10
   if PreviousGCDSpell(unstable_affliction) or BuffRemaining(soul_harvest_buff) >= 10 Spell(berserking)
   #blood_fury
@@ -344,13 +344,13 @@ AddFunction AfflictionMgCdActions
  unless not BuffPresent(deadwind_harvester_buff) and TimeInCombat() > 5 and { BuffStacks(tormented_souls_buff) >= 4 + Enemies(tagged=1) or BuffStacks(tormented_souls_buff) >= 9 or target.TimeToDie() <= BuffStacks(tormented_souls_buff) * { 5 + 1.5 * HasEquippedItem(144364) } + BuffRemaining(deadwind_harvester_buff) * { 5 + 1.5 * HasEquippedItem(144364) } / 12 * { 5 + 1.5 * HasEquippedItem(144364) } } and Spell(reap_souls) or DebuffCountOnAny(agony_debuff) < Enemies(tagged=1) and DebuffCountOnAny(agony_debuff) <= 5 and False(target_is_sim_target) and Talent(soul_harvest_talent) and SpellCooldown(soul_harvest) < CastTime(agony) * 6 and target.DebuffRemaining(agony_debuff) <= BaseDuration(agony_debuff) * 0.3 and target.TimeToDie() >= target.DebuffRemaining(agony_debuff) and target.TimeToDie() > target.TickTime(agony_debuff) * 3 and Spell(agony) or DebuffCountOnAny(agony_debuff) < Enemies(tagged=1) and DebuffCountOnAny(agony_debuff) <= 4 and target.DebuffRemaining(agony_debuff) <= target.TickTime(agony_debuff) + GCD() and Spell(agony) or Talent(sow_the_seeds_talent) and Enemies(tagged=1) >= 3 and SoulShards() == 5 and Spell(seed_of_corruption) or True(target_is_sim_target) and SoulShards() == 5 and Spell(unstable_affliction) or target.TimeToDie() < GCD() * 2 and SoulShards() < 5 and Spell(drain_soul) or Talent(empowered_life_tap_talent) and BuffRemaining(empowered_life_tap_buff) <= GCD() and Spell(life_tap) or target.DebuffRemaining(corruption_debuff) and target.DebuffRemaining(agony_debuff) and Spell(service_felhunter)
  {
   #summon_doomguard,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal<=2&(target.time_to_die>180|target.health.pct<=20|target.time_to_die<30)
-  if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) <= 2 and { target.TimeToDie() > 180 or target.HealthPercent() <= 20 or target.TimeToDie() < 30 } Spell(summon_doomguard)
+  if not Talent(grimoire_of_supremacy_talent) and not Talent(grimoire_of_sacrifice_talent) and Enemies(tagged=1) <= 2 and { target.TimeToDie() > 180 or target.HealthPercent() <= 20 or target.TimeToDie() < 30 } Spell(summon_doomguard)
   #summon_infernal,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>2
-  if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
+  if not Talent(grimoire_of_supremacy_talent) and not Talent(grimoire_of_sacrifice_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
   #summon_doomguard,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal=1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
   #summon_infernal,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
   #berserking,if=prev_gcd.1.unstable_affliction|buff.soul_harvest.remains>=10
   if PreviousGCDSpell(unstable_affliction) or BuffRemaining(soul_harvest_buff) >= 10 Spell(berserking)
   #blood_fury
@@ -407,11 +407,11 @@ AddFunction AfflictionPrecombatCdActions
  unless not Talent(grimoire_of_supremacy_talent) and { not Talent(grimoire_of_sacrifice_talent) or BuffExpires(demonic_power_buff) } and not pet.Present() and Spell(summon_felhunter)
  {
   #summon_infernal,if=talent.grimoire_of_supremacy.enabled&artifact.lord_of_flames.rank>0
-  if Talent(grimoire_of_supremacy_talent) and ArtifactTraitRank(lord_of_flames) > 0 Spell(summon_infernal)
+  # if Talent(grimoire_of_supremacy_talent) and ArtifactTraitRank(lord_of_flames) > 0 Spell(summon_infernal)
   #summon_infernal,if=talent.grimoire_of_supremacy.enabled&active_enemies>1
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 Spell(summon_infernal)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 Spell(summon_infernal)
   #summon_doomguard,if=talent.grimoire_of_supremacy.enabled&active_enemies=1&artifact.lord_of_flames.rank=0
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and ArtifactTraitRank(lord_of_flames) == 0 Spell(summon_doomguard)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and ArtifactTraitRank(lord_of_flames) == 0 Spell(summon_doomguard)
 
   unless Talent(empowered_life_tap_talent) and not BuffPresent(empowered_life_tap_buff) and Spell(life_tap)
   {
@@ -531,13 +531,13 @@ AddFunction AfflictionWritheCdActions
  unless not BuffPresent(deadwind_harvester_buff) and TimeInCombat() > 5 and { BuffStacks(tormented_souls_buff) >= 5 or target.TimeToDie() <= BuffStacks(tormented_souls_buff) * { 5 + 1.5 * HasEquippedItem(144364) } + BuffRemaining(deadwind_harvester_buff) * { 5 + 1.5 * HasEquippedItem(144364) } / 12 * { 5 + 1.5 * HasEquippedItem(144364) } } and Spell(reap_souls) or not BuffPresent(deadwind_harvester_buff) and TimeInCombat() > 5 and { BuffRemaining(soul_harvest_buff) >= 5 + 1.5 * HasEquippedItem(144364) and target.DebuffStacks(unstable_affliction_debuff) > 1 or BuffPresent(concordance_of_the_legionfall_buff) or BuffPresent(trinket_proc_intellect_buff) or BuffPresent(trinket_stacking_proc_intellect_buff) or BuffPresent(trinket_proc_mastery_buff) or BuffPresent(trinket_stacking_proc_mastery_buff) or BuffPresent(trinket_proc_crit_buff) or BuffPresent(trinket_stacking_proc_crit_buff) or BuffPresent(trinket_proc_versatility_buff) or BuffPresent(trinket_stacking_proc_versatility_buff) or BuffPresent(trinket_proc_spell_power_buff) or BuffPresent(trinket_stacking_proc_spell_power_buff) } and Spell(reap_souls) or target.DebuffRemaining(agony_debuff) <= target.TickTime(agony_debuff) + GCD() and Spell(agony) or DebuffCountOnAny(agony_debuff) < Enemies(tagged=1) and DebuffCountOnAny(agony_debuff) <= 5 and False(target_is_sim_target) and Talent(soul_harvest_talent) and SpellCooldown(soul_harvest) < CastTime(agony) * 6 and target.DebuffRemaining(agony_debuff) <= BaseDuration(agony_debuff) * 0.3 and target.TimeToDie() >= target.DebuffRemaining(agony_debuff) and target.TimeToDie() > target.TickTime(agony_debuff) * 3 and Spell(agony) or DebuffCountOnAny(agony_debuff) < Enemies(tagged=1) and DebuffCountOnAny(agony_debuff) <= 3 and False(target_is_sim_target) and target.DebuffRemaining(agony_debuff) <= target.TickTime(agony_debuff) + GCD() and target.TimeToDie() > target.TickTime(agony_debuff) * 3 and Spell(agony) or Talent(sow_the_seeds_talent) and Enemies(tagged=1) >= 3 and SoulShards() == 5 and Spell(seed_of_corruption) or { SoulShards() == 5 or target.TimeToDie() <= { BaseDuration(unstable_affliction_debuff) + CastTime(unstable_affliction) } * SoulShards() } and Spell(unstable_affliction) or target.TimeToDie() <= GCD() * 2 and SoulShards() < 5 and Spell(drain_soul) or Talent(empowered_life_tap_talent) and BuffRemaining(empowered_life_tap_buff) <= GCD() and Spell(life_tap) or target.DebuffRemaining(corruption_debuff) and target.DebuffRemaining(agony_debuff) and Spell(service_felhunter)
  {
   #summon_doomguard,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal<=2&(target.time_to_die>180|target.health.pct<=20|target.time_to_die<30)
-  if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) <= 2 and { target.TimeToDie() > 180 or target.HealthPercent() <= 20 or target.TimeToDie() < 30 } Spell(summon_doomguard)
+  if not Talent(grimoire_of_supremacy_talent) and not Talent(grimoire_of_sacrifice_talent) and Enemies(tagged=1) <= 2 and { target.TimeToDie() > 180 or target.HealthPercent() <= 20 or target.TimeToDie() < 30 } Spell(summon_doomguard)
   #summon_infernal,if=!talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>2
-  if not Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
+  if not Talent(grimoire_of_supremacy_talent) and not Talent(grimoire_of_sacrifice_talent) and Enemies(tagged=1) > 2 Spell(summon_infernal)
   #summon_doomguard,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal=1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) == 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_doomguard)
   #summon_infernal,if=talent.grimoire_of_supremacy.enabled&spell_targets.summon_infernal>1&equipped.132379&!cooldown.sindorei_spite_icd.remains
-  if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
+  # if Talent(grimoire_of_supremacy_talent) and Enemies(tagged=1) > 1 and HasEquippedItem(132379) and not SpellCooldown(sindorei_spite_icd) > 0 Spell(summon_infernal)
   #berserking,if=prev_gcd.1.unstable_affliction|buff.soul_harvest.remains>=10
   if PreviousGCDSpell(unstable_affliction) or BuffRemaining(soul_harvest_buff) >= 10 Spell(berserking)
   #blood_fury
