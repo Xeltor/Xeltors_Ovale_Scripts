@@ -124,40 +124,41 @@ Define(germination_talent 18)
 
 AddIcon specialization=4 help=main
 {
+	# Don't fucking dismount me asshole script.
 	unless Stance(3)
 	{
 		if HealthPercent() < 70 Spell(renewal)
-	}
 	
-	# Ress dead ally
-	if target.IsDead() and target.IsFriend() and InCombat() and Spell(rebirth) Spell(rebirth)
-	
-	# Do main rotation.
-	if target.Present() and target.IsFriend() and target.InRange(lifebloom) and { InCombat() or target.HealthPercent() < 90 } and not { mounted() or Stance(3) }
-	{
-		Cooldowns()
+		# Ress dead ally
+		if target.IsDead() and target.IsFriend() and InCombat() and Spell(rebirth) Spell(rebirth)
 		
-		Rotation()
+		if not UnitInRaid() and CheckBoxOn(auto) and not Stance(3) Party_Auto_Target()
+		
+		# Do main rotation.
+		if target.Present() and target.IsFriend() and target.InRange(lifebloom) and { InCombat() or target.HealthPercent() < 90 } and not { mounted() or Stance(3) }
+		{
+			Cooldowns()
+			
+			Rotation()
+		}
+		
+		# Keep up focus stuff regardless of target.
+		if not target.Present() and HasFocus()
+		{
+			if focus.HealthPercent() < 60 Spell(ironbark)
+			# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
+			if focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
+		}
+		
+		# Alternate DPS rotations.
+		if target.InRange(mangle) and HasFullControl() and target.Present() and not target.IsFriend()
+		{
+			# if BuffPresent(bear_form) or CheckBoxOn(solo) Guardian_Affinity()
+		}
 	}
-	
-	# Keep up focus stuff regardless of target.
-	if not target.Present() and HasFocus()
-	{
-		if focus.HealthPercent() < 60 Spell(ironbark)
-		# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
-		if focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
-	}
-	
-	# Alternate DPS rotations.
-	if target.InRange(mangle) and HasFullControl() and target.Present() and not target.IsFriend()
-	{
-		if BuffPresent(bear_form) or CheckBoxOn(solo) Guardian_Affinity()
-	}
-	
-	# Travel()
 }
 AddCheckBox(hard "Heal harder")
-AddCheckBox(solo "Solo")
+AddCheckBox(auto "Party auto target")
 
 # Travel!
 AddFunction Travel
@@ -209,13 +210,13 @@ AddFunction Rotation
 	# Use Regrowth as an emergency heal.
 	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and Speed() == 0 Spell(regrowth_restoration)
 	# Use Clearcasting procs on one of the tanks.
-	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and Speed() == 0 } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and Speed() == 0 and target.HealthPercent() <= 80 } Spell(regrowth_restoration)
+	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and target.IsFocus() and Speed() == 0 } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and Speed() == 0 and target.HealthPercent() <= 80 } Spell(regrowth_restoration)
 	# Keep Rejuvenation on the tank and on members of the group that just took damage or are about to take damage. Keep up both Rejuvenations on targets on which the damage is too high for a single one.
 	if target.BuffRemains(rejuvenation_buff) <= 3.5 or not target.BuffPresent(rejuvenation_buff) or { target.BuffPresent(cultivation_buff) and not target.BuffPresent(rejuvenation_germination) and Talent(germination_talent) } Spell(rejuvenation)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() <= 40 Spell(swiftmend)
 	if target.HealthPercent() <= 60 and Speed() == 0 Spell(regrowth_restoration)
-	if target.HealthPercent() <= 98 and Speed() == 0 Spell(healing_touch)
+	if target.HealthPercent() <= 89 and Speed() == 0 Spell(healing_touch)
 }
 
 # Guardian Affinity
@@ -228,8 +229,6 @@ AddFunction Guardian_Affinity
 	Spell(thrash_bear)
 	Spell(mangle)
 }
-
-# 
 ]]
 	OvaleScripts:RegisterScript("DRUID", "restoration", name, desc, code, "script")
 end

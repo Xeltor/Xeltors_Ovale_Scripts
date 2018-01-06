@@ -47,6 +47,13 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 	
+	# Party auto targeting system
+	Texture(misc_arrowdown) # Link to F1 (target self)
+	Texture(ships_ability_boardingparty) # Link to F2 (target party member 2)
+	Texture(ships_ability_boardingpartyalliance) # Link to F3 (target party member 3)
+	Texture(ships_ability_boardingpartyhorde) # Link to F4 (target party member 4)
+	Texture(inv_helm_misc_starpartyhat) # Link to F5 (target party member 5)
+	
 	# Guardian Affinity
 	Texture(ability_racial_bearform) # Bear Form
 	Texture(ability_druid_mangle2) # Mangle
