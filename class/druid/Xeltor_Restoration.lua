@@ -182,10 +182,13 @@ AddFunction Cooldowns
 		Spell(berserking)
 		Spell(innervate)
 	}
-	# Use Cenarion Ward on cooldown.
-	Spell(cenarion_ward)
-	# Save the tank / save the target.
-	if { HasFocus() and focus.HealthPercent() < 60 } or { not HasFocus() and target.HealthPercent() < 40 } Spell(ironbark)
+	if InCombat()
+	{
+		# Use Cenarion Ward on cooldown.
+		Spell(cenarion_ward)
+		# Save the tank / save the target.
+		if { HasFocus() and focus.HealthPercent() < 60 } or { not HasFocus() and target.HealthPercent() < 40 } Spell(ironbark)
+	}
 	# Use Flourish and Essence of G'Hanir as often as possible (no need to use them together).
 	if { UnitInRaid() and BuffCountOnAny(rejuvenation_buff) >= 5 } or { not UnitInRaid() and BuffCountOnAny(wild_growth_buff) >= 1 }
 	{
