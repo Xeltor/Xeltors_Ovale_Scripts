@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_restoration"
-	local desc = "[Xel][7.2.5] Druid: Restoration"
+	local desc = "[Xel][7.3] Druid: Restoration"
 	local code = [[
 # Required macros (every line is a macro)
 # /cast [@focus, help][@target, help] Ironbark
@@ -66,6 +66,7 @@ Define(rejuvenation 774)
 	SpellAddTargetBuff(rejuvenation rejuvenation_germination=1 talent=germination_talent)
 Define(rejuvenation_buff 774)
 	SpellInfo(rejuvenation_buff duration=15)
+Define(revitalize 212040)
 Define(healing_touch 5185)
 Define(swiftmend 18562)
 	SpellInfo(swiftmend cd=30)
@@ -125,17 +126,21 @@ Define(germination_talent 18)
 AddIcon specialization=4 help=main
 {
 	# Don't fucking dismount me asshole script.
-	unless Stance(3)
+	unless Stance(2) or Stance(3) or mounted()
 	{
-		if HealthPercent() < 70 Spell(renewal)
+		if not IsDead() and HealthPercent() < 70 Spell(renewal)
 	
 		# Ress dead ally
-		if target.IsDead() and target.IsFriend() and InCombat() and Spell(rebirth) Spell(rebirth)
+		if target.IsDead() and target.IsFriend()
+		{
+			if InCombat() and Spell(rebirth) and target.InRange(rebirth) and not PreviousGCDSpell(rebirth) Spell(rebirth)
+			if not InCombat() and Spell(revitalize) and not PreviousGCDSpell(revitalize) and { Speed() == 0 or CanMove() > 0 } Spell(revitalize)
+		}
 		
-		if not UnitInRaid() and CheckBoxOn(auto) and not Stance(3) Party_Auto_Target()
+		if not UnitInRaid() and CheckBoxOn(auto) Party_Auto_Target()
 		
 		# Do main rotation.
-		if target.Present() and target.IsFriend() and target.InRange(lifebloom) and { InCombat() or target.HealthPercent() < 90 } and not { mounted() or Stance(3) }
+		if target.Present() and target.IsFriend() and target.InRange(lifebloom) and target.HealthPercent() < 100
 		{
 			Cooldowns()
 			
@@ -153,7 +158,7 @@ AddIcon specialization=4 help=main
 		# Alternate DPS rotations.
 		if target.InRange(mangle) and HasFullControl() and target.Present() and not target.IsFriend()
 		{
-			# if BuffPresent(bear_form) or CheckBoxOn(solo) Guardian_Affinity()
+			if BuffPresent(bear_form) Guardian_Affinity()
 		}
 	}
 }
@@ -175,10 +180,42 @@ AddFunction HasFocus
 	focus.Present() and focus.Exists() and focus.InRange(lifebloom)
 }
 
+# Party auto target system
+AddFunction Party_Auto_Target
+{
+	unless UnitInRaid()
+	{
+		if HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and HealthPercent() < 100
+		{
+			unless player.IsTarget() Texture(misc_arrowdown)
+		}
+		
+		if { party1.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party1.HealthPercent() < 100 } and party1.Present() and party1.InRange(rejuvenation)
+		{
+			unless party1.IsTarget() Texture(ships_ability_boardingparty)
+		}
+		
+		if { party2.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party2.HealthPercent() < 100 } and party2.Present() and party2.InRange(rejuvenation)
+		{
+			unless party2.IsTarget() Texture(ships_ability_boardingpartyalliance)
+		}
+		
+		if { party3.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party3.HealthPercent() < 100 } and party3.Present() and party3.InRange(rejuvenation)
+		{
+			unless party3.IsTarget() Texture(ships_ability_boardingpartyhorde)
+		}
+		
+		if { party4.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party4.HealthPercent() < 100 } and party4.Present() and party4.InRange(rejuvenation)
+		{
+			unless party4.IsTarget() Texture(inv_helm_misc_starpartyhat)
+		}
+	}
+}
+
 AddFunction Cooldowns 
 {
 	# We are on a healing frenzy
-	if { UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } 
+	if CheckBoxOn(hard) and Speed() == 0
 	{
 		Spell(berserking)
 		Spell(innervate)
@@ -201,7 +238,7 @@ AddFunction Cooldowns
 AddFunction Rotation
 {
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
-	if target.HealthPercent() <= 25 Spell(swiftmend)
+	if target.HealthPercent() < 35 Spell(swiftmend)
 	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
 	# Use Wild Growth when at least 4 members of the group are damaged.
 	if { UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } Spell(wild_growth)

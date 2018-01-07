@@ -15,6 +15,8 @@ AddIcon
 	Texture(spell_nature_resistnature) # Regrowth
 	Texture(inv_relics_idolofrejuvenation) # Swiftmend
 	Texture(ability_druid_flourish) # Wild Growth
+	Texture(spell_nature_reincarnation) # Rebirth
+	Texture(ability_druid_empoweredtouch) # Revitalize
 	
 	# Buffs
 	Texture(ability_druid_catform) # Cat Form
