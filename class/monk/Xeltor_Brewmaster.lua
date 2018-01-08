@@ -3,10 +3,9 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_brewmaster"
-	local desc = "[Xel][7.1.5] Monk: Brewmaster"
+	local desc = "[Xel][7.3] Monk: Brewmaster"
 	local code = [[
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_monk_spells)
@@ -22,12 +21,10 @@ AddIcon specialization=1 help=main
 	if target.InRange(tiger_palm) and HasFullControl()
 	{
 		if Boss() BrewmasterDefaultCdActions()
+		
 		BrewmasterDefaultShortCdActions()
-		if Talent(blackout_combo_talent) BrewmasterBlackoutComboMainActions()
-		unless Talent(blackout_combo_talent) W
-		{
-			BrewmasterDefaultMainActions()
-		}
+		
+		BrewmasterDefaultMainActions()
 	}
 }
 
@@ -55,158 +52,149 @@ AddFunction InterruptActions
 
 ### actions.default
 
-AddFunction BrewmasterExpelHarmOffensivelyPreConditions
-{
-	(SpellCount(expel_harm) >= 3 and (SpellCount(expel_harm) * 7.5 * AttackPower() * 2.65) <= HealthMissing()) and Spell(expel_harm)
-}
-
-AddFunction BrewmasterHealMe
-{
-	if (HealthPercent() < 35) Spell(healing_elixir)
-	if (SpellCount(expel_harm) >= 1 and HealthPercent() < 35) Spell(expel_harm)
-	if (HealthPercent() <= 100 - (15 * 2.6)) Spell(healing_elixir)
-}
-
-AddFunction StaggerPercentage
-{
-	StaggerRemaining() / MaxHealth() * 100
-}
-
-AddFunction BrewmasterRangeCheck
-{
-	if not target.InRange(tiger_palm) Texture(misc_arrowlup help=L(not_in_melee_range))
-}
-
-AddFunction BrewmasterDefaultShortCDActions
-{
-	# keep stagger below 100%
-	if (StaggerPercentage() > 100 and SpellCharges(purifying_brew) > 0) Spell(purifying_brew)
-	# use black_ox_brew when at 0 charges but delay it when a charge is about to come off cd
-	if ((SpellCharges(purifying_brew) == 0) and (SpellChargeCooldown(purifying_brew) > 2 or StaggerPercentage() > 100)) Spell(black_ox_brew)
-	# heal me
-	BrewmasterHealMe()
-	
-	# range check
-	# BrewmasterRangeCheck()
-
-	unless StaggerPercentage() > 100 or BrewmasterHealMe() or (StaggerRemaining() == 0 and not Talent(special_delivery_talent))
-	{
-		# purify heavy stagger when we have enough ISB
-		if (DebuffPresent(heavy_stagger_debuff) and (not Talent(elusive_dance_talent) or BuffExpires(elusive_dance_buff)) and (BuffRemaining(ironskin_brew_buff) > 1.5*SpellRechargeDuration(ironskin_brew))) Spell(purifying_brew)
-		# always keep 1 charge unless black_ox_brew is coming off cd
-		if (SpellCharges(ironskin_brew) > 1 or (Talent(black_ox_brew_talent) and SpellCooldown(black_ox_brew) <= 3))
-		{
-			# never be at (almost) max charges 
-			if (SpellCharges(ironskin_brew count=0) >= SpellMaxCharges(ironskin_brew)-0.3) Spell(ironskin_brew)
-			# use up those charges when black_ox_brew_talent comes off cd
-			if (Talent(black_ox_brew_talent) and SpellCooldown(black_ox_brew) <= 3) Spell(ironskin_brew)
-			
-			if(StaggerRemaining() > 0)
-			{
-				# keep brew-stache rolling (when not elusive_dance)
-				if (HasArtifactTrait(brew_stache_trait) and BuffExpires(brew_stache_buff) and not Talent(elusive_dance_talent)) Spell(ironskin_brew text=stache)
-				# keep up ironskin_brew_buff
-				if (BuffExpires(ironskin_brew_buff 2)) Spell(ironskin_brew)
-				# purify stagger when doing trash when talent elusive dance 
-				if (Talent(elusive_dance_talent) and not IsBossFight() and BuffExpires(elusive_dance_buff)) Spell(purifying_brew)
-			}
-		}
-	}
-}
-
-#
-# Single-Target
-#
-
 AddFunction BrewmasterDefaultMainActions
 {
-	Spell(keg_smash)
-	if EnergyDeficit() <= 35 Spell(tiger_palm)
-	unless EnergyDeficit() <= 35
-	{
-		Spell(blackout_strike)
-		Spell(rushing_jade_wind)
-		if target.DebuffPresent(keg_smash_debuff) Spell(breath_of_fire)
-		Spell(chi_burst)
-		Spell(chi_wave)
-		Spell(exploding_keg)
-	}
+ #call_action_list,name=st
+ BrewmasterStMainActions()
 }
 
-AddFunction BrewmasterBlackoutComboMainActions
+AddFunction BrewmasterDefaultMainPostConditions
 {
-	if(not BuffPresent(blackout_combo_buff)) Spell(blackout_strike)
-	if(BuffPresent(blackout_combo_buff)) 
-	{
-		Spell(keg_smash)
-		unless (SpellCooldown(keg_smash) < GCD())
-		{
-			Spell(breath_of_fire)
-			Spell(tiger_palm)
-		}
-	}
-	
-	unless (BuffPresent(blackout_combo_buff)) 
-	{
-		Spell(rushing_jade_wind)
-		Spell(chi_burst)
-		Spell(chi_wave)
-		if EnergyDeficit() <= 35 Spell(tiger_palm)
-		Spell(exploding_keg)
-	}
+ BrewmasterStMainPostConditions()
 }
 
-#
-# AOE
-#
-
-AddFunction BrewmasterDefaultAoEActions
+AddFunction BrewmasterDefaultShortCdActions
 {
-	Spell(exploding_keg)
-	Spell(keg_smash)
-	Spell(chi_burst)
-	Spell(chi_wave)
-	if target.DebuffPresent(keg_smash_debuff) Spell(breath_of_fire)
-	Spell(rushing_jade_wind)
-	if EnergyDeficit() <= 35 Spell(tiger_palm)
-	unless EnergyDeficit() <= 35
-	{
-		Spell(blackout_strike)
-	}
+ #auto_attack
+ # BrewmasterGetInMeleeRange()
+ #call_action_list,name=st
+ BrewmasterStShortCdActions()
 }
 
-AddFunction BrewmasterBlackoutComboAoEActions
+AddFunction BrewmasterDefaultShortCdPostConditions
 {
-	if(not BuffPresent(blackout_combo_buff)) Spell(blackout_strike)
-	if(BuffPresent(blackout_combo_buff)) 
-	{
-		Spell(keg_smash)
-		Spell(breath_of_fire)
-		Spell(tiger_palm)
-	}
-	
-	unless (BuffPresent(blackout_combo_buff)) 
-	{
-		Spell(exploding_keg)
-		Spell(rushing_jade_wind)
-		Spell(chi_burst)
-		Spell(chi_wave)
-		if EnergyDeficit() <= 35 Spell(tiger_palm)
-	}
+ BrewmasterStShortCdPostConditions()
 }
 
-AddFunction BrewmasterDefaultCdActions 
+AddFunction BrewmasterDefaultCdActions
 {
-	# BrewmasterInterruptActions()
-	# if CheckBoxOn(opt_legendary_ring_tank) Item(legendary_ring_bonus_armor usable=1)
-	#if not PetPresent(name=Niuzao) Spell(invoke_niuzao)
-	# Item(Trinket0Slot usable=1 text=13)
-	# Item(Trinket1Slot usable=1 text=14)
-	#if (HasEquippedItem(fundamental_observation)) Spell(zen_meditation)
-	#Spell(fortifying_brew)
-	#Spell(zen_meditation)
-	#Spell(dampen_harm)
-	# Item(unbending_potion usable=1)
+ #gift_of_the_ox
+ #dampen_harm,if=incoming_damage_1500ms&buff.fortifying_brew.down
+ if IncomingDamage(1.5) > 0 and BuffExpires(fortifying_brew_buff) Spell(dampen_harm)
+ #fortifying_brew,if=incoming_damage_1500ms&(buff.dampen_harm.down|buff.diffuse_magic.down)
+ if IncomingDamage(1.5) > 0 and { BuffExpires(dampen_harm_buff) or BuffExpires(diffuse_magic_buff) } Spell(fortifying_brew)
+ #use_item,name=archimondes_hatred_reborn
+ # BrewmasterUseItemActions()
+ #call_action_list,name=st
+ BrewmasterStCdActions()
+}
+
+AddFunction BrewmasterDefaultCdPostConditions
+{
+ BrewmasterStCdPostConditions()
+}
+
+### actions.precombat
+
+AddFunction BrewmasterPrecombatMainActions
+{
+ #chi_burst
+ Spell(chi_burst)
+ #chi_wave
+ Spell(chi_wave)
+}
+
+AddFunction BrewmasterPrecombatMainPostConditions
+{
+}
+
+AddFunction BrewmasterPrecombatShortCdActions
+{
+}
+
+AddFunction BrewmasterPrecombatShortCdPostConditions
+{
+ Spell(chi_burst) or Spell(chi_wave)
+}
+
+AddFunction BrewmasterPrecombatCdActions
+{
+ #flask
+ #food
+ #augmentation
+ #snapshot_stats
+ #potion
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war_potion usable=1)
+ #dampen_harm
+ Spell(dampen_harm)
+}
+
+AddFunction BrewmasterPrecombatCdPostConditions
+{
+ Spell(chi_burst) or Spell(chi_wave)
+}
+
+### actions.st
+
+AddFunction BrewmasterStMainActions
+{
+ #exploding_keg
+ Spell(exploding_keg)
+ #tiger_palm,if=buff.blackout_combo.up
+ if BuffPresent(blackout_combo_buff) Spell(tiger_palm)
+ #blackout_strike,if=cooldown.keg_smash.remains>0
+ if SpellCooldown(keg_smash) > 0 Spell(blackout_strike)
+ #keg_smash
+ Spell(keg_smash)
+ #breath_of_fire,if=buff.bloodlust.down&buff.blackout_combo.down|(buff.bloodlust.up&buff.blackout_combo.down&dot.breath_of_fire.remains<=0)
+ if BuffExpires(burst_haste_buff any=1) and BuffExpires(blackout_combo_buff) or BuffPresent(burst_haste_buff any=1) and BuffExpires(blackout_combo_buff) and target.DebuffRemaining(breath_of_fire_debuff) <= 0 Spell(breath_of_fire)
+ #rushing_jade_wind
+ Spell(rushing_jade_wind)
+ #tiger_palm,if=!talent.blackout_combo.enabled&cooldown.keg_smash.remains>=gcd&(energy+(energy.regen*(cooldown.keg_smash.remains)))>=55
+ if not Talent(blackout_combo_talent) and SpellCooldown(keg_smash) >= GCD() and Energy() + EnergyRegenRate() * SpellCooldown(keg_smash) >= 55 Spell(tiger_palm)
+}
+
+AddFunction BrewmasterStMainPostConditions
+{
+}
+
+AddFunction BrewmasterStShortCdActions
+{
+ unless Spell(exploding_keg)
+ {
+  #ironskin_brew,if=buff.blackout_combo.down&cooldown.ironskin_brew.charges>=1
+  if BuffExpires(blackout_combo_buff) and SpellCharges(ironskin_brew) >= 1 Spell(ironskin_brew)
+  #black_ox_brew,if=(energy+(energy.regen*(cooldown.keg_smash.remains)))<40&buff.blackout_combo.down&cooldown.keg_smash.up
+  if Energy() + EnergyRegenRate() * SpellCooldown(keg_smash) < 40 and BuffExpires(blackout_combo_buff) and not SpellCooldown(keg_smash) > 0 Spell(black_ox_brew)
+ }
+}
+
+AddFunction BrewmasterStShortCdPostConditions
+{
+ Spell(exploding_keg) or BuffPresent(blackout_combo_buff) and Spell(tiger_palm) or SpellCooldown(keg_smash) > 0 and Spell(blackout_strike) or Spell(keg_smash) or { BuffExpires(burst_haste_buff any=1) and BuffExpires(blackout_combo_buff) or BuffPresent(burst_haste_buff any=1) and BuffExpires(blackout_combo_buff) and target.DebuffRemaining(breath_of_fire_debuff) <= 0 } and Spell(breath_of_fire) or Spell(rushing_jade_wind) or not Talent(blackout_combo_talent) and SpellCooldown(keg_smash) >= GCD() and Energy() + EnergyRegenRate() * SpellCooldown(keg_smash) >= 55 and Spell(tiger_palm)
+}
+
+AddFunction BrewmasterStCdActions
+{
+ #potion
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war_potion usable=1)
+ #blood_fury
+ Spell(blood_fury_apsp)
+ #berserking
+ Spell(berserking)
+
+ unless Spell(exploding_keg)
+ {
+  #invoke_niuzao,if=target.time_to_die>45
+  if target.TimeToDie() > 45 Spell(invoke_niuzao)
+  #arcane_torrent,if=energy<31
+  if Energy() < 31 Spell(arcane_torrent_chi)
+ }
+}
+
+AddFunction BrewmasterStCdPostConditions
+{
+ Spell(exploding_keg) or BuffPresent(blackout_combo_buff) and Spell(tiger_palm) or SpellCooldown(keg_smash) > 0 and Spell(blackout_strike) or Spell(keg_smash) or { BuffExpires(burst_haste_buff any=1) and BuffExpires(blackout_combo_buff) or BuffPresent(burst_haste_buff any=1) and BuffExpires(blackout_combo_buff) and target.DebuffRemaining(breath_of_fire_debuff) <= 0 } and Spell(breath_of_fire) or Spell(rushing_jade_wind) or not Talent(blackout_combo_talent) and SpellCooldown(keg_smash) >= GCD() and Energy() + EnergyRegenRate() * SpellCooldown(keg_smash) >= 55 and Spell(tiger_palm)
 }
 ]]
 
