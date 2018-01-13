@@ -30,8 +30,8 @@ Define(soul_of_the_forest_buff 114108)
 	SpellInfo(soul_of_the_forest_buff duration=15)
 Define(rejuvenation_buff 774)
 	SpellInfo(rejuvenation_buff duration=15)
-Define(rejuvenation_germination 155777)
-	SpellInfo(rejuvenation_germination duration=15)
+Define(germination_buff 155777)
+	SpellInfo(germination_buff duration=15)
 Define(cultivation_buff 200389)
 	SpellInfo(cultivation_buff duration=6)
 Define(wild_growth 48438)
@@ -48,6 +48,8 @@ Define(starsurge_restoration 197626)
 	SpellAddBuff(starsurge_restoration solar_empowerment_buff=1)
 Define(travel_form 783)
 Define(travel_form_buff 783)
+Define(tranquility 740)
+	SpellInfo(tranquility cd=180 duration=8)
 Define(essence_of_ghanir 208253)
 	SpellInfo(essence_of_ghanir cd=90)
 Define(cenarion_ward 102351)
@@ -63,7 +65,7 @@ Define(renewal 108238)
 	SpellInfo(renewal cd=120 gcd=0 offgcd=1)
 Define(rejuvenation 774)
 	SpellAddTargetBuff(rejuvenation rejuvenation_buff=1)
-	SpellAddTargetBuff(rejuvenation rejuvenation_germination=1 talent=germination_talent)
+	SpellAddTargetBuff(rejuvenation germination_buff=1 talent=germination_talent)
 Define(rejuvenation_buff 774)
 	SpellInfo(rejuvenation_buff duration=15)
 Define(revitalize 212040)
@@ -77,6 +79,7 @@ Define(innervate 29166)
 	SpellInfo(innervate cd=300)
 	
 # Balance Affinity
+Define(balance_affinity_talent 7)
 Define(moonkin_form 24858)
 	SpellInfo(moonkin_form to_stance=druid_moonkin_form)
 	SpellInfo(moonkin_form unusable=1 if_stance=druid_moonkin_form)
@@ -96,9 +99,11 @@ Define(solar_wrath 190984)
 	SpellAddBuff(solar_wrath solar_empowerment_buff=-1)
 
 # Feral Affinity
+Define(feral_affinity_talent 8)
 
 
 # Guardian Affinity
+Define(guardian_affinity_talent 9)
 Define(bear_form 5487)
 	SpellInfo(bear_form to_stance=druid_bear_form)
 	SpellInfo(bear_form unusable=1 if_stance=druid_bear_form)
@@ -126,7 +131,7 @@ Define(germination_talent 18)
 AddIcon specialization=4 help=main
 {
 	# Don't fucking dismount me asshole script.
-	unless Stance(2) or Stance(3) or mounted()
+	unless Stance(2) or Stance(3) or mounted() or IsDead()
 	{
 		if not IsDead() and HealthPercent() < 70 Spell(renewal)
 	
@@ -148,9 +153,8 @@ AddIcon specialization=4 help=main
 		}
 		
 		# Keep up focus stuff regardless of target.
-		if not target.Present() and HasFocus()
+		if not { target.Present() and target.IsFriend() and target.InRange(lifebloom) and target.HealthPercent() < 100 } and HasFocus()
 		{
-			if focus.HealthPercent() < 60 Spell(ironbark)
 			# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
 			if focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
 		}
@@ -158,7 +162,7 @@ AddIcon specialization=4 help=main
 		# Alternate DPS rotations.
 		if target.InRange(mangle) and HasFullControl() and target.Present() and not target.IsFriend()
 		{
-			if BuffPresent(bear_form) Guardian_Affinity()
+			if BuffPresent(bear_form) and Talent(guardian_affinity_talent) Guardian_Affinity()
 		}
 	}
 }
@@ -177,7 +181,7 @@ AddFunction Travel
 
 AddFunction HasFocus
 {
-	focus.Present() and focus.Exists() and focus.InRange(lifebloom)
+	focus.Present() and focus.InRange(lifebloom)
 }
 
 # Party auto target system
@@ -185,32 +189,86 @@ AddFunction Party_Auto_Target
 {
 	unless UnitInRaid()
 	{
-		if HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and HealthPercent() < 100
+		# Prioritize low health
+		if HealthPercent() < 45 and { target.HealthPercent() >= 45 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
+		if party1.HealthPercent() < 45 and { target.HealthPercent() >= 45 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
+		if party2.HealthPercent() < 45 and { target.HealthPercent() >= 45 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) and party2.HealthPercent() < target.HealthPercent() PartyMemberTwo()
+		if party3.HealthPercent() < 45 and { target.HealthPercent() >= 45 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) and party3.HealthPercent() < target.HealthPercent() PartyMemberThree()
+		if party4.HealthPercent() < 45 and { target.HealthPercent() >= 45 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) and party4.HealthPercent() < target.HealthPercent() PartyMemberFour()
+		
+		# Prioritize putting rejuvenation on people
+		unless HealthPercent() < 45 or party1.HealthPercent() < 45 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 45 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 45 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 45 and party4.Present() and party4.InRange(rejuvenation)
 		{
-			unless player.IsTarget() Texture(misc_arrowdown)
+			if HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } ThePlayer()
+			if party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
+			if party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) PartyMemberTwo()
+			if party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) PartyMemberThree()
+			if party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) PartyMemberFour()
 		}
 		
-		if { party1.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party1.HealthPercent() < 100 } and party1.Present() and party1.InRange(rejuvenation)
+		# Normal healing.
+		unless HealthPercent() < 45 or HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 or party1.HealthPercent() < 45 and party1.Present() and party1.InRange(rejuvenation) or party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 45 and party2.Present() and party2.InRange(rejuvenation) or party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 45 and party3.Present() and party3.InRange(rejuvenation) or party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 45 and party4.Present() and party4.InRange(rejuvenation) or party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and party4.Present() and party4.InRange(rejuvenation)
 		{
-			unless party1.IsTarget() Texture(ships_ability_boardingparty)
-		}
-		
-		if { party2.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party2.HealthPercent() < 100 } and party2.Present() and party2.InRange(rejuvenation)
-		{
-			unless party2.IsTarget() Texture(ships_ability_boardingpartyalliance)
-		}
-		
-		if { party3.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party3.HealthPercent() < 100 } and party3.Present() and party3.InRange(rejuvenation)
-		{
-			unless party3.IsTarget() Texture(ships_ability_boardingpartyhorde)
-		}
-		
-		if { party4.HealthPercent() < target.HealthPercent() and target.Present() and target.IsFriend() or not target.Present() and party4.HealthPercent() < 100 } and party4.Present() and party4.InRange(rejuvenation)
-		{
-			unless party4.IsTarget() Texture(inv_helm_misc_starpartyhat)
+			if HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
+			if party1.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
+			if party2.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) and party2.HealthPercent() < target.HealthPercent() PartyMemberTwo()
+			if party3.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) and party3.HealthPercent() < target.HealthPercent() PartyMemberThree()
+			if party4.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) and party4.HealthPercent() < target.HealthPercent() PartyMemberFour()
 		}
 	}
 }
+
+AddFunction ThePlayer
+{
+	unless player.IsTarget() Texture(misc_arrowdown)
+}
+
+AddFunction PartyMemberOne
+{
+	unless party1.IsTarget() Texture(ships_ability_boardingparty)
+}
+
+AddFunction PartyMemberTwo
+{
+	unless party2.IsTarget() Texture(ships_ability_boardingpartyalliance)
+}
+
+AddFunction PartyMemberThree
+{
+	unless party3.IsTarget() Texture(ships_ability_boardingpartyhorde)
+}
+
+AddFunction PartyMemberFour
+{
+	unless party4.IsTarget() Texture(inv_helm_misc_starpartyhat)
+}
+
+AddFunction PartyMemberCount
+{
+	player.Present() + party1.Present() + party2.Present() + party3.Present() + party4.Present()
+}
+
+AddFunction PartyHealth
+{
+	Health() + party1.Health() + party2.Health() + party3.Health() + party4.Health()
+}
+
+AddFunction PartyMaxHealth
+{
+	MaxHealth() + party1.MaxHealth() + party2.MaxHealth() + party3.MaxHealth() + party4.MaxHealth()
+}
+
+AddFunction PartyHealthPercent
+{
+	{ PartyHealth() / PartyMaxHealth() } * 100
+}
+
+AddFunction PartyMembersWithinFourtyYard
+{
+	player.InRange(rejuvenation) + party1.InRange(rejuvenation) + party2.InRange(rejuvenation) + party3.InRange(rejuvenation) + party4.InRange(rejuvenation)
+}
+
+# Rotation
 
 AddFunction Cooldowns 
 {
@@ -225,10 +283,10 @@ AddFunction Cooldowns
 		# Use Cenarion Ward on cooldown.
 		Spell(cenarion_ward)
 		# Save the tank / save the target.
-		if { HasFocus() and focus.HealthPercent() < 60 } or { not HasFocus() and target.HealthPercent() < 40 } Spell(ironbark)
+		if target.HealthPercent() < 50 Spell(ironbark)
 	}
 	# Use Flourish and Essence of G'Hanir as often as possible (no need to use them together).
-	if { UnitInRaid() and BuffCountOnAny(rejuvenation_buff) >= 5 } or { not UnitInRaid() and BuffCountOnAny(wild_growth_buff) >= 1 }
+	if { UnitInRaid() and BuffCountOnAny(rejuvenation_buff) >= 5 } or { not UnitInRaid() and BuffCountOnAny(wild_growth_buff) >= PartyMemberCount() }
 	{
 		Spell(flourish)
 		Spell(essence_of_ghanir)
@@ -237,21 +295,25 @@ AddFunction Cooldowns
 
 AddFunction Rotation
 {
+	# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
+	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() < 35 Spell(swiftmend)
 	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
 	# Use Wild Growth when at least 4 members of the group are damaged.
-	if { UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and CheckBoxOn(hard) and Speed() == 0 } Spell(wild_growth)
-	# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
-	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
+	if { CheckBoxOn(hard) and Speed() == 0 } or { not UnitInRaid() and PartyMemberCount() >= 4 and PartyHealthPercent() <= 75 and Speed() == 0 } Spell(wild_growth)
+	# Use Tranquility, if group is still taking heavy damage (it does 100% more healing 5-man content).
+	if not UnitInRaid() and PartyMemberCount() >= 4 and PartyMembersWithinFourtyYard() >= PartyMemberCount() and BuffCountOnAny(wild_growth_buff) >= PartyMemberCount() and PartyHealthPercent() <= 55 Spell(tranquility)
 	# Use Regrowth as an emergency heal.
 	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and Speed() == 0 Spell(regrowth_restoration)
 	# Use Clearcasting procs on one of the tanks.
 	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and target.IsFocus() and Speed() == 0 } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and Speed() == 0 and target.HealthPercent() <= 80 } Spell(regrowth_restoration)
-	# Keep Rejuvenation on the tank and on members of the group that just took damage or are about to take damage. Keep up both Rejuvenations on targets on which the damage is too high for a single one.
-	if target.BuffRemains(rejuvenation_buff) <= 3.5 or not target.BuffPresent(rejuvenation_buff) or { target.BuffPresent(cultivation_buff) and not target.BuffPresent(rejuvenation_germination) and Talent(germination_talent) } Spell(rejuvenation)
+	# Keep Rejuvenation on the tank and on members of the group that just took damage or are about to take damage.
+	if target.BuffRemains(rejuvenation_buff) <= 3.5 Spell(rejuvenation)
+	# Keep up both Rejuvenations on targets on which the damage is too high for a single one.
+	if target.HealthPercent() <= 89 and target.BuffPresent(rejuvenation_buff) and target.BuffRemains(germination_buff) < target.BuffRemains(rejuvenation_buff) and target.BuffRemains(germination_buff) <= 3.5 and Talent(germination_talent) Spell(rejuvenation)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
-	if target.HealthPercent() <= 40 Spell(swiftmend)
+	if target.HealthPercent() <= 45 Spell(swiftmend)
 	if target.HealthPercent() <= 60 and Speed() == 0 Spell(regrowth_restoration)
 	if target.HealthPercent() <= 89 and Speed() == 0 Spell(healing_touch)
 }
