@@ -197,14 +197,14 @@ AddFunction Party_Auto_Target
 		if not target.IsFriend() and target.Exists() and InCombat() ThePlayer()
 
 		# Prioritize low health
-		if HealthPercent() < 50 and { target.HealthPercent() >= 50 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
-		if party1.HealthPercent() < 50 and { target.HealthPercent() >= 50 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
-		if party2.HealthPercent() < 50 and { target.HealthPercent() >= 50 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) and party2.HealthPercent() < target.HealthPercent() PartyMemberTwo()
-		if party3.HealthPercent() < 50 and { target.HealthPercent() >= 50 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) and party3.HealthPercent() < target.HealthPercent() PartyMemberThree()
-		if party4.HealthPercent() < 50 and { target.HealthPercent() >= 50 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) and party4.HealthPercent() < target.HealthPercent() PartyMemberFour()
+		if HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
+		if party1.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
+		if party2.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) and party2.HealthPercent() < target.HealthPercent() PartyMemberTwo()
+		if party3.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) and party3.HealthPercent() < target.HealthPercent() PartyMemberThree()
+		if party4.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) and party4.HealthPercent() < target.HealthPercent() PartyMemberFour()
 		
 		# Prioritize putting rejuvenation on people
-		unless HealthPercent() < 50 or party1.HealthPercent() < 50 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 50 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 50 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 50 and party4.Present() and party4.InRange(rejuvenation)
+		unless HealthPercent() < 60 or party1.HealthPercent() < 60 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 60 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 60 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 60 and party4.Present() and party4.InRange(rejuvenation)
 		{
 			if HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } ThePlayer()
 			if party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
@@ -214,7 +214,7 @@ AddFunction Party_Auto_Target
 		}
 		
 		# Normal healing.
-		unless HealthPercent() < 50 or HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 or party1.HealthPercent() < 50 and party1.Present() and party1.InRange(rejuvenation) or party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 50 and party2.Present() and party2.InRange(rejuvenation) or party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 50 and party3.Present() and party3.InRange(rejuvenation) or party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 50 and party4.Present() and party4.InRange(rejuvenation) or party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and party4.Present() and party4.InRange(rejuvenation)
+		unless HealthPercent() < 60 or HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 or party1.HealthPercent() < 60 and party1.Present() and party1.InRange(rejuvenation) or party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 60 and party2.Present() and party2.InRange(rejuvenation) or party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 60 and party3.Present() and party3.InRange(rejuvenation) or party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 60 and party4.Present() and party4.InRange(rejuvenation) or party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and party4.Present() and party4.InRange(rejuvenation)
 		{
 			if HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
 			if party1.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
@@ -319,8 +319,8 @@ AddFunction Guardian_Affinity
 	if not BuffPresent(bear_form) Spell(bear_form)
 	if IncomingDamage(5) / MaxHealth() >= 0.2 or Health() <= MaxHealth() * 0.65 Spell(frenzied_regeneration)
 	if Rage() > 55 Spell(ironfur)
-	if target.DebuffExpires(moonfire_debuff) Spell(moonfire)
 	Spell(thrash_bear)
+	if target.DebuffExpires(moonfire_debuff) Spell(moonfire)
 	Spell(mangle)
 }
 ]]
