@@ -65,7 +65,7 @@ AddFunction AssassinationGetInMeleeRange
 
 AddFunction InterruptActions
 {
-	if target.IsFriend(no) and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(kick) and not {BuffPresent(stealthed_buff any=1) and BuffPresent(vanish_buff)} Spell(kick)
 		if target.Classification(worldboss no)

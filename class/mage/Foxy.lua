@@ -10,7 +10,7 @@ Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_mage_spells)
 
-AddCheckBox(opt_interrupt L(interrupt) default)
+# AddCheckBox(opt_interrupt L(interrupt) default)
 # AddCheckBox(opt_potion_intellect ItemName(draenic_intellect_potion) default)
 # AddCheckBox(opt_legendary_ring_intellect ItemName(legendary_ring_intellect) default)
 # AddCheckBox(opt_time_warp SpellName(time_warp) default)
@@ -24,16 +24,13 @@ AddFunction UsePotionIntellect
 
 AddFunction InterruptActions
 {
-	if InCombat() and target.InRange(counterspell) and HasFullControl()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
-		if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.IsInterruptible()
+		if target.InRange(counterspell) Spell(counterspell)
+		if not target.Classification(worldboss)
 		{
-			Spell(counterspell)
-			if not target.Classification(worldboss)
-			{
-				if target.Distance(less 8) Spell(arcane_torrent_mana)
-				if target.InRange(quaking_palm) Spell(quaking_palm)
-			}
+			if target.Distance(less 8) Spell(arcane_torrent_mana)
+			if target.InRange(quaking_palm) Spell(quaking_palm)
 		}
 	}
 }

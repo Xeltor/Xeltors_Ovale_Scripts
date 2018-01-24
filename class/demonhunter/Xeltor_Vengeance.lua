@@ -38,7 +38,7 @@ AddFunction Boss
 # Common functions.
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.Casting() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(consume_magic) and target.IsInterruptible() Spell(consume_magic)
 		if target.InRange(fel_eruption) and not target.Classification(worldboss) Spell(fel_eruption)

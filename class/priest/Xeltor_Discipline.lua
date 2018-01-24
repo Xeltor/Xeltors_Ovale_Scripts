@@ -76,7 +76,7 @@ AddCheckBox(grouped "Group")
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if not target.Classification(worldboss)
 		{

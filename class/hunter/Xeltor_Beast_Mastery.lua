@@ -73,7 +73,7 @@ AddFunction HunterTankStuff
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(counter_shot) Spell(counter_shot)
 		if not target.Classification(worldboss)

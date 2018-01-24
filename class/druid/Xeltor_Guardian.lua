@@ -70,7 +70,7 @@ AddFunction Travel
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(skull_bash) Spell(skull_bash)
 		if not target.Classification(worldboss)

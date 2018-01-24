@@ -35,6 +35,7 @@ AddIcon specialization=3 help=main
 	if target.InRange(heroic_throw) and not PreviousGCDSpell(intercept) and target.InRange(intercept) and InCombat() and HasFullControl() and Falling() Spell(intercept)
 	if target.InRange(heroic_throw) and InCombat() and HasFullControl() Spell(heroic_throw usable=1)
 }
+
 AddFunction ProtectionHealMe
 {
 	if HealthPercent() < 70 Spell(victory_rush)
@@ -53,7 +54,7 @@ AddFunction ProtectionGetInMeleeRange
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.Casting()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(pummel) and target.IsInterruptible() Spell(pummel)
 		if target.InRange(storm_bolt) and not target.Classification(worldboss) Spell(storm_bolt)

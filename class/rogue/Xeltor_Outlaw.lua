@@ -50,7 +50,7 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if target.IsFriend(no) and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(kick) and not Stealthed() Spell(kick)
 		if target.Classification(worldboss no)

@@ -66,7 +66,7 @@ AddFunction SurvivalSummonPet
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(muzzle) Spell(muzzle)
 		if not target.Classification(worldboss)

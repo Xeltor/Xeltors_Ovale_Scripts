@@ -21,19 +21,19 @@ AddIcon specialization=2 help=main
 		ProtectionDefaultCdActions()
 		ProtectionDefaultShortCdActions()
 		
-		if not BuffPresent(consecration) Spell(consecration)
+		if not BuffPresent(consecration_buff) Spell(consecration)
 		ProtectionDefaultMainActions()
 	}
 }
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(rebuke) Spell(rebuke)
 		if not target.Classification(worldboss)
 		{
-			if target.InRange(avengers_shield) Spell(avengers_shield)
+			if target.InRange(avengers_shield) and Level() >= 42 Spell(avengers_shield)
 			if not InFlightToTarget(avengers_shield) and not target.Classification(worldboss)
 			{
 				if target.InRange(hammer_of_justice) Spell(hammer_of_justice)
