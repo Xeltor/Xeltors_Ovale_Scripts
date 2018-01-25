@@ -18,10 +18,9 @@ AddIcon specialization=2 help=main
 	
 	if { target.InRange(shield_of_the_righteous) or target.InRange(hammer_of_the_righteous) } and HasFullControl()
 	{
+		if not BuffPresent(consecration_buff) Spell(consecration)
 		ProtectionDefaultCdActions()
 		ProtectionDefaultShortCdActions()
-		
-		if not BuffPresent(consecration_buff) Spell(consecration)
 		ProtectionDefaultMainActions()
 	}
 }
@@ -209,7 +208,7 @@ AddFunction ProtectionProtMainActions
  #judgment,if=!talent.seraphim.enabled
  if not Talent(seraphim_talent) Spell(judgment)
  #avengers_shield,if=!talent.seraphim.enabled&talent.crusaders_judgment.enabled&buff.grand_crusader.up
- if not Talent(seraphim_talent) and Talent(crusaders_judgment_talent) and BuffPresent(grand_crusader_buff) Spell(avengers_shield)
+ if not Talent(seraphim_talent) and BuffPresent(grand_crusader_buff) Spell(avengers_shield)
  #blessed_hammer,if=!talent.seraphim.enabled
  if not Talent(seraphim_talent) Spell(blessed_hammer)
  #avengers_shield,if=!talent.seraphim.enabled
@@ -282,7 +281,7 @@ AddFunction ProtectionProtCdActions
  #guardian_of_ancient_kings,if=!talent.seraphim.enabled&incoming_damage_2500ms>health.max*0.4&!(debuff.eye_of_tyr.up|buff.aegis_of_light.up|buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
  if not Talent(seraphim_talent) and IncomingDamage(2.5) > MaxHealth() * 0.4 and not { target.DebuffPresent(eye_of_tyr_debuff) or BuffPresent(aegis_of_light_buff) or BuffPresent(ardent_defender_buff) or BuffPresent(guardian_of_ancient_kings_buff) or BuffPresent(divine_shield_buff) or BuffPresent(potion_buff) } Spell(guardian_of_ancient_kings)
  #divine_shield,if=!talent.seraphim.enabled&talent.final_stand.enabled&incoming_damage_2500ms>health.max*0.4&!(debuff.eye_of_tyr.up|buff.aegis_of_light.up|buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
- if not Talent(seraphim_talent) and Talent(final_stand_talent) and IncomingDamage(2.5) > MaxHealth() * 0.4 and not { target.DebuffPresent(eye_of_tyr_debuff) or BuffPresent(aegis_of_light_buff) or BuffPresent(ardent_defender_buff) or BuffPresent(guardian_of_ancient_kings_buff) or BuffPresent(divine_shield_buff) or BuffPresent(potion_buff) } Spell(divine_shield)
+ # if not Talent(seraphim_talent) and Talent(final_stand_talent) and IncomingDamage(2.5) > MaxHealth() * 0.4 and not { target.DebuffPresent(eye_of_tyr_debuff) or BuffPresent(aegis_of_light_buff) or BuffPresent(ardent_defender_buff) or BuffPresent(guardian_of_ancient_kings_buff) or BuffPresent(divine_shield_buff) or BuffPresent(potion_buff) } Spell(divine_shield)
  #ardent_defender,if=!talent.seraphim.enabled&incoming_damage_2500ms>health.max*0.4&!(debuff.eye_of_tyr.up|buff.aegis_of_light.up|buff.ardent_defender.up|buff.guardian_of_ancient_kings.up|buff.divine_shield.up|buff.potion.up)
  if not Talent(seraphim_talent) and IncomingDamage(2.5) > MaxHealth() * 0.4 and not { target.DebuffPresent(eye_of_tyr_debuff) or BuffPresent(aegis_of_light_buff) or BuffPresent(ardent_defender_buff) or BuffPresent(guardian_of_ancient_kings_buff) or BuffPresent(divine_shield_buff) or BuffPresent(potion_buff) } Spell(ardent_defender)
  #lay_on_hands,if=!talent.seraphim.enabled&health.pct<15
