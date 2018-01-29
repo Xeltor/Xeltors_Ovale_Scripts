@@ -40,7 +40,7 @@ AddFunction Boss
 # Common functions.
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
         if target.InRange(mind_freeze) and target.IsInterruptible() Spell(mind_freeze)
         if target.Distance(less 12) and not target.Classification(worldboss) Spell(blinding_sleet)

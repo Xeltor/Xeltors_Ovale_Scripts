@@ -3,15 +3,9 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_survival"
-	local desc = "[Xel][7.2.5] Hunter: Survival"
+	local desc = "[Xel][7.3] Hunter: Survival"
 	local code = [[
-# Based on SimulationCraft profile "Hunter_SV_T18M".
-#	class=hunter
-#	spec=survival
-#	talents=3202022
-
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_hunter_spells)
@@ -72,7 +66,7 @@ AddFunction SurvivalSummonPet
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(muzzle) Spell(muzzle)
 		if not target.Classification(worldboss)
@@ -82,6 +76,16 @@ AddFunction InterruptActions
 			if target.Distance(less 8) Spell(war_stomp)
 		}
 	}
+}
+
+AddFunction mokTalented
+{
+ Talent(way_of_the_moknathal_talent)
+}
+
+AddFunction frizzosEquipped
+{
+ HasEquippedItem(137043)
 }
 
 ### actions.CDs
@@ -96,8 +100,8 @@ AddFunction SurvivalCdsMainPostConditions
 
 AddFunction SurvivalCdsShortCdActions
 {
-    #snake_hunter,if=cooldown.mongoose_bite.charges=0&buff.mongoose_fury.remains>3*gcd&buff.aspect_of_the_eagle.down
-    if SpellCharges(mongoose_bite) == 0 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() and BuffExpires(aspect_of_the_eagle_buff) Spell(snake_hunter)
+ #snake_hunter,if=cooldown.mongoose_bite.charges=0&buff.mongoose_fury.remains>3*gcd&(cooldown.aspect_of_the_eagle.remains>5&!buff.aspect_of_the_eagle.up)
+ if SpellCharges(mongoose_bite) == 0 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() and SpellCooldown(aspect_of_the_eagle) > 5 and not BuffPresent(aspect_of_the_eagle_buff) Spell(snake_hunter)
 }
 
 AddFunction SurvivalCdsShortCdPostConditions
@@ -106,186 +110,170 @@ AddFunction SurvivalCdsShortCdPostConditions
 
 AddFunction SurvivalCdsCdActions
 {
-    #arcane_torrent,if=focus<=30
-    if Focus() <= 30 Spell(arcane_torrent_focus)
-    #berserking,if=buff.aspect_of_the_eagle.up
-    if BuffPresent(aspect_of_the_eagle_buff) Spell(berserking)
-    #blood_fury,if=buff.aspect_of_the_eagle.up
-    if BuffPresent(aspect_of_the_eagle_buff) Spell(blood_fury_ap)
-    #potion,if=buff.aspect_of_the_eagle.up
-    # if BuffPresent(aspect_of_the_eagle_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ #arcane_torrent,if=focus<=30
+ if Focus() <= 30 Spell(arcane_torrent_focus)
+ #berserking,if=buff.aspect_of_the_eagle.up
+ if BuffPresent(aspect_of_the_eagle_buff) Spell(berserking)
+ #blood_fury,if=buff.aspect_of_the_eagle.up
+ if BuffPresent(aspect_of_the_eagle_buff) Spell(blood_fury_ap)
+ #potion,if=buff.aspect_of_the_eagle.up&(buff.berserking.up|buff.blood_fury.up|!race.troll&!race.orc)
+ # if BuffPresent(aspect_of_the_eagle_buff) and { BuffPresent(berserking_buff) or BuffPresent(blood_fury_ap_buff) or not Race(Troll) and not Race(Orc) } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
 
-    unless SpellCharges(mongoose_bite) == 0 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() and BuffExpires(aspect_of_the_eagle_buff) and Spell(snake_hunter)
-    {
-        #aspect_of_the_eagle,if=buff.mongoose_fury.stack>=2&buff.mongoose_fury.remains>3*gcd
-        if BuffStacks(mongoose_fury_buff) >= 2 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() Spell(aspect_of_the_eagle)
-    }
+ unless SpellCharges(mongoose_bite) == 0 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() and SpellCooldown(aspect_of_the_eagle) > 5 and not BuffPresent(aspect_of_the_eagle_buff) and Spell(snake_hunter)
+ {
+  #aspect_of_the_eagle,if=buff.mongoose_fury.up&(cooldown.mongoose_bite.charges=0|buff.mongoose_fury.remains<11)
+  if BuffPresent(mongoose_fury_buff) and { SpellCharges(mongoose_bite) == 0 or BuffRemaining(mongoose_fury_buff) < 11 } Spell(aspect_of_the_eagle)
+ }
 }
 
 AddFunction SurvivalCdsCdPostConditions
 {
-    SpellCharges(mongoose_bite) == 0 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() and BuffExpires(aspect_of_the_eagle_buff) and Spell(snake_hunter)
+ SpellCharges(mongoose_bite) == 0 and BuffRemaining(mongoose_fury_buff) > 3 * GCD() and SpellCooldown(aspect_of_the_eagle) > 5 and not BuffPresent(aspect_of_the_eagle_buff) and Spell(snake_hunter)
 }
 
 ### actions.default
 
 AddFunction SurvivalDefaultMainActions
 {
-    #call_action_list,name=mokMaintain,if=talent.way_of_the_moknathal.enabled
-    if Talent(way_of_the_moknathal_talent) SurvivalMokmaintainMainActions()
+ #call_action_list,name=mokMaintain,if=variable.mokTalented
+ if mokTalented() SurvivalMokmaintainMainActions()
 
-    unless Talent(way_of_the_moknathal_talent) and SurvivalMokmaintainMainPostConditions()
+ unless mokTalented() and SurvivalMokmaintainMainPostConditions()
+ {
+  #call_action_list,name=CDs
+  SurvivalCdsMainActions()
+
+  unless SurvivalCdsMainPostConditions()
+  {
+   #call_action_list,name=aoe,if=active_enemies>=3
+   if Enemies(tagged=1) >= 3 SurvivalAoeMainActions()
+
+   unless Enemies(tagged=1) >= 3 and SurvivalAoeMainPostConditions()
+   {
+    #call_action_list,name=fillers,if=!buff.mongoose_fury.up
+    if not BuffPresent(mongoose_fury_buff) SurvivalFillersMainActions()
+
+    unless not BuffPresent(mongoose_fury_buff) and SurvivalFillersMainPostConditions()
     {
-        #call_action_list,name=CDs
-        SurvivalCdsMainActions()
+     #call_action_list,name=biteTrigger,if=!buff.mongoose_fury.up
+     if not BuffPresent(mongoose_fury_buff) SurvivalBitetriggerMainActions()
 
-        unless SurvivalCdsMainPostConditions()
-        {
-            #call_action_list,name=preBitePhase,if=!buff.mongoose_fury.up
-            if not BuffPresent(mongoose_fury_buff) SurvivalPrebitephaseMainActions()
-
-            unless not BuffPresent(mongoose_fury_buff) and SurvivalPrebitephaseMainPostConditions()
-            {
-                #call_action_list,name=aoe,if=active_enemies>=3
-                if Enemies(tagged=1) >= 3 SurvivalAoeMainActions()
-
-                unless Enemies(tagged=1) >= 3 and SurvivalAoeMainPostConditions()
-                {
-                    #call_action_list,name=bitePhase
-                    SurvivalBitephaseMainActions()
-
-                    unless SurvivalBitephaseMainPostConditions()
-                    {
-                        #call_action_list,name=biteFill
-                        SurvivalBitefillMainActions()
-
-                        unless SurvivalBitefillMainPostConditions()
-                        {
-                            #call_action_list,name=fillers
-                            SurvivalFillersMainActions()
-                        }
-                    }
-                }
-            }
-        }
+     unless not BuffPresent(mongoose_fury_buff) and SurvivalBitetriggerMainPostConditions()
+     {
+      #call_action_list,name=bitePhase,if=buff.mongoose_fury.up
+      if BuffPresent(mongoose_fury_buff) SurvivalBitephaseMainActions()
+     }
     }
+   }
+  }
+ }
 }
 
 AddFunction SurvivalDefaultMainPostConditions
 {
-    Talent(way_of_the_moknathal_talent) and SurvivalMokmaintainMainPostConditions() or SurvivalCdsMainPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalPrebitephaseMainPostConditions() or Enemies(tagged=1) >= 3 and SurvivalAoeMainPostConditions() or SurvivalBitephaseMainPostConditions() or SurvivalBitefillMainPostConditions() or SurvivalFillersMainPostConditions()
+ mokTalented() and SurvivalMokmaintainMainPostConditions() or SurvivalCdsMainPostConditions() or Enemies(tagged=1) >= 3 and SurvivalAoeMainPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalFillersMainPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalBitetriggerMainPostConditions() or BuffPresent(mongoose_fury_buff) and SurvivalBitephaseMainPostConditions()
 }
 
 AddFunction SurvivalDefaultShortCdActions
 {
-    #auto_attack
-    # SurvivalGetInMeleeRange()
-    #call_action_list,name=mokMaintain,if=talent.way_of_the_moknathal.enabled
-    if Talent(way_of_the_moknathal_talent) SurvivalMokmaintainShortCdActions()
+ #auto_attack
+ # SurvivalGetInMeleeRange()
+ #call_action_list,name=mokMaintain,if=variable.mokTalented
+ if mokTalented() SurvivalMokmaintainShortCdActions()
 
-    unless Talent(way_of_the_moknathal_talent) and SurvivalMokmaintainShortCdPostConditions()
+ unless mokTalented() and SurvivalMokmaintainShortCdPostConditions()
+ {
+  #call_action_list,name=CDs
+  SurvivalCdsShortCdActions()
+
+  unless SurvivalCdsShortCdPostConditions()
+  {
+   #call_action_list,name=aoe,if=active_enemies>=3
+   if Enemies(tagged=1) >= 3 SurvivalAoeShortCdActions()
+
+   unless Enemies(tagged=1) >= 3 and SurvivalAoeShortCdPostConditions()
+   {
+    #call_action_list,name=fillers,if=!buff.mongoose_fury.up
+    if not BuffPresent(mongoose_fury_buff) SurvivalFillersShortCdActions()
+
+    unless not BuffPresent(mongoose_fury_buff) and SurvivalFillersShortCdPostConditions()
     {
-        #call_action_list,name=CDs
-        SurvivalCdsShortCdActions()
+     #call_action_list,name=biteTrigger,if=!buff.mongoose_fury.up
+     if not BuffPresent(mongoose_fury_buff) SurvivalBitetriggerShortCdActions()
 
-        unless SurvivalCdsShortCdPostConditions()
-        {
-            #call_action_list,name=preBitePhase,if=!buff.mongoose_fury.up
-            if not BuffPresent(mongoose_fury_buff) SurvivalPrebitephaseShortCdActions()
-
-            unless not BuffPresent(mongoose_fury_buff) and SurvivalPrebitephaseShortCdPostConditions()
-            {
-                #call_action_list,name=aoe,if=active_enemies>=3
-                if Enemies(tagged=1) >= 3 SurvivalAoeShortCdActions()
-
-                unless Enemies(tagged=1) >= 3 and SurvivalAoeShortCdPostConditions()
-                {
-                    #call_action_list,name=bitePhase
-                    SurvivalBitephaseShortCdActions()
-
-                    unless SurvivalBitephaseShortCdPostConditions()
-                    {
-                        #call_action_list,name=biteFill
-                        SurvivalBitefillShortCdActions()
-
-                        unless SurvivalBitefillShortCdPostConditions()
-                        {
-                            #call_action_list,name=fillers
-                            SurvivalFillersShortCdActions()
-                        }
-                    }
-                }
-            }
-        }
+     unless not BuffPresent(mongoose_fury_buff) and SurvivalBitetriggerShortCdPostConditions()
+     {
+      #call_action_list,name=bitePhase,if=buff.mongoose_fury.up
+      if BuffPresent(mongoose_fury_buff) SurvivalBitephaseShortCdActions()
+     }
     }
+   }
+  }
+ }
 }
 
 AddFunction SurvivalDefaultShortCdPostConditions
 {
-    Talent(way_of_the_moknathal_talent) and SurvivalMokmaintainShortCdPostConditions() or SurvivalCdsShortCdPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalPrebitephaseShortCdPostConditions() or Enemies(tagged=1) >= 3 and SurvivalAoeShortCdPostConditions() or SurvivalBitephaseShortCdPostConditions() or SurvivalBitefillShortCdPostConditions() or SurvivalFillersShortCdPostConditions()
+ mokTalented() and SurvivalMokmaintainShortCdPostConditions() or SurvivalCdsShortCdPostConditions() or Enemies(tagged=1) >= 3 and SurvivalAoeShortCdPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalFillersShortCdPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalBitetriggerShortCdPostConditions() or BuffPresent(mongoose_fury_buff) and SurvivalBitephaseShortCdPostConditions()
 }
 
 AddFunction SurvivalDefaultCdActions
 {
-    #muzzle,if=target.debuff.casting.react
-    # if target.IsInterruptible() SurvivalInterruptActions()
-    #use_items
-    # SurvivalUseItemActions()
-    #call_action_list,name=mokMaintain,if=talent.way_of_the_moknathal.enabled
-    if Talent(way_of_the_moknathal_talent) SurvivalMokmaintainCdActions()
+ #variable,name=frizzosEquipped,value=(equipped.137043)
+ #variable,name=mokTalented,value=(talent.way_of_the_moknathal.enabled)
+ #use_items
+ # SurvivalUseItemActions()
+ #muzzle,if=target.debuff.casting.react
+ # if target.IsInterruptible() SurvivalInterruptActions()
+ #call_action_list,name=mokMaintain,if=variable.mokTalented
+ if mokTalented() SurvivalMokmaintainCdActions()
 
-    unless Talent(way_of_the_moknathal_talent) and SurvivalMokmaintainCdPostConditions()
+ unless mokTalented() and SurvivalMokmaintainCdPostConditions()
+ {
+  #call_action_list,name=CDs
+  SurvivalCdsCdActions()
+
+  unless SurvivalCdsCdPostConditions()
+  {
+   #call_action_list,name=aoe,if=active_enemies>=3
+   if Enemies(tagged=1) >= 3 SurvivalAoeCdActions()
+
+   unless Enemies(tagged=1) >= 3 and SurvivalAoeCdPostConditions()
+   {
+    #call_action_list,name=fillers,if=!buff.mongoose_fury.up
+    if not BuffPresent(mongoose_fury_buff) SurvivalFillersCdActions()
+
+    unless not BuffPresent(mongoose_fury_buff) and SurvivalFillersCdPostConditions()
     {
-        #call_action_list,name=CDs
-        SurvivalCdsCdActions()
+     #call_action_list,name=biteTrigger,if=!buff.mongoose_fury.up
+     if not BuffPresent(mongoose_fury_buff) SurvivalBitetriggerCdActions()
 
-        unless SurvivalCdsCdPostConditions()
-        {
-            #call_action_list,name=preBitePhase,if=!buff.mongoose_fury.up
-            if not BuffPresent(mongoose_fury_buff) SurvivalPrebitephaseCdActions()
-
-            unless not BuffPresent(mongoose_fury_buff) and SurvivalPrebitephaseCdPostConditions()
-            {
-                #call_action_list,name=aoe,if=active_enemies>=3
-                if Enemies(tagged=1) >= 3 SurvivalAoeCdActions()
-
-                unless Enemies(tagged=1) >= 3 and SurvivalAoeCdPostConditions()
-                {
-                    #call_action_list,name=bitePhase
-                    SurvivalBitephaseCdActions()
-
-                    unless SurvivalBitephaseCdPostConditions()
-                    {
-                        #call_action_list,name=biteFill
-                        SurvivalBitefillCdActions()
-
-                        unless SurvivalBitefillCdPostConditions()
-                        {
-                            #call_action_list,name=fillers
-                            SurvivalFillersCdActions()
-                        }
-                    }
-                }
-            }
-        }
+     unless not BuffPresent(mongoose_fury_buff) and SurvivalBitetriggerCdPostConditions()
+     {
+      #call_action_list,name=bitePhase,if=buff.mongoose_fury.up
+      if BuffPresent(mongoose_fury_buff) SurvivalBitephaseCdActions()
+     }
     }
+   }
+  }
+ }
 }
 
 AddFunction SurvivalDefaultCdPostConditions
 {
-    Talent(way_of_the_moknathal_talent) and SurvivalMokmaintainCdPostConditions() or SurvivalCdsCdPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalPrebitephaseCdPostConditions() or Enemies(tagged=1) >= 3 and SurvivalAoeCdPostConditions() or SurvivalBitephaseCdPostConditions() or SurvivalBitefillCdPostConditions() or SurvivalFillersCdPostConditions()
+ mokTalented() and SurvivalMokmaintainCdPostConditions() or SurvivalCdsCdPostConditions() or Enemies(tagged=1) >= 3 and SurvivalAoeCdPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalFillersCdPostConditions() or not BuffPresent(mongoose_fury_buff) and SurvivalBitetriggerCdPostConditions() or BuffPresent(mongoose_fury_buff) and SurvivalBitephaseCdPostConditions()
 }
 
 ### actions.aoe
 
 AddFunction SurvivalAoeMainActions
 {
-    #butchery
-    Spell(butchery)
-    #caltrops,if=!ticking
-    if not target.DebuffPresent(caltrops_debuff) Spell(caltrops)
-    #carve,if=(talent.serpent_sting.enabled&dot.serpent_sting.refreshable)|(active_enemies>5)
-    if Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) or Enemies(tagged=1) > 5 Spell(carve)
+ #butchery
+ Spell(butchery)
+ #caltrops,if=!ticking
+ if not target.DebuffPresent(caltrops_debuff) Spell(caltrops)
+ #carve,if=(talent.serpent_sting.enabled&dot.serpent_sting.refreshable)|(active_enemies>5)
+ if Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) or Enemies(tagged=1) > 5 Spell(carve)
 }
 
 AddFunction SurvivalAoeMainPostConditions
@@ -294,16 +282,16 @@ AddFunction SurvivalAoeMainPostConditions
 
 AddFunction SurvivalAoeShortCdActions
 {
-    unless Spell(butchery) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops)
-    {
-        #explosive_trap
-        Spell(explosive_trap)
-    }
+ unless Spell(butchery) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops)
+ {
+  #explosive_trap
+  Spell(explosive_trap)
+ }
 }
 
 AddFunction SurvivalAoeShortCdPostConditions
 {
-    Spell(butchery) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or { Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) or Enemies(tagged=1) > 5 } and Spell(carve)
+ Spell(butchery) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or { Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) or Enemies(tagged=1) > 5 } and Spell(carve)
 }
 
 AddFunction SurvivalAoeCdActions
@@ -312,75 +300,25 @@ AddFunction SurvivalAoeCdActions
 
 AddFunction SurvivalAoeCdPostConditions
 {
-    Spell(butchery) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or Spell(explosive_trap) or { Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) or Enemies(tagged=1) > 5 } and Spell(carve)
-}
-
-### actions.biteFill
-
-AddFunction SurvivalBitefillMainActions
-{
-    #butchery,if=equipped.frizzos_fingertrap&dot.lacerate.refreshable
-    if HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) Spell(butchery)
-    #carve,if=equipped.frizzos_fingertrap&dot.lacerate.refreshable
-    if HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) Spell(carve)
-    #lacerate,if=refreshable
-    if target.Refreshable(lacerate_debuff) Spell(lacerate)
-    #raptor_strike,if=active_enemies=1&talent.serpent_sting.enabled&dot.serpent_sting.refreshable
-    if Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) Spell(raptor_strike)
-    #caltrops,if=!ticking
-    if not target.DebuffPresent(caltrops_debuff) Spell(caltrops)
-}
-
-AddFunction SurvivalBitefillMainPostConditions
-{
-}
-
-AddFunction SurvivalBitefillShortCdActions
-{
-    #spitting_cobra
-    Spell(spitting_cobra)
-
-    unless HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(butchery) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(carve) or target.Refreshable(lacerate_debuff) and Spell(lacerate) or Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(raptor_strike)
-    {
-        #steel_trap
-        Spell(steel_trap)
-        #a_murder_of_crows
-        Spell(a_murder_of_crows)
-        #dragonsfire_grenade
-        Spell(dragonsfire_grenade)
-        #explosive_trap
-        Spell(explosive_trap)
-    }
-}
-
-AddFunction SurvivalBitefillShortCdPostConditions
-{
-    HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(butchery) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(carve) or target.Refreshable(lacerate_debuff) and Spell(lacerate) or Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(raptor_strike) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops)
-}
-
-AddFunction SurvivalBitefillCdActions
-{
-}
-
-AddFunction SurvivalBitefillCdPostConditions
-{
-    Spell(spitting_cobra) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(butchery) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(carve) or target.Refreshable(lacerate_debuff) and Spell(lacerate) or Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(raptor_strike) or Spell(steel_trap) or Spell(a_murder_of_crows) or Spell(dragonsfire_grenade) or Spell(explosive_trap) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops)
+ Spell(butchery) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or Spell(explosive_trap) or { Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) or Enemies(tagged=1) > 5 } and Spell(carve)
 }
 
 ### actions.bitePhase
 
 AddFunction SurvivalBitephaseMainActions
 {
-    #lacerate,if=!dot.lacerate.ticking&set_bonus.tier20_4pc&buff.mongoose_fury.duration>cooldown.mongoose_bite.charges*gcd
-    if not target.DebuffPresent(lacerate_debuff) and ArmorSetBonus(T20 4) and BaseDuration(mongoose_fury_buff) > SpellCharges(mongoose_bite) * GCD() Spell(lacerate)
-    #mongoose_bite,if=charges>=2&cooldown.mongoose_bite.remains<gcd*2
-    if Charges(mongoose_bite) >= 2 and SpellCooldown(mongoose_bite) < GCD() * 2 Spell(mongoose_bite)
-    #flanking_strike,if=((buff.mongoose_fury.remains>(gcd*(cooldown.mongoose_bite.charges+2)))&cooldown.mongoose_bite.charges<=1)&(!set_bonus.tier19_4pc|(set_bonus.tier19_4pc&!buff.aspect_of_the_eagle.up))
-    if BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 2 } and SpellCharges(mongoose_bite) <= 1 and { not ArmorSetBonus(T19 4) or ArmorSetBonus(T19 4) and not BuffPresent(aspect_of_the_eagle_buff) } Spell(flanking_strike)
-    #mongoose_bite,if=buff.mongoose_fury.up
-    if BuffPresent(mongoose_fury_buff) Spell(mongoose_bite)
-    #flanking_strike
-    Spell(flanking_strike)
+ #mongoose_bite,if=cooldown.mongoose_bite.charges=3
+ if SpellCharges(mongoose_bite) == 3 Spell(mongoose_bite)
+ #flanking_strike,if=buff.mongoose_fury.remains>(gcd*(cooldown.mongoose_bite.charges+1))
+ if BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 1 } Spell(flanking_strike)
+ #mongoose_bite,if=buff.mongoose_fury.up
+ if BuffPresent(mongoose_fury_buff) Spell(mongoose_bite)
+ #lacerate,if=dot.lacerate.refreshable&(focus>((50+35)-((cooldown.flanking_strike.remains%gcd)*(focus.regen*gcd))))
+ if target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 35 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() Spell(lacerate)
+ #raptor_strike,if=buff.t21_2p_exposed_flank.up
+ if BuffPresent(t21_2p_exposed_flank_buff) Spell(raptor_strike)
+ #caltrops,if=!ticking
+ if not target.DebuffPresent(caltrops_debuff) Spell(caltrops)
 }
 
 AddFunction SurvivalBitephaseMainPostConditions
@@ -389,13 +327,34 @@ AddFunction SurvivalBitephaseMainPostConditions
 
 AddFunction SurvivalBitephaseShortCdActions
 {
-    #fury_of_the_eagle,if=(!talent.way_of_the_moknathal.enabled|buff.moknathal_tactics.remains>(gcd*(8%3)))&buff.mongoose_fury.stack>3&cooldown.mongoose_bite.charges<1&!buff.aspect_of_the_eagle.up,interrupt_if=(talent.way_of_the_moknathal.enabled&buff.moknathal_tactics.remains<=tick_time)|(cooldown.mongoose_bite.charges=3)
-    if { not Talent(way_of_the_moknathal_talent) or BuffRemaining(moknathal_tactics_buff) > GCD() * { 8 / 3 } } and BuffStacks(mongoose_fury_buff) > 3 and SpellCharges(mongoose_bite) < 1 and not BuffPresent(aspect_of_the_eagle_buff) Spell(fury_of_the_eagle)
+ unless SpellCharges(mongoose_bite) == 3 and Spell(mongoose_bite) or BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 1 } and Spell(flanking_strike) or BuffPresent(mongoose_fury_buff) and Spell(mongoose_bite)
+ {
+  #fury_of_the_eagle,if=(!variable.mokTalented|(buff.moknathal_tactics.remains>(gcd*(8%3))))&!buff.aspect_of_the_eagle.up
+  if { not mokTalented() or BuffRemaining(moknathal_tactics_buff) > GCD() * { 8 / 3 } } and not BuffPresent(aspect_of_the_eagle_buff) Spell(fury_of_the_eagle)
+
+  unless target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 35 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(lacerate) or BuffPresent(t21_2p_exposed_flank_buff) and Spell(raptor_strike)
+  {
+   #spitting_cobra
+   Spell(spitting_cobra)
+   #dragonsfire_grenade
+   Spell(dragonsfire_grenade)
+   #steel_trap
+   Spell(steel_trap)
+   #a_murder_of_crows
+   Spell(a_murder_of_crows)
+
+   unless not target.DebuffPresent(caltrops_debuff) and Spell(caltrops)
+   {
+    #explosive_trap
+    Spell(explosive_trap)
+   }
+  }
+ }
 }
 
 AddFunction SurvivalBitephaseShortCdPostConditions
 {
-    not target.DebuffPresent(lacerate_debuff) and ArmorSetBonus(T20 4) and BaseDuration(mongoose_fury_buff) > SpellCharges(mongoose_bite) * GCD() and Spell(lacerate) or Charges(mongoose_bite) >= 2 and SpellCooldown(mongoose_bite) < GCD() * 2 and Spell(mongoose_bite) or BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 2 } and SpellCharges(mongoose_bite) <= 1 and { not ArmorSetBonus(T19 4) or ArmorSetBonus(T19 4) and not BuffPresent(aspect_of_the_eagle_buff) } and Spell(flanking_strike) or BuffPresent(mongoose_fury_buff) and Spell(mongoose_bite) or Spell(flanking_strike)
+ SpellCharges(mongoose_bite) == 3 and Spell(mongoose_bite) or BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 1 } and Spell(flanking_strike) or BuffPresent(mongoose_fury_buff) and Spell(mongoose_bite) or target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 35 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(lacerate) or BuffPresent(t21_2p_exposed_flank_buff) and Spell(raptor_strike) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops)
 }
 
 AddFunction SurvivalBitephaseCdActions
@@ -404,21 +363,63 @@ AddFunction SurvivalBitephaseCdActions
 
 AddFunction SurvivalBitephaseCdPostConditions
 {
-    { not Talent(way_of_the_moknathal_talent) or BuffRemaining(moknathal_tactics_buff) > GCD() * { 8 / 3 } } and BuffStacks(mongoose_fury_buff) > 3 and SpellCharges(mongoose_bite) < 1 and not BuffPresent(aspect_of_the_eagle_buff) and Spell(fury_of_the_eagle) or not target.DebuffPresent(lacerate_debuff) and ArmorSetBonus(T20 4) and BaseDuration(mongoose_fury_buff) > SpellCharges(mongoose_bite) * GCD() and Spell(lacerate) or Charges(mongoose_bite) >= 2 and SpellCooldown(mongoose_bite) < GCD() * 2 and Spell(mongoose_bite) or BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 2 } and SpellCharges(mongoose_bite) <= 1 and { not ArmorSetBonus(T19 4) or ArmorSetBonus(T19 4) and not BuffPresent(aspect_of_the_eagle_buff) } and Spell(flanking_strike) or BuffPresent(mongoose_fury_buff) and Spell(mongoose_bite) or Spell(flanking_strike)
+ SpellCharges(mongoose_bite) == 3 and Spell(mongoose_bite) or BuffRemaining(mongoose_fury_buff) > GCD() * { SpellCharges(mongoose_bite) + 1 } and Spell(flanking_strike) or BuffPresent(mongoose_fury_buff) and Spell(mongoose_bite) or { not mokTalented() or BuffRemaining(moknathal_tactics_buff) > GCD() * { 8 / 3 } } and not BuffPresent(aspect_of_the_eagle_buff) and Spell(fury_of_the_eagle) or target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 35 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(lacerate) or BuffPresent(t21_2p_exposed_flank_buff) and Spell(raptor_strike) or Spell(spitting_cobra) or Spell(dragonsfire_grenade) or Spell(steel_trap) or Spell(a_murder_of_crows) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or Spell(explosive_trap)
+}
+
+### actions.biteTrigger
+
+AddFunction SurvivalBitetriggerMainActions
+{
+ #lacerate,if=remains<14&set_bonus.tier20_4pc&cooldown.mongoose_bite.remains<gcd*3
+ if target.DebuffRemaining(lacerate_debuff) < 14 and ArmorSetBonus(T20 4) and SpellCooldown(mongoose_bite) < GCD() * 3 Spell(lacerate)
+ #mongoose_bite,if=charges>=2
+ if Charges(mongoose_bite) >= 2 Spell(mongoose_bite)
+}
+
+AddFunction SurvivalBitetriggerMainPostConditions
+{
+}
+
+AddFunction SurvivalBitetriggerShortCdActions
+{
+}
+
+AddFunction SurvivalBitetriggerShortCdPostConditions
+{
+ target.DebuffRemaining(lacerate_debuff) < 14 and ArmorSetBonus(T20 4) and SpellCooldown(mongoose_bite) < GCD() * 3 and Spell(lacerate) or Charges(mongoose_bite) >= 2 and Spell(mongoose_bite)
+}
+
+AddFunction SurvivalBitetriggerCdActions
+{
+}
+
+AddFunction SurvivalBitetriggerCdPostConditions
+{
+ target.DebuffRemaining(lacerate_debuff) < 14 and ArmorSetBonus(T20 4) and SpellCooldown(mongoose_bite) < GCD() * 3 and Spell(lacerate) or Charges(mongoose_bite) >= 2 and Spell(mongoose_bite)
 }
 
 ### actions.fillers
 
 AddFunction SurvivalFillersMainActions
 {
-    #carve,if=active_enemies>1&talent.serpent_sting.enabled&dot.serpent_sting.refreshable
-    if Enemies(tagged=1) > 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) Spell(carve)
-    #throwing_axes
-    Spell(throwing_axes)
-    #carve,if=active_enemies>2
-    if Enemies(tagged=1) > 2 Spell(carve)
-    #raptor_strike,if=(talent.way_of_the_moknathal.enabled&buff.moknathal_tactics.remains<gcd*4)|(focus>((25-focus.regen*gcd)+55))
-    if Talent(way_of_the_moknathal_talent) and BuffRemaining(moknathal_tactics_buff) < GCD() * 4 or Focus() > 25 - FocusRegenRate() * GCD() + 55 Spell(raptor_strike)
+ #flanking_strike,if=cooldown.mongoose_bite.charges<3
+ if SpellCharges(mongoose_bite) < 3 Spell(flanking_strike)
+ #lacerate,if=refreshable|!ticking
+ if target.Refreshable(lacerate_debuff) or not target.DebuffPresent(lacerate_debuff) Spell(lacerate)
+ #raptor_strike,if=buff.t21_2p_exposed_flank.up&!variable.mokTalented
+ if BuffPresent(t21_2p_exposed_flank_buff) and not mokTalented() Spell(raptor_strike)
+ #raptor_strike,if=(talent.serpent_sting.enabled&!dot.serpent_sting.ticking)
+ if Talent(serpent_sting_talent) and not target.DebuffPresent(serpent_sting_debuff) Spell(raptor_strike)
+ #caltrops,if=refreshable|!ticking
+ if target.Refreshable(caltrops_debuff) or not target.DebuffPresent(caltrops_debuff) Spell(caltrops)
+ #butchery,if=variable.frizzosEquipped&dot.lacerate.refreshable&(focus>((50+40)-((cooldown.flanking_strike.remains%gcd)*(focus.regen*gcd))))
+ if frizzosEquipped() and target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 40 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() Spell(butchery)
+ #carve,if=variable.frizzosEquipped&dot.lacerate.refreshable&(focus>((50+40)-((cooldown.flanking_strike.remains%gcd)*(focus.regen*gcd))))
+ if frizzosEquipped() and target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 40 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() Spell(carve)
+ #flanking_strike
+ Spell(flanking_strike)
+ #raptor_strike,if=(variable.mokTalented&buff.moknathal_tactics.remains<gcd*4)|(focus>((75-focus.regen*gcd)))
+ if mokTalented() and BuffRemaining(moknathal_tactics_buff) < GCD() * 4 or Focus() > 75 - FocusRegenRate() * GCD() Spell(raptor_strike)
 }
 
 AddFunction SurvivalFillersMainPostConditions
@@ -427,11 +428,30 @@ AddFunction SurvivalFillersMainPostConditions
 
 AddFunction SurvivalFillersShortCdActions
 {
+ unless SpellCharges(mongoose_bite) < 3 and Spell(flanking_strike)
+ {
+  #spitting_cobra
+  Spell(spitting_cobra)
+  #dragonsfire_grenade
+  Spell(dragonsfire_grenade)
+
+  unless { target.Refreshable(lacerate_debuff) or not target.DebuffPresent(lacerate_debuff) } and Spell(lacerate) or BuffPresent(t21_2p_exposed_flank_buff) and not mokTalented() and Spell(raptor_strike) or Talent(serpent_sting_talent) and not target.DebuffPresent(serpent_sting_debuff) and Spell(raptor_strike)
+  {
+   #steel_trap,if=refreshable|!ticking
+   if target.Refreshable(steel_trap_debuff) or not target.DebuffPresent(steel_trap_debuff) Spell(steel_trap)
+
+   unless { target.Refreshable(caltrops_debuff) or not target.DebuffPresent(caltrops_debuff) } and Spell(caltrops)
+   {
+    #explosive_trap
+    Spell(explosive_trap)
+   }
+  }
+ }
 }
 
 AddFunction SurvivalFillersShortCdPostConditions
 {
-    Enemies(tagged=1) > 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(carve) or Spell(throwing_axes) or Enemies(tagged=1) > 2 and Spell(carve) or { Talent(way_of_the_moknathal_talent) and BuffRemaining(moknathal_tactics_buff) < GCD() * 4 or Focus() > 25 - FocusRegenRate() * GCD() + 55 } and Spell(raptor_strike)
+ SpellCharges(mongoose_bite) < 3 and Spell(flanking_strike) or { target.Refreshable(lacerate_debuff) or not target.DebuffPresent(lacerate_debuff) } and Spell(lacerate) or BuffPresent(t21_2p_exposed_flank_buff) and not mokTalented() and Spell(raptor_strike) or Talent(serpent_sting_talent) and not target.DebuffPresent(serpent_sting_debuff) and Spell(raptor_strike) or { target.Refreshable(caltrops_debuff) or not target.DebuffPresent(caltrops_debuff) } and Spell(caltrops) or frizzosEquipped() and target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 40 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(butchery) or frizzosEquipped() and target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 40 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(carve) or Spell(flanking_strike) or { mokTalented() and BuffRemaining(moknathal_tactics_buff) < GCD() * 4 or Focus() > 75 - FocusRegenRate() * GCD() } and Spell(raptor_strike)
 }
 
 AddFunction SurvivalFillersCdActions
@@ -440,15 +460,15 @@ AddFunction SurvivalFillersCdActions
 
 AddFunction SurvivalFillersCdPostConditions
 {
-    Enemies(tagged=1) > 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(carve) or Spell(throwing_axes) or Enemies(tagged=1) > 2 and Spell(carve) or { Talent(way_of_the_moknathal_talent) and BuffRemaining(moknathal_tactics_buff) < GCD() * 4 or Focus() > 25 - FocusRegenRate() * GCD() + 55 } and Spell(raptor_strike)
+ SpellCharges(mongoose_bite) < 3 and Spell(flanking_strike) or Spell(spitting_cobra) or Spell(dragonsfire_grenade) or { target.Refreshable(lacerate_debuff) or not target.DebuffPresent(lacerate_debuff) } and Spell(lacerate) or BuffPresent(t21_2p_exposed_flank_buff) and not mokTalented() and Spell(raptor_strike) or Talent(serpent_sting_talent) and not target.DebuffPresent(serpent_sting_debuff) and Spell(raptor_strike) or { target.Refreshable(steel_trap_debuff) or not target.DebuffPresent(steel_trap_debuff) } and Spell(steel_trap) or { target.Refreshable(caltrops_debuff) or not target.DebuffPresent(caltrops_debuff) } and Spell(caltrops) or Spell(explosive_trap) or frizzosEquipped() and target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 40 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(butchery) or frizzosEquipped() and target.DebuffRefreshable(lacerate_debuff) and Focus() > 50 + 40 - SpellCooldown(flanking_strike) / GCD() * FocusRegenRate() * GCD() and Spell(carve) or Spell(flanking_strike) or { mokTalented() and BuffRemaining(moknathal_tactics_buff) < GCD() * 4 or Focus() > 75 - FocusRegenRate() * GCD() } and Spell(raptor_strike)
 }
 
 ### actions.mokMaintain
 
 AddFunction SurvivalMokmaintainMainActions
 {
-    #raptor_strike,if=(buff.moknathal_tactics.remains<gcd)|(buff.moknathal_tactics.stack<2)
-    if BuffRemaining(moknathal_tactics_buff) < GCD() or BuffStacks(moknathal_tactics_buff) < 2 Spell(raptor_strike)
+ #raptor_strike,if=(buff.moknathal_tactics.remains<(gcd)|(buff.moknathal_tactics.stack<3))
+ if BuffRemaining(moknathal_tactics_buff) < GCD() or BuffStacks(moknathal_tactics_buff) < 3 Spell(raptor_strike)
 }
 
 AddFunction SurvivalMokmaintainMainPostConditions
@@ -461,7 +481,7 @@ AddFunction SurvivalMokmaintainShortCdActions
 
 AddFunction SurvivalMokmaintainShortCdPostConditions
 {
-    { BuffRemaining(moknathal_tactics_buff) < GCD() or BuffStacks(moknathal_tactics_buff) < 2 } and Spell(raptor_strike)
+ { BuffRemaining(moknathal_tactics_buff) < GCD() or BuffStacks(moknathal_tactics_buff) < 3 } and Spell(raptor_strike)
 }
 
 AddFunction SurvivalMokmaintainCdActions
@@ -470,78 +490,15 @@ AddFunction SurvivalMokmaintainCdActions
 
 AddFunction SurvivalMokmaintainCdPostConditions
 {
-    { BuffRemaining(moknathal_tactics_buff) < GCD() or BuffStacks(moknathal_tactics_buff) < 2 } and Spell(raptor_strike)
-}
-
-### actions.preBitePhase
-
-AddFunction SurvivalPrebitephaseMainActions
-{
-    #flanking_strike,if=cooldown.mongoose_bite.charges<3
-    if SpellCharges(mongoose_bite) < 3 Spell(flanking_strike)
-    #raptor_strike,if=active_enemies=1&talent.serpent_sting.enabled&dot.serpent_sting.refreshable
-    if Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) Spell(raptor_strike)
-    #lacerate,if=refreshable
-    if target.Refreshable(lacerate_debuff) Spell(lacerate)
-    #butchery,if=equipped.frizzos_fingertrap&dot.lacerate.refreshable
-    if HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) Spell(butchery)
-    #carve,if=equipped.frizzos_fingertrap&dot.lacerate.refreshable
-    if HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) Spell(carve)
-    #mongoose_bite,if=charges=3&cooldown.flanking_strike.remains>=gcd
-    if Charges(mongoose_bite) == 3 and SpellCooldown(flanking_strike) >= GCD() Spell(mongoose_bite)
-    #caltrops,if=!ticking
-    if not target.DebuffPresent(caltrops_debuff) Spell(caltrops)
-    #flanking_strike
-    Spell(flanking_strike)
-    #lacerate,if=remains<14&set_bonus.tier20_2pc
-    if target.DebuffRemaining(lacerate_debuff) < 14 and ArmorSetBonus(T20 2) Spell(lacerate)
-}
-
-AddFunction SurvivalPrebitephaseMainPostConditions
-{
-}
-
-AddFunction SurvivalPrebitephaseShortCdActions
-{
-    unless SpellCharges(mongoose_bite) < 3 and Spell(flanking_strike)
-    {
-        #spitting_cobra
-        Spell(spitting_cobra)
-        #dragonsfire_grenade
-        Spell(dragonsfire_grenade)
-
-        unless Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(raptor_strike)
-        {
-            #steel_trap
-            Spell(steel_trap)
-            #a_murder_of_crows
-            Spell(a_murder_of_crows)
-            #explosive_trap
-            Spell(explosive_trap)
-        }
-    }
-}
-
-AddFunction SurvivalPrebitephaseShortCdPostConditions
-{
-    SpellCharges(mongoose_bite) < 3 and Spell(flanking_strike) or Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(raptor_strike) or target.Refreshable(lacerate_debuff) and Spell(lacerate) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(butchery) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(carve) or Charges(mongoose_bite) == 3 and SpellCooldown(flanking_strike) >= GCD() and Spell(mongoose_bite) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or Spell(flanking_strike) or target.DebuffRemaining(lacerate_debuff) < 14 and ArmorSetBonus(T20 2) and Spell(lacerate)
-}
-
-AddFunction SurvivalPrebitephaseCdActions
-{
-}
-
-AddFunction SurvivalPrebitephaseCdPostConditions
-{
-    SpellCharges(mongoose_bite) < 3 and Spell(flanking_strike) or Spell(spitting_cobra) or Spell(dragonsfire_grenade) or Enemies(tagged=1) == 1 and Talent(serpent_sting_talent) and target.DebuffRefreshable(serpent_sting_debuff) and Spell(raptor_strike) or Spell(steel_trap) or Spell(a_murder_of_crows) or Spell(explosive_trap) or target.Refreshable(lacerate_debuff) and Spell(lacerate) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(butchery) or HasEquippedItem(frizzos_fingertrap) and target.DebuffRefreshable(lacerate_debuff) and Spell(carve) or Charges(mongoose_bite) == 3 and SpellCooldown(flanking_strike) >= GCD() and Spell(mongoose_bite) or not target.DebuffPresent(caltrops_debuff) and Spell(caltrops) or Spell(flanking_strike) or target.DebuffRemaining(lacerate_debuff) < 14 and ArmorSetBonus(T20 2) and Spell(lacerate)
+ { BuffRemaining(moknathal_tactics_buff) < GCD() or BuffStacks(moknathal_tactics_buff) < 3 } and Spell(raptor_strike)
 }
 
 ### actions.precombat
 
 AddFunction SurvivalPrecombatMainActions
 {
-    #harpoon
-    Spell(harpoon)
+ #harpoon
+ # if CheckBoxOn(opt_harpoon) Spell(harpoon)
 }
 
 AddFunction SurvivalPrecombatMainPostConditions
@@ -550,34 +507,34 @@ AddFunction SurvivalPrecombatMainPostConditions
 
 AddFunction SurvivalPrecombatShortCdActions
 {
-    #flask
-    #augmentation
-    #food
-    #summon_pet
-    # SurvivalSummonPet()
-    #explosive_trap
-    Spell(explosive_trap)
-    #steel_trap
-    Spell(steel_trap)
-    #dragonsfire_grenade
-    Spell(dragonsfire_grenade)
+ #flask
+ #augmentation
+ #food
+ #summon_pet
+ # SurvivalSummonPet()
+ #explosive_trap
+ Spell(explosive_trap)
+ #steel_trap
+ Spell(steel_trap)
+ #dragonsfire_grenade
+ Spell(dragonsfire_grenade)
 }
 
 AddFunction SurvivalPrecombatShortCdPostConditions
 {
-    Spell(harpoon)
+ # CheckBoxOn(opt_harpoon) and Spell(harpoon)
 }
 
 AddFunction SurvivalPrecombatCdActions
 {
-    #snapshot_stats
-    #potion
-    # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ #snapshot_stats
+ #potion
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
 }
 
 AddFunction SurvivalPrecombatCdPostConditions
 {
-    Spell(explosive_trap) or Spell(steel_trap) or Spell(dragonsfire_grenade) or Spell(harpoon)
+ # Spell(explosive_trap) or Spell(steel_trap) or Spell(dragonsfire_grenade) or CheckBoxOn(opt_harpoon) and Spell(harpoon)
 }
 ]]
 

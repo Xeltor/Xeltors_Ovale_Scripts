@@ -10,6 +10,10 @@ Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_mage_spells)
 
+Define(blazing_barrier 235313)
+	SpellInfo(blazing_barrier cd=25)
+Define(blazing_barrier_buff 235313)
+	SpellInfo(blazing_barrier_buff duration=60)
 Define(ice_block 45438)
 	SpellInfo(ice_block cd=300)
 	SpellAddBuff(ice_block ice_block_buff=1)
@@ -25,14 +29,14 @@ AddIcon specialization=2 help=main
 	
 	#cold_snap,if=health.pct<30
 	if HealthPercent() < 30 and not mounted() and not DebuffPresent(hypothermia_debuff) and not BuffPresent(ice_block_buff) and InCombat() Spell(ice_block)
-	if BuffExpires(ice_barrier) and not mounted() and InCombat() and target.istargetingplayer() Spell(ice_barrier)
+	if BuffExpires(blazing_barrier_buff) and not mounted() and InCombat() and target.istargetingplayer() Spell(blazing_barrier)
 	
 	if InCombat() and target.InRange(fireball) and HasFullControl()
 	{
-		if BuffExpires(ice_floes_buff) and not { Speed() == 0 or CanMove() > 0 } Spell(ice_floes)
+		if not { Speed() == 0 or CanMove() > 0 } Spell(ice_floes)
 		
 		# Cooldowns
-		if Boss()
+		if Boss() or target.Classification(worldboss)
 		{
 			if Speed() == 0 or CanMove() > 0 FireDefaultCdActions()
 		}
@@ -54,7 +58,7 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(counterspell) Spell(counterspell)
 		if not target.Classification(worldboss)
@@ -176,7 +180,7 @@ AddFunction FireActiveTalentsShortCdActions
   unless { SpellCooldown(combustion) < CastTime(cinderstorm) and { BuffPresent(rune_of_power_buff) or not Talent(rune_of_power_talent) } or SpellCooldown(combustion) > 10 * { 100 / { 100 + SpellHaste() } } and not BuffPresent(combustion_buff) } and Spell(cinderstorm)
   {
    #dragons_breath,if=equipped.132863|(talent.alexstraszas_fury.enabled&!buff.hot_streak.react)
-   if HasEquippedItem(132863) or Talent(alexstraszas_fury_talent) and not BuffPresent(hot_streak_buff) Spell(dragons_breath)
+   if { HasEquippedItem(132863) or Talent(alexstraszas_fury_talent) and not BuffPresent(hot_streak_buff) } and target.Distance(less 8) Spell(dragons_breath)
   }
  }
 }
@@ -239,7 +243,7 @@ AddFunction FireCombustionPhaseShortCdActions
   unless Spell(phoenixs_flames) or BuffRemaining(combustion_buff) > CastTime(scorch) and Spell(scorch)
   {
    #dragons_breath,if=!buff.hot_streak.react&action.fire_blast.charges<1&action.phoenixs_flames.charges<1
-   if not BuffPresent(hot_streak_buff) and Charges(fire_blast) < 1 and Charges(phoenixs_flames) < 1 Spell(dragons_breath)
+   if not BuffPresent(hot_streak_buff) and Charges(fire_blast) < 1 and Charges(phoenixs_flames) < 1 and target.Distance(less 8) Spell(dragons_breath)
   }
  }
 }
@@ -321,28 +325,31 @@ AddFunction FirePrecombatCdPostConditions
 
 AddFunction FireRopPhaseMainActions
 {
- #flamestrike,if=((talent.flame_patch.enabled&active_enemies>1)|active_enemies>3)&buff.hot_streak.react
- if { Talent(flame_patch_talent) and Enemies(tagged=1) > 1 or Enemies(tagged=1) > 3 } and BuffPresent(hot_streak_buff) Spell(flamestrike)
- #pyroblast,if=buff.hot_streak.react
- if BuffPresent(hot_streak_buff) Spell(pyroblast)
- #call_action_list,name=active_talents
- FireActiveTalentsMainActions()
+	unless BuffPresent(heating_up_buff) and InFlightToTarget(fireball)
+	{
+		#flamestrike,if=((talent.flame_patch.enabled&active_enemies>1)|active_enemies>3)&buff.hot_streak.react
+		if { Talent(flame_patch_talent) and Enemies(tagged=1) > 1 or Enemies(tagged=1) > 3 } and BuffPresent(hot_streak_buff) Spell(flamestrike)
+		#pyroblast,if=buff.hot_streak.react
+		if BuffPresent(hot_streak_buff) Spell(pyroblast)
+		#call_action_list,name=active_talents
+		FireActiveTalentsMainActions()
 
- unless FireActiveTalentsMainPostConditions()
- {
-  #pyroblast,if=buff.kaelthas_ultimate_ability.react&execute_time<buff.kaelthas_ultimate_ability.remains&buff.rune_of_power.remains>cast_time
-  if BuffPresent(kaelthas_ultimate_ability_buff) and ExecuteTime(pyroblast) < BuffRemaining(kaelthas_ultimate_ability_buff) and TotemRemaining(rune_of_power) > CastTime(pyroblast) Spell(pyroblast)
-  #phoenixs_flames,if=!prev_gcd.1.phoenixs_flames&charges_fractional>2.7&firestarter.active
-  if not PreviousGCDSpell(phoenixs_flames) and Charges(phoenixs_flames count=0) > 2.7 and Talent(firestarter_talent) and target.HealthPercent() >= 90 Spell(phoenixs_flames)
-  #phoenixs_flames,if=!prev_gcd.1.phoenixs_flames
-  if not PreviousGCDSpell(phoenixs_flames) Spell(phoenixs_flames)
-  #scorch,if=target.health.pct<=30&equipped.132454
-  if target.HealthPercent() <= 30 and HasEquippedItem(132454) Spell(scorch)
-  #flamestrike,if=(talent.flame_patch.enabled&active_enemies>2)|active_enemies>5
-  if Talent(flame_patch_talent) and Enemies(tagged=1) > 2 or Enemies(tagged=1) > 5 Spell(flamestrike)
-  #fireball
-  Spell(fireball)
- }
+		unless FireActiveTalentsMainPostConditions()
+		{
+			#pyroblast,if=buff.kaelthas_ultimate_ability.react&execute_time<buff.kaelthas_ultimate_ability.remains&buff.rune_of_power.remains>cast_time
+			if BuffPresent(kaelthas_ultimate_ability_buff) and ExecuteTime(pyroblast) < BuffRemaining(kaelthas_ultimate_ability_buff) and TotemRemaining(rune_of_power) > CastTime(pyroblast) Spell(pyroblast)
+			#phoenixs_flames,if=!prev_gcd.1.phoenixs_flames&charges_fractional>2.7&firestarter.active
+			if not PreviousGCDSpell(phoenixs_flames) and Charges(phoenixs_flames count=0) > 2.7 and Talent(firestarter_talent) and target.HealthPercent() >= 90 Spell(phoenixs_flames)
+			#phoenixs_flames,if=!prev_gcd.1.phoenixs_flames
+			if not PreviousGCDSpell(phoenixs_flames) Spell(phoenixs_flames)
+			#scorch,if=target.health.pct<=30&equipped.132454
+			if target.HealthPercent() <= 30 and HasEquippedItem(132454) Spell(scorch)
+			#flamestrike,if=(talent.flame_patch.enabled&active_enemies>2)|active_enemies>5
+			if Talent(flame_patch_talent) and Enemies(tagged=1) > 2 or Enemies(tagged=1) > 5 Spell(flamestrike)
+			#fireball
+			Spell(fireball)
+		}
+	}
 }
 
 AddFunction FireRopPhaseMainPostConditions
@@ -373,7 +380,7 @@ AddFunction FireRopPhaseShortCdActions
     unless not PreviousGCDSpell(phoenixs_flames) and Spell(phoenixs_flames) or target.HealthPercent() <= 30 and HasEquippedItem(132454) and Spell(scorch)
     {
      #dragons_breath,if=active_enemies>2
-     if Enemies(tagged=1) > 2 Spell(dragons_breath)
+     if Enemies(tagged=1) > 2 and target.Distance(less 8) Spell(dragons_breath)
     }
    }
   }
@@ -403,40 +410,43 @@ AddFunction FireRopPhaseCdPostConditions
 
 AddFunction FireStandardRotationMainActions
 {
- #flamestrike,if=((talent.flame_patch.enabled&active_enemies>1)|active_enemies>3)&buff.hot_streak.react
- if { Talent(flame_patch_talent) and Enemies(tagged=1) > 1 or Enemies(tagged=1) > 3 } and BuffPresent(hot_streak_buff) Spell(flamestrike)
- #pyroblast,if=buff.hot_streak.react&buff.hot_streak.remains<action.fireball.execute_time
- if BuffPresent(hot_streak_buff) and BuffRemaining(hot_streak_buff) < ExecuteTime(fireball) Spell(pyroblast)
- #pyroblast,if=buff.hot_streak.react&firestarter.active&!talent.rune_of_power.enabled
- if BuffPresent(hot_streak_buff) and Talent(firestarter_talent) and target.HealthPercent() >= 90 and not Talent(rune_of_power_talent) Spell(pyroblast)
- #phoenixs_flames,if=charges_fractional>2.7&active_enemies>2
- if Charges(phoenixs_flames count=0) > 2.7 and Enemies(tagged=1) > 2 Spell(phoenixs_flames)
- #pyroblast,if=buff.hot_streak.react&(!prev_gcd.1.pyroblast|action.pyroblast.in_flight)
- if BuffPresent(hot_streak_buff) and { not PreviousGCDSpell(pyroblast) or InFlightToTarget(pyroblast) } Spell(pyroblast)
- #pyroblast,if=buff.hot_streak.react&target.health.pct<=30&equipped.132454
- if BuffPresent(hot_streak_buff) and target.HealthPercent() <= 30 and HasEquippedItem(132454) Spell(pyroblast)
- #pyroblast,if=buff.kaelthas_ultimate_ability.react&execute_time<buff.kaelthas_ultimate_ability.remains
- if BuffPresent(kaelthas_ultimate_ability_buff) and ExecuteTime(pyroblast) < BuffRemaining(kaelthas_ultimate_ability_buff) Spell(pyroblast)
- #call_action_list,name=active_talents
- FireActiveTalentsMainActions()
+	unless BuffPresent(heating_up_buff) and InFlightToTarget(fireball)
+	{
+		#flamestrike,if=((talent.flame_patch.enabled&active_enemies>1)|active_enemies>3)&buff.hot_streak.react
+		if { Talent(flame_patch_talent) and Enemies(tagged=1) > 1 or Enemies(tagged=1) > 3 } and BuffPresent(hot_streak_buff) Spell(flamestrike)
+		#pyroblast,if=buff.hot_streak.react&buff.hot_streak.remains<action.fireball.execute_time
+		if BuffPresent(hot_streak_buff) and BuffRemaining(hot_streak_buff) < ExecuteTime(fireball) Spell(pyroblast)
+		#pyroblast,if=buff.hot_streak.react&firestarter.active&!talent.rune_of_power.enabled
+		if BuffPresent(hot_streak_buff) and Talent(firestarter_talent) and target.HealthPercent() >= 90 and not Talent(rune_of_power_talent) Spell(pyroblast)
+		#phoenixs_flames,if=charges_fractional>2.7&active_enemies>2
+		if Charges(phoenixs_flames count=0) > 2.7 and Enemies(tagged=1) > 2 Spell(phoenixs_flames)
+		#pyroblast,if=buff.hot_streak.react&(!prev_gcd.1.pyroblast|action.pyroblast.in_flight)
+		if BuffPresent(hot_streak_buff) and { not PreviousGCDSpell(pyroblast) or InFlightToTarget(pyroblast) } Spell(pyroblast)
+		#pyroblast,if=buff.hot_streak.react&target.health.pct<=30&equipped.132454
+		if BuffPresent(hot_streak_buff) and target.HealthPercent() <= 30 and HasEquippedItem(132454) Spell(pyroblast)
+		#pyroblast,if=buff.kaelthas_ultimate_ability.react&execute_time<buff.kaelthas_ultimate_ability.remains
+		if BuffPresent(kaelthas_ultimate_ability_buff) and ExecuteTime(pyroblast) < BuffRemaining(kaelthas_ultimate_ability_buff) Spell(pyroblast)
+		#call_action_list,name=active_talents
+		FireActiveTalentsMainActions()
 
- unless FireActiveTalentsMainPostConditions()
- {
-  #phoenixs_flames,if=(buff.combustion.up|buff.rune_of_power.up|buff.incanters_flow.stack>3|talent.mirror_image.enabled)&artifact.phoenix_reborn.enabled&(4-charges_fractional)*13<cooldown.combustion.remains+5|target.time_to_die<10
-  if { BuffPresent(combustion_buff) or BuffPresent(rune_of_power_buff) or BuffStacks(incanters_flow_buff) > 3 or Talent(mirror_image_talent) } and HasArtifactTrait(phoenix_reborn) and { 4 - Charges(phoenixs_flames count=0) } * 13 < SpellCooldown(combustion) + 5 or target.TimeToDie() < 10 Spell(phoenixs_flames)
-  #phoenixs_flames,if=(buff.combustion.up|buff.rune_of_power.up)&(4-charges_fractional)*30<cooldown.combustion.remains+5
-  if { BuffPresent(combustion_buff) or BuffPresent(rune_of_power_buff) } and { 4 - Charges(phoenixs_flames count=0) } * 30 < SpellCooldown(combustion) + 5 Spell(phoenixs_flames)
-  #phoenixs_flames,if=charges_fractional>2.5&cooldown.combustion.remains>23
-  if Charges(phoenixs_flames count=0) > 2.5 and SpellCooldown(combustion) > 23 Spell(phoenixs_flames)
-  #flamestrike,if=(talent.flame_patch.enabled&active_enemies>3)|active_enemies>5
-  if Talent(flame_patch_talent) and Enemies(tagged=1) > 3 or Enemies(tagged=1) > 5 Spell(flamestrike)
-  #scorch,if=target.health.pct<=30&equipped.132454
-  if target.HealthPercent() <= 30 and HasEquippedItem(132454) Spell(scorch)
-  #fireball
-  Spell(fireball)
-  #scorch
-  Spell(scorch)
- }
+		unless FireActiveTalentsMainPostConditions()
+		{
+			#phoenixs_flames,if=(buff.combustion.up|buff.rune_of_power.up|buff.incanters_flow.stack>3|talent.mirror_image.enabled)&artifact.phoenix_reborn.enabled&(4-charges_fractional)*13<cooldown.combustion.remains+5|target.time_to_die<10
+			if { BuffPresent(combustion_buff) or BuffPresent(rune_of_power_buff) or BuffStacks(incanters_flow_buff) > 3 or Talent(mirror_image_talent) } and HasArtifactTrait(phoenix_reborn) and { 4 - Charges(phoenixs_flames count=0) } * 13 < SpellCooldown(combustion) + 5 or target.TimeToDie() < 10 Spell(phoenixs_flames)
+			#phoenixs_flames,if=(buff.combustion.up|buff.rune_of_power.up)&(4-charges_fractional)*30<cooldown.combustion.remains+5
+			if { BuffPresent(combustion_buff) or BuffPresent(rune_of_power_buff) } and { 4 - Charges(phoenixs_flames count=0) } * 30 < SpellCooldown(combustion) + 5 Spell(phoenixs_flames)
+			#phoenixs_flames,if=charges_fractional>2.5&cooldown.combustion.remains>23
+			if Charges(phoenixs_flames count=0) > 2.5 and SpellCooldown(combustion) > 23 Spell(phoenixs_flames)
+			#flamestrike,if=(talent.flame_patch.enabled&active_enemies>3)|active_enemies>5
+			if Talent(flame_patch_talent) and Enemies(tagged=1) > 3 or Enemies(tagged=1) > 5 Spell(flamestrike)
+			#scorch,if=target.health.pct<=30&equipped.132454
+			if target.HealthPercent() <= 30 and HasEquippedItem(132454) Spell(scorch)
+			#fireball
+			Spell(fireball)
+			#scorch
+			Spell(scorch)
+		}
+	}
 }
 
 AddFunction FireStandardRotationMainPostConditions

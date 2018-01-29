@@ -15,6 +15,7 @@ AddIcon
 	Texture(spell_shadow_haunting) # Drain Soul
 	Texture(spell_shadow_seedofdestruction) # Seed of Corruption
 	Texture(spell_shadow_mindrot) # Spel Lock (Felhunter)
+	Texture(spell_shadow_painandsuffering) # Shadow Lock (Doomguard)
 
 	# Buffs
 	Texture(spell_shadow_burningspirit) # Life Tap

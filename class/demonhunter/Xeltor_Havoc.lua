@@ -38,7 +38,7 @@ AddFunction Boss
 
 AddFunction HavocInterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(consume_magic) and target.IsInterruptible() Spell(consume_magic)
         if target.InRange(fel_eruption) and not target.Classification(worldboss) Spell(fel_eruption)

@@ -31,7 +31,7 @@ AddIcon
 	# Talents
 	Texture(spell_shadow_lifedrain) # Hemorrhage (T1)
 	Texture(rogue_leeching_poison) # Leeching Poison (T4)
-	Texture(inv_poison_mindnumbing) # Agonizing Poison (T6)
+	Texture(inv_weapon_shortblade_62) # Toxic Blade (T6)
 	Texture(ability_deathwing_bloodcorruption_earth) # Exsanguinate (T6)
 	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T7)
 	Texture(spell_rogue_deathfromabove) # Death from Above (T7)

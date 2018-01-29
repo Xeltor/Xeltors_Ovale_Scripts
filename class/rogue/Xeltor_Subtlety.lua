@@ -18,7 +18,7 @@ Define(crimson_vial 185311)
 # Subtlety (Shanky)
 AddIcon specialization=3 help=main
 {
-	if not mounted() and not Stealthed() and not InCombat() and HealthPercent() > 0 and Enemies(tagged=1) > 0 Spell(stealth)
+	if not mounted() and not Stealthed() and not InCombat() and HealthPercent() > 0 and not PlayerIsResting() Spell(stealth)
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
 		#marked_for_death
@@ -70,7 +70,7 @@ AddFunction GetInMeleeRange
 
 AddFunction InterruptActions
 {
-	if target.IsFriend(no) and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(kick) and not Stealthed() Spell(kick)
 		if target.Classification(worldboss no)
@@ -589,8 +589,8 @@ AddFunction SubtletyStealthCdsShortCdActions
 {
  #vanish,if=!variable.dsh_dfa&mantle_duration=0&cooldown.shadow_dance.charges_fractional<variable.shd_fractional+(equipped.mantle_of_the_master_assassin&time<30)*0.3&(!equipped.mantle_of_the_master_assassin|buff.symbols_of_death.up)
  if not dsh_dfa() and BuffRemaining(master_assassins_initiative) == 0 and SpellCharges(shadow_dance count=0) < shd_fractional() + { HasEquippedItem(mantle_of_the_master_assassin) and TimeInCombat() < 30 } * 0.3 and { not HasEquippedItem(mantle_of_the_master_assassin) or BuffPresent(symbols_of_death_buff) } Spell(vanish)
- #shadow_dance,if=charges_fractional>=variable.shd_fractional|target.time_to_die<cooldown.symbols_of_death.remains
- if Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) Spell(shadow_dance)
+ #shadow_dance,if=dot.nightblade.remains>=5&charges_fractional>=variable.shd_fractional|target.time_to_die<cooldown.symbols_of_death.remains
+ if target.DebuffRemaining(nightblade_debuff) >= 5 and Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) Spell(shadow_dance)
  #pool_resource,for_next=1,extra_amount=40
  #shadowmeld,if=energy>=40&energy.deficit>=10+variable.ssw_refund
  unless True(pool_energy 40) and EnergyDeficit() >= 10 + ssw_refund() and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(40)

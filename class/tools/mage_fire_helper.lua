@@ -13,21 +13,22 @@ AddIcon
 	Texture(spell_fire_fireball02) # Pyroblast
 	Texture(spell_fire_fireball) # Fire Blast
 	Texture(spell_fire_soulburn) # Scorch
+	Texture(spell_fire_selfdestruct) # Flamestrike
+	Texture(inv_misc_head_dragon_01) # Dragons Breath
 	Texture(spell_frost_iceshock) # Counterspell
 
 	# Buffs
 	Texture(spell_fire_sealoffire) # Combustion
+	Texture(ability_mage_moltenarmor) # Blazing Barrier
 
 	# Artifact
 	Texture(artifactability_firemage_phoenixbolt) # Phoenix's Flames
 
 	# Talents
 	Texture(spell_arcane_massdispel) # Shimmer (T2)
+	Texture(spell_holy_excorcism_02) # Blast Wave (T2)
 	Texture(spell_magic_lesserinvisibilty) # Mirror Image (T3)
 	Texture(spell_mage_runeofpower) # Rune of Power (T3)
-	Texture(spell_holy_excorcism_02) # Blast Wave (T4)
-	Texture(inv_helm_circlet_firelands_d_01) # Flame On (T4)
-	Texture(spell_mage_iceflows) # Ice Floes (T5)
 	Texture(ability_mage_livingbomb) # Living Bomb (T6)
 	Texture(spell_fire_flare) # Cinderstorm (T7)
 	Texture(spell_mage_meteor) # Meteor (T7)
@@ -45,12 +46,6 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
-
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
 ]]
 

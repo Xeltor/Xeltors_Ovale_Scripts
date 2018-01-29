@@ -54,7 +54,7 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible()
+	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(wind_shear) and target.IsInterruptible() Spell(wind_shear)
         if target.Distance(less 5) and not target.Classification(worldboss) Spell(sundering)
