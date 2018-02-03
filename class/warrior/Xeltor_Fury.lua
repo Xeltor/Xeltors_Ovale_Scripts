@@ -6,7 +6,6 @@ do
 	local desc = "[Xel][7.3] Warrior: Fury"
 	local code = [[
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_warrior_spells)
@@ -32,6 +31,7 @@ AddIcon specialization=2 help=main
 		FuryDefaultMainActions()
 	
 	}
+	
 	# On the move
 	if not target.InRange(rampage) and InCombat() and HasFullControl()
 	{
@@ -64,7 +64,11 @@ AddFunction InterruptActions
 ### actions.default
 
 AddFunction FuryDefaultMainActions
-{#dragon_roar,if=(equipped.convergence_of_fates&cooldown.battle_cry.remains<2)|!equipped.convergence_of_fates&(!cooldown.battle_cry.remains<=10|cooldown.battle_cry.remains<2)|(talent.bloodbath.enabled&(cooldown.bloodbath.remains<1|buff.bloodbath.up))
+{
+ #run_action_list,name=movement,if=movement.distance>5
+ # if target.Distance() > 5 FuryMovementMainActions()
+
+ #dragon_roar,if=(equipped.convergence_of_fates&cooldown.battle_cry.remains<2)|!equipped.convergence_of_fates&(!cooldown.battle_cry.remains<=10|cooldown.battle_cry.remains<2)|(talent.bloodbath.enabled&(cooldown.bloodbath.remains<1|buff.bloodbath.up))
   if HasEquippedItem(convergence_of_fates) and SpellCooldown(battle_cry) < 2 or not HasEquippedItem(convergence_of_fates) and { not SpellCooldown(battle_cry) <= 10 or SpellCooldown(battle_cry) < 2 } or Talent(bloodbath_talent) and { SpellCooldown(bloodbath) < 1 or BuffPresent(bloodbath_buff) } Spell(dragon_roar)
   #rampage,if=cooldown.battle_cry.remains<1&cooldown.bloodbath.remains<1&target.health.pct>20
   if SpellCooldown(battle_cry) < 1 and SpellCooldown(bloodbath) < 1 and target.HealthPercent() > 20 Spell(rampage)
@@ -113,8 +117,11 @@ AddFunction FuryDefaultShortCdActions
  # FuryGetInMeleeRange()
  #charge
  # if CheckBoxOn(opt_melee_range) and target.InRange(charge) Spell(charge)
+ #run_action_list,name=movement,if=movement.distance>5
+ # if target.Distance() > 5 FuryMovementShortCdActions()
+
   #heroic_leap,if=(raid_event.movement.distance>25&raid_event.movement.in>45)|!raid_event.movement.exists
-  if { target.Distance() > 25 and 600 > 45 or not False(raid_event_movement_exists) } and CheckBoxOn(opt_melee_range) and target.Distance(atLeast 8) and target.Distance(atMost 40) Spell(heroic_leap)
+  # if { target.Distance() > 25 and 600 > 45 or not False(raid_event_movement_exists) } and CheckBoxOn(opt_melee_range) and target.Distance(atLeast 8) and target.Distance(atMost 40) Spell(heroic_leap)
 
   unless { HasEquippedItem(convergence_of_fates) and SpellCooldown(battle_cry) < 2 or not HasEquippedItem(convergence_of_fates) and { not SpellCooldown(battle_cry) <= 10 or SpellCooldown(battle_cry) < 2 } or Talent(bloodbath_talent) and { SpellCooldown(bloodbath) < 1 or BuffPresent(bloodbath_buff) } } and Spell(dragon_roar) or SpellCooldown(battle_cry) < 1 and SpellCooldown(bloodbath) < 1 and target.HealthPercent() > 20 and Spell(rampage) or Talent(frenzy_talent) and { BuffStacks(frenzy_buff) < 3 or BuffRemaining(frenzy_buff) < 3 or SpellCooldown(battle_cry) < 1 and BuffRemaining(frenzy_buff) < 9 } and Spell(furious_slash) or HasEquippedItem(kazzalax_fujiedas_fury) and BuffExpires(fujiedas_fury_buff) and Spell(bloodthirst)
   {
@@ -149,11 +156,14 @@ AddFunction FuryDefaultShortCdActions
 
 AddFunction FuryDefaultShortCdPostConditions
 {
- { HasEquippedItem(convergence_of_fates) and SpellCooldown(battle_cry) < 2 or not HasEquippedItem(convergence_of_fates) and { not SpellCooldown(battle_cry) <= 10 or SpellCooldown(battle_cry) < 2 } or Talent(bloodbath_talent) and { SpellCooldown(bloodbath) < 1 or BuffPresent(bloodbath_buff) } } and Spell(dragon_roar) or SpellCooldown(battle_cry) < 1 and SpellCooldown(bloodbath) < 1 and target.HealthPercent() > 20 and Spell(rampage) or Talent(frenzy_talent) and { BuffStacks(frenzy_buff) < 3 or BuffRemaining(frenzy_buff) < 3 or SpellCooldown(battle_cry) < 1 and BuffRemaining(frenzy_buff) < 9 } and Spell(furious_slash) or HasEquippedItem(kazzalax_fujiedas_fury) and BuffExpires(fujiedas_fury_buff) and Spell(bloodthirst) or BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 and FuryCooldownsShortCdPostConditions() or target.HealthPercent() > 20 and { Enemies(tagged=1) == 3 or Enemies(tagged=1) == 4 } and FuryThreeTargetsShortCdPostConditions() or Enemies(tagged=1) > 4 and FuryAoeShortCdPostConditions() or target.HealthPercent() < 20 and FuryExecuteShortCdPostConditions() or target.HealthPercent() > 20 and FurySingleTargetShortCdPostConditions()
+ target.Distance() > 5 and FuryMovementShortCdPostConditions() or { HasEquippedItem(convergence_of_fates) and SpellCooldown(battle_cry) < 2 or not HasEquippedItem(convergence_of_fates) and { not SpellCooldown(battle_cry) <= 10 or SpellCooldown(battle_cry) < 2 } or Talent(bloodbath_talent) and { SpellCooldown(bloodbath) < 1 or BuffPresent(bloodbath_buff) } } and Spell(dragon_roar) or SpellCooldown(battle_cry) < 1 and SpellCooldown(bloodbath) < 1 and target.HealthPercent() > 20 and Spell(rampage) or Talent(frenzy_talent) and { BuffStacks(frenzy_buff) < 3 or BuffRemaining(frenzy_buff) < 3 or SpellCooldown(battle_cry) < 1 and BuffRemaining(frenzy_buff) < 9 } and Spell(furious_slash) or HasEquippedItem(kazzalax_fujiedas_fury) and BuffExpires(fujiedas_fury_buff) and Spell(bloodthirst) or BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 and FuryCooldownsShortCdPostConditions() or target.HealthPercent() > 20 and { Enemies(tagged=1) == 3 or Enemies(tagged=1) == 4 } and FuryThreeTargetsShortCdPostConditions() or Enemies(tagged=1) > 4 and FuryAoeShortCdPostConditions() or target.HealthPercent() < 20 and FuryExecuteShortCdPostConditions() or target.HealthPercent() > 20 and FurySingleTargetShortCdPostConditions()
 }
 
 AddFunction FuryDefaultCdActions
 {
+ #run_action_list,name=movement,if=movement.distance>5
+ # if target.Distance() > 5 FuryMovementCdActions()
+
   #potion,name=old_war,if=buff.battle_cry.up&(buff.avatar.up|!talent.avatar.enabled)
   # if BuffPresent(battle_cry_buff) and { BuffPresent(avatar_buff) or not Talent(avatar_talent) } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war_potion usable=1)
 

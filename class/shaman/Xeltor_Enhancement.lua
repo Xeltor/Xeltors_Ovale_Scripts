@@ -22,7 +22,7 @@ AddIcon specialization=2 help=main
 	# Interrupt
 	if InCombat() InterruptActions()
 	
-	if target.InRange(rockbiter) and HasFullControl()
+	if { Talent(ascendance_talent) and target.InRange(rockbiter) or not Talent(ascendance_talent) and target.InRange(stormstrike) } and HasFullControl()
     {
 		if InCombat() and Spell(rainfall) and not BuffPresent(rainfall_buff) Spell(rainfall)
 	
@@ -44,7 +44,7 @@ AddIcon specialization=2 help=main
 	{
 		if target.InRange(feral_lunge) Spell(feral_lunge)
 	}
-	if InCombat() and not target.InRange(rockbiter) and target.Present() and not target.IsFriend() and not BuffPresent(ghost_wolf_buff) Spell(ghost_wolf)
+	if InCombat() and not target.InRange(rockbiter) and target.Present() and not target.IsFriend() and not target.IsDead() and not BuffPresent(ghost_wolf_buff) Spell(ghost_wolf)
 }
 
 AddFunction Boss
