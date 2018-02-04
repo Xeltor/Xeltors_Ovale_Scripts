@@ -50,7 +50,7 @@ AddIcon specialization=1 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction InterruptActions
@@ -251,7 +251,7 @@ AddFunction AfflictionHauntCdActions
   #blood_fury
   Spell(blood_fury_sp)
   #soul_harvest,if=buff.soul_harvest.remains<=8&buff.active_uas.stack>=1&(raid_event.adds.in>20|active_enemies>1|!raid_event.adds.exists)
-  if BuffRemaining(soul_harvest_buff) <= 8 and target.DebuffStacks(unstable_affliction_debuff) >= 1 and { 600 > 20 or Enemies(tagged=1) > 1 or not False(raid_event_adds_exists) } Spell(soul_harvest)
+  if BuffRemaining(soul_harvest_buff) <= 8 and target.DebuffStacks(unstable_affliction_debuff) >= 1 Spell(soul_harvest)
   #potion,if=!talent.soul_harvest.enabled&(trinket.proc.any.react|trinket.stack_proc.any.react|target.time_to_die<=70|buff.active_uas.stack>2)
   # if not Talent(soul_harvest_talent) and { BuffPresent(trinket_proc_any_buff) or BuffPresent(trinket_stack_proc_any_buff) or target.TimeToDie() <= 70 or target.DebuffStacks(unstable_affliction_debuff) > 2 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
   #potion,if=talent.soul_harvest.enabled&buff.soul_harvest.remains&(trinket.proc.any.react|trinket.stack_proc.any.react|target.time_to_die<=70|!cooldown.haunt.remains|buff.active_uas.stack>2)

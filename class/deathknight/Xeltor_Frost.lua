@@ -34,7 +34,7 @@ AddIcon specialization=2 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
+	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
 }
 
 # Common functions.
