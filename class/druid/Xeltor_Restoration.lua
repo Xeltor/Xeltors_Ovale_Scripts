@@ -197,11 +197,11 @@ AddFunction Party_Auto_Target
 		if not target.IsFriend() and target.Exists() and InCombat() ThePlayer()
 
 		# Prioritize low health
-		if HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
-		if party1.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
-		if party2.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) and party2.HealthPercent() < target.HealthPercent() PartyMemberTwo()
-		if party3.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) and party3.HealthPercent() < target.HealthPercent() PartyMemberThree()
-		if party4.HealthPercent() < 60 and { target.HealthPercent() >= 60 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) and party4.HealthPercent() < target.HealthPercent() PartyMemberFour()
+		if HealthPercent() < 60 and { target.HealthPercent() >= 60 or HealthPercent() < target.HealthPercent() or not target.Present() } ThePlayer()
+		if party1.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party1.HealthPercent() < target.HealthPercent() or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
+		if party2.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party2.HealthPercent() < target.HealthPercent() or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) PartyMemberTwo()
+		if party3.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party3.HealthPercent() < target.HealthPercent() or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) PartyMemberThree()
+		if party4.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party4.HealthPercent() < target.HealthPercent() or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) PartyMemberFour()
 		
 		# Prioritize putting rejuvenation on people
 		unless HealthPercent() < 60 or party1.HealthPercent() < 60 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 60 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 60 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 60 and party4.Present() and party4.InRange(rejuvenation)
@@ -216,11 +216,11 @@ AddFunction Party_Auto_Target
 		# Normal healing.
 		unless HealthPercent() < 60 or HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 or party1.HealthPercent() < 60 and party1.Present() and party1.InRange(rejuvenation) or party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 60 and party2.Present() and party2.InRange(rejuvenation) or party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 60 and party3.Present() and party3.InRange(rejuvenation) or party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 60 and party4.Present() and party4.InRange(rejuvenation) or party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and party4.Present() and party4.InRange(rejuvenation)
 		{
-			if HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and HealthPercent() < target.HealthPercent() ThePlayer()
-			if party1.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) and party1.HealthPercent() < target.HealthPercent() PartyMemberOne()
-			if party2.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) and party2.HealthPercent() < target.HealthPercent() PartyMemberTwo()
-			if party3.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) and party3.HealthPercent() < target.HealthPercent() PartyMemberThree()
-			if party4.HealthPercent() < 89 and { target.HealthPercent() >= 89 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) and party4.HealthPercent() < target.HealthPercent() PartyMemberFour()
+			if HealthPercent() < 89 and { target.HealthPercent() >= 89 or HealthPercent() < target.HealthPercent() or not target.Present() } ThePlayer()
+			if party1.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party1.HealthPercent() < target.HealthPercent() or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
+			if party2.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party2.HealthPercent() < target.HealthPercent() or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) PartyMemberTwo()
+			if party3.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party3.HealthPercent() < target.HealthPercent() or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) PartyMemberThree()
+			if party4.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party4.HealthPercent() < target.HealthPercent() or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) PartyMemberFour()
 		}
 	}
 }
@@ -294,11 +294,11 @@ AddFunction Rotation
 	if target.HealthPercent() < 35 Spell(swiftmend)
 	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
 	# Use Wild Growth when at least 4 members of the group are damaged.
-	if { CheckBoxOn(hard) and Speed() == 0 } or { UnitInRaid() and RaidHealthPercent() <= 75 and Speed() == 0 } or { not UnitInRaid() and PartyMemberCount() >= 4 and PartyHealthPercent() <= 75 and Speed() == 0 } Spell(wild_growth)
+	if { CheckBoxOn(hard) and Speed() == 0 } or { UnitInRaid() and { RaidMembersBelowSixty() >= 4 or RaidMembersBelowEighty() >= 6 } and Speed() == 0 } or { not UnitInRaid() and PartyMemberCount() >= 4 and { PartyMembersBelowSixty() >= 3 or PartyMembersBelowEighty() >= 4 } and Speed() == 0 } Spell(wild_growth)
 	# Use Tranquility, if group is still taking heavy damage (it does 100% more healing 5-man content).
-	if not UnitInRaid() and PartyMemberCount() >= 4 and PartyMembersWithinFourtyYard() >= PartyMemberCount() and BuffCountOnAny(wild_growth_buff) >= PartyMemberCount() and PartyHealthPercent() <= 55 Spell(tranquility)
+	if not UnitInRaid() and PartyMemberCount() >= 4 and PartyMembersWithinFourtyYard() >= 4 and BuffCountOnAny(wild_growth_buff) >= PartyMemberCount() and PartyMembersBelowSixty() >= 3 Spell(tranquility)
 	# Heal the raid if its low health and at least 75% of the living members are in range.
-	if UnitInRaid() and RaidMembersWithinFourtyYard() >= RaidMemberCount() * 0.75 and RaidHealthPercent() <= 50 Spell(tranquility)
+	if UnitInRaid() and RaidMembersWithinFourtyYard() >= 10 and RaidMembersBelowSixty() >= 10 Spell(tranquility)
 	# Use Regrowth as an emergency heal.
 	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and Speed() == 0 Spell(regrowth_restoration)
 	# Use Clearcasting procs on one of the tanks.

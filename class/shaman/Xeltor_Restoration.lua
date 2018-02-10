@@ -128,16 +128,14 @@ AddFunction PartyMemberFour
 	unless party4.IsTarget() Texture(inv_helm_misc_starpartyhat)
 }
 
-AddFunction MembersWithinFourtyYard
+AddFunction RaidMembersWithinFourtyYard
 {
-	if not UnitInRaid()
-	{
-		player.InRange(riptide) + party1.InRange(riptide) + party2.InRange(riptide) + party3.InRange(riptide) + party4.InRange(riptide)
-	}
-	if UnitInRaid()
-	{
-		player.InRange(riptide) + raid1.InRange(riptide) + raid2.InRange(riptide) + raid3.InRange(riptide) + raid4.InRange(riptide) + raid5.InRange(riptide) + raid6.InRange(riptide) + raid7.InRange(riptide) + raid8.InRange(riptide) + raid9.InRange(riptide) + raid10.InRange(riptide) + raid11.InRange(riptide) + raid12.InRange(riptide) + raid13.InRange(riptide) + raid14.InRange(riptide) + raid15.InRange(riptide) + raid16.InRange(riptide) + raid17.InRange(riptide) + raid18.InRange(riptide) + raid19.InRange(riptide) + raid20.InRange(riptide) + raid21.InRange(riptide) + raid22.InRange(riptide) + raid23.InRange(riptide) + raid24.InRange(riptide) + raid25.InRange(riptide)
-	}
+	player.InRange(riptide) + raid1.InRange(riptide) + raid2.InRange(riptide) + raid3.InRange(riptide) + raid4.InRange(riptide) + raid5.InRange(riptide) + raid6.InRange(riptide) + raid7.InRange(riptide) + raid8.InRange(riptide) + raid9.InRange(riptide) + raid10.InRange(riptide) + raid11.InRange(riptide) + raid12.InRange(riptide) + raid13.InRange(riptide) + raid14.InRange(riptide) + raid15.InRange(riptide) + raid16.InRange(riptide) + raid17.InRange(riptide) + raid18.InRange(riptide) + raid19.InRange(riptide) + raid20.InRange(riptide) + raid21.InRange(riptide) + raid22.InRange(riptide) + raid23.InRange(riptide) + raid24.InRange(riptide) + raid25.InRange(riptide)
+}
+
+AddFunction PartyMembersWithinFourtyYard
+{
+	player.InRange(riptide) + party1.InRange(riptide) + party2.InRange(riptide) + party3.InRange(riptide) + party4.InRange(riptide)
 }
 
 ############
@@ -154,26 +152,26 @@ AddFunction Cooldowns
 		Spell(blood_fury_apsp)
 	}
 	# Cloudburst Totem
-	if not TotemPresent(cloudburst_totem) and { CheckBoxOn(hard) or not UnitInRaid() and MembersWithinFourtyYard() >= 3 and MembersBelowSixty() >= 3 or UnitInRaid() and MembersWithinFourtyYard() >= 6 and MembersBelowSixty() >= 6 } Spell(cloudburst_totem)
+	if not TotemPresent(cloudburst_totem) and { CheckBoxOn(hard) or not UnitInRaid() and PartyMembersWithinFourtyYard() >= 3 and PartyMembersBelowSixty() >= 3 or UnitInRaid() and RaidMembersWithinFourtyYard() >= 6 and RaidMembersBelowSixty() >= 6 } Spell(cloudburst_totem)
 	# Ancestral Guidance
-	if CheckBoxOn(hard) or Talent(cloudburst_totem_talent) and TotemPresent(cloudburst_totem) or not Talent(cloudburst_totem_talent) and { not UnitInRaid() and MembersWithinFourtyYard() >= 3 and MembersBelowSixty() >= 3 or UnitInRaid() and MembersWithinFourtyYard() >= 6 and MembersBelowSixty() >= 6 } Spell(ancestral_guidance)
+	if CheckBoxOn(hard) or Talent(cloudburst_totem_talent) and TotemPresent(cloudburst_totem) or not Talent(cloudburst_totem_talent) and { not UnitInRaid() and PartyMembersWithinFourtyYard() >= 3 and PartyMembersBelowSixty() >= 3 or UnitInRaid() and RaidMembersWithinFourtyYard() >= 6 and RaidMembersBelowSixty() >= 6 } Spell(ancestral_guidance)
 	# Gift of the Queen
-	if { Speed() == 0 or CanMove() } and { CheckBoxOn(hard) or Talent(cloudburst_totem_talent) and TotemPresent(cloudburst_totem) or not Talent(cloudburst_totem_talent) and { not UnitInRaid() and MembersWithinFourtyYard() >= 3 and MembersBelowSixty() >= 3 or UnitInRaid() and MembersWithinFourtyYard() >= 6 and MembersBelowSixty() >= 6 } } Spell(gift_of_the_queen)
+	if { Speed() == 0 or CanMove() } and { CheckBoxOn(hard) or Talent(cloudburst_totem_talent) and TotemPresent(cloudburst_totem) or not Talent(cloudburst_totem_talent) and { not UnitInRaid() and PartyMembersWithinFourtyYard() >= 3 and MembersBelowSixty() >= 3 or UnitInRaid() and RaidMembersWithinFourtyYard() >= 6 and RaidMembersBelowSixty() >= 6 } } Spell(gift_of_the_queen)
 	# Healing Tide Totem
-	if not UnitInRaid() and MembersBelowSixty() >= 3 and MembersWithinFourtyYard() >= 3 Spell(healing_tide_totem)
+	if not UnitInRaid() and PartyMembersBelowSixty() >= 3 and PartyMembersWithinFourtyYard() >= 3 Spell(healing_tide_totem)
 	# Healing Stream Totem
-	if InCombat() and not TotemPresent(healing_stream_totem) and MembersWithinFourtyYard() >= 4 Spell(healing_stream_totem)
+	if InCombat() and not TotemPresent(healing_stream_totem) Spell(healing_stream_totem)
 }
 
 AddFunction Rotation
 {
 	# Keep up tidal wave, always.
 	if not target.BuffPresent(riptide_buff) and BuffStacks(tidal_wave_buff) < 2 and target.HealthPercent() < 100 or target.HealthPercent() <= 25 Spell(riptide)
-	if BuffStacks(tidal_wave_buff) == 0 and SpellCooldown(riptide) > CastTime(chain_heal) and target.HealthPercent() < 100 and { Speed() == 0 or CanMove() } Spell(chain_heal)
+	if BuffStacks(tidal_wave_buff) == 0 and SpellCooldown(riptide) > CastTime(chain_heal) + GCD() and target.HealthPercent() < 100 and { Speed() == 0 or CanMove() } Spell(chain_heal)
 	
 	# Routine
-	if Talent(high_tide_talent) and target.HealthPercent() < 80 and MembersBelowEighty() >= 3 and { Speed() == 0 or CanMove() } Spell(chain_heal)
-	if not Talent(high_tide_talent) and target.HealthPercent() < 60 and MembersBelowSixty() >= 3 and { Speed() == 0 or CanMove() } Spell(chain_heal)
+	if Talent(high_tide_talent) and target.HealthPercent() < 80 and { PartyMembersBelowEighty() >= 3 or RaidMembersBelowEighty() >= 5 } and { Speed() == 0 or CanMove() } Spell(chain_heal)
+	if not Talent(high_tide_talent) and target.HealthPercent() < 60 and { PartyMembersBelowEighty() >= 3 or RaidMembersBelowEighty() >= 5 } and { Speed() == 0 or CanMove() } Spell(chain_heal)
 	if target.HealthPercent() < 60 and BuffStacks(tidal_wave_buff) >= 1 and { Speed() == 0 or CanMove() } Spell(healing_surge)
 	if target.HealthPercent() < 100 and { Speed() == 0 or CanMove() } Spell(healing_wave)
 }
