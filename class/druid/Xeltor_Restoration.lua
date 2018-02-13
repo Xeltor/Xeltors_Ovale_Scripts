@@ -5,19 +5,9 @@ do
 	local name = "xeltor_restoration"
 	local desc = "[Xel][7.3] Druid: Restoration"
 	local code = [[
-# Required macros (every line is a macro)
-# /cast [@focus, help][@target, help] Ironbark
-# /cast [@focus, help][@target, help] Lifebloom
-# /cast [@player] Innervate
-
-# Optional macros (every line is a macro)
-# /focus
-# /cast [@cursor] Efflorescence
-
 Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
-#Include(ovale_druid_spells)
 
 Define(ironbark 102342)
 	SpellInfo(ironbark cd=90)
@@ -250,17 +240,6 @@ AddFunction PartyMemberFour
 	unless party4.IsTarget() Texture(inv_helm_misc_starpartyhat)
 }
 
-AddFunction PartyMembersWithinFourtyYard
-{
-	player.InRange(rejuvenation) + party1.InRange(rejuvenation) + party2.InRange(rejuvenation) + party3.InRange(rejuvenation) + party4.InRange(rejuvenation)
-}
-
-# Raid Range check
-AddFunction RaidMembersWithinFourtyYard
-{
-	player.InRange(rejuvenation) + raid1.InRange(rejuvenation) + raid2.InRange(rejuvenation) + raid3.InRange(rejuvenation) + raid4.InRange(rejuvenation) + raid5.InRange(rejuvenation) + raid6.InRange(rejuvenation) + raid7.InRange(rejuvenation) + raid8.InRange(rejuvenation) + raid9.InRange(rejuvenation) + raid10.InRange(rejuvenation) + raid11.InRange(rejuvenation) + raid12.InRange(rejuvenation) + raid13.InRange(rejuvenation) + raid14.InRange(rejuvenation) + raid15.InRange(rejuvenation) + raid16.InRange(rejuvenation) + raid17.InRange(rejuvenation) + raid18.InRange(rejuvenation) + raid19.InRange(rejuvenation) + raid20.InRange(rejuvenation) + raid21.InRange(rejuvenation) + raid22.InRange(rejuvenation) + raid23.InRange(rejuvenation) + raid24.InRange(rejuvenation) + raid25.InRange(rejuvenation)
-}
-
 # Rotation
 
 AddFunction Cooldowns 
@@ -292,13 +271,9 @@ AddFunction Rotation
 	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() < 35 Spell(swiftmend)
-	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenation Icon Rejuvenations up.
+	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenations up.
 	# Use Wild Growth when at least 4 members of the group are damaged.
-	if { CheckBoxOn(hard) and Speed() == 0 } or { UnitInRaid() and { RaidMembersBelowSixty() >= 4 or RaidMembersBelowEighty() >= 6 } and Speed() == 0 } or { not UnitInRaid() and PartyMemberCount() >= 4 and { PartyMembersBelowSixty() >= 3 or PartyMembersBelowEighty() >= 4 } and Speed() == 0 } Spell(wild_growth)
-	# Use Tranquility, if group is still taking heavy damage (it does 100% more healing 5-man content).
-	if not UnitInRaid() and PartyMemberCount() >= 4 and PartyMembersWithinFourtyYard() >= 4 and BuffCountOnAny(wild_growth_buff) >= PartyMemberCount() and PartyMembersBelowSixty() >= 3 Spell(tranquility)
-	# Heal the raid if its low health and at least 75% of the living members are in range.
-	if UnitInRaid() and RaidMembersWithinFourtyYard() >= 10 and RaidMembersBelowSixty() >= 10 Spell(tranquility)
+	if { CheckBoxOn(hard) and Speed() == 0 } or { UnitInRaid() and RaidMembersInRange(wild_growth) >= 4 and { RaidMembersWithHealthPercent(less 60) >= 4 or RaidMembersWithHealthPercent(less 80) >= 6 } and Speed() == 0 } or { not UnitInRaid() and PartyMembersInRange(wild_growth) >= 3 and { PartyMembersWithHealthPercent(less 60) >= 3 or PartyMembersWithHealthPercent(less 75) >= 4 } and Speed() == 0 } Spell(wild_growth)
 	# Use Regrowth as an emergency heal.
 	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and Speed() == 0 Spell(regrowth_restoration)
 	# Use Clearcasting procs on one of the tanks.
