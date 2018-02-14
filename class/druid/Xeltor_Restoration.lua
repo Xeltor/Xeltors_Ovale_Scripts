@@ -116,6 +116,7 @@ Define(frenzied_regeneration_buff 22842)
 
 # Talents
 Define(prosperity_talent 1)
+Define(abundance_talent 3)
 Define(germination_talent 18)
 
 AddIcon specialization=4 help=main
@@ -245,7 +246,7 @@ AddFunction PartyMemberFour
 AddFunction Cooldowns 
 {
 	# We are on a healing frenzy
-	if CheckBoxOn(hard) and Speed() == 0
+	if CheckBoxOn(hard) and { Speed() == 0 or CanMove() }
 	{
 		Spell(berserking)
 		Spell(innervate)
@@ -271,21 +272,25 @@ AddFunction Rotation
 	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() < 35 Spell(swiftmend)
+	# Force wild growth
+	if CheckBoxOn(hard) and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
 	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenations up.
+	if UnitInRaid() and RaidMembersInRange(wild_growth) >= 4 and { RaidMembersWithHealthPercent(less 70) >= 4 or RaidMembersWithHealthPercent(less 80) >= 6 } and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
 	# Use Wild Growth when at least 4 members of the group are damaged.
-	if { CheckBoxOn(hard) and Speed() == 0 } or { UnitInRaid() and RaidMembersInRange(wild_growth) >= 4 and { RaidMembersWithHealthPercent(less 60) >= 4 or RaidMembersWithHealthPercent(less 80) >= 6 } and Speed() == 0 } or { not UnitInRaid() and PartyMembersInRange(wild_growth) >= 3 and { PartyMembersWithHealthPercent(less 60) >= 3 or PartyMembersWithHealthPercent(less 75) >= 4 } and Speed() == 0 } Spell(wild_growth)
+	if not UnitInRaid() and PartyMembersInRange(wild_growth) >= 3 and { PartyMembersWithHealthPercent(less 70) >= 3 or PartyMembersWithHealthPercent(less 80) >= 4 } and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
 	# Use Regrowth as an emergency heal.
-	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and Speed() == 0 Spell(regrowth_restoration)
+	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and { Speed() == 0 or CanMove() > 0 } Spell(regrowth_restoration)
 	# Use Clearcasting procs on one of the tanks.
-	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and target.IsFocus() and Speed() == 0 } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and Speed() == 0 and target.HealthPercent() <= 80 } Spell(regrowth_restoration)
+	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and target.IsFocus() and { Speed() == 0 or CanMove() > 0 } } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and { Speed() == 0 or CanMove() > 0 } and target.HealthPercent() <= 80 } Spell(regrowth_restoration)
 	# Keep Rejuvenation on the tank and on members of the group that just took damage or are about to take damage.
-	if target.BuffRemains(rejuvenation_buff) <= 3.5 Spell(rejuvenation)
+	if not Talent(germination_talent) and target.BuffRemains(rejuvenation_buff) <= 3.5 Spell(rejuvenation)
+	if Talent(germination_talent) and target.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(germination_buff) > target.BuffRemains(rejuvenation_buff) or not target.BuffPresent(germination_buff) } Spell(rejuvenation)
 	# Keep up both Rejuvenations on targets on which the damage is too high for a single one.
-	if target.HealthPercent() <= 89 and target.BuffPresent(rejuvenation_buff) and target.BuffRemains(germination_buff) < target.BuffRemains(rejuvenation_buff) and target.BuffRemains(germination_buff) <= 3.5 and Talent(germination_talent) Spell(rejuvenation)
+	if Talent(germination_talent) and { Talent(abundance_talent) or target.HealthPercent() < 89 } and target.BuffRemains(germination_buff) <= 3.5 and target.BuffPresent(rejuvenation_buff) and target.BuffRemains(germination_buff) < target.BuffRemains(rejuvenation_buff) Spell(rejuvenation)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() <= 45 Spell(swiftmend)
-	if target.HealthPercent() <= 60 and Speed() == 0 Spell(regrowth_restoration)
-	if target.HealthPercent() <= 89 and Speed() == 0 Spell(healing_touch)
+	if target.HealthPercent() <= 60 and { Speed() == 0 or CanMove() > 0 } Spell(regrowth_restoration)
+	if target.HealthPercent() <= 89 and { Speed() == 0 or CanMove() > 0 } Spell(healing_touch)
 }
 
 # Guardian Affinity
