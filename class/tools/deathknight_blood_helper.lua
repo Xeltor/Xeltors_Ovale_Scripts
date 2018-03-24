@@ -13,6 +13,7 @@ AddIcon
 	Texture(inv_weapon_shortblade_40) # Heart Strike
 	Texture(spell_deathknight_butcher2) # Death Strike
 	Texture(spell_deathknight_bloodboil) # Blood Boil
+	Texture(spell_shadow_deathanddecay) # Death and Decay
 	Texture(spell_deathknight_mindfreeze) # Mind Freeze
 	Texture(ability_deathknight_asphixiate) # Asphyxiate
 
