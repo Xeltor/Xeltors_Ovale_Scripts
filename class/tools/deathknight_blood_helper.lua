@@ -30,7 +30,7 @@ AddIcon
 	Texture(ability_hunter_rapidkilling) # Mark of Blood (T4)
 	Texture(ability_fiegndead) # Tombstone (T4)
 	Texture(spell_deathknight_runetap) # Rune Tap (T6)
-	Texture(ability_deathknight_boneshield) # Bonestorm (T7)
+	Texture(achievement_boss_lordmarrowgar) # Bonestorm (T7)
 	Texture(inv_misc_gem_bloodstone_01) # Blood Mirror(T7)
 
 	# Racials

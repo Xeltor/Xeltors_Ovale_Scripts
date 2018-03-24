@@ -21,20 +21,17 @@ AddIcon specialization=1 help=main
 {
 	# Path o' Frost
 	if BuffExpires(path_of_frost_buff) and { mounted() or wet() } and not InCombat() Spell(path_of_frost)
-	
-	if InCombat() and HealthPercent() < 100
-	{
-		BloodDefaultCdActions()
-		
-		BloodDefaultShortCdActions()
-	}
-		
+
 	if InCombat() InterruptActions()
 	
 	if target.InRange(heart_strike) and HasFullControl()
     {
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
-		
+
+		BloodDefaultCdActions()
+
+		BloodDefaultShortCdActions()
+
 		BloodDefaultMainActions()
 	}
 }
