@@ -139,7 +139,7 @@ AddIcon specialization=4 help=main
 			if CheckBoxOn(auto) Party_Auto_Target()
 			
 			# Do main rotation.
-			if target.Present() and target.IsFriend() and target.InRange(lifebloom) and target.HealthPercent() < 100
+			if target.Present() and target.IsFriend() and target.InRange(lifebloom) and { target.Health() / target.MaxHealth() } * 100 < 100
 			{
 				Cooldowns()
 				
@@ -176,7 +176,7 @@ AddFunction Travel
 
 AddFunction HasFocus
 {
-	focus.Present() and focus.InRange(lifebloom)
+	focus.Present() and focus.InRange(lifebloom) and not focus.IsDead()
 }
 
 # Party auto target system
