@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "DKBhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Blood"
+	local desc = "[Xel][7.3.5] Spellhelper: Blood"
 	local code = [[
 AddIcon
 {
@@ -12,7 +12,6 @@ AddIcon
 	Texture(ability_deathknight_marrowrend) # Marrowrend
 	Texture(inv_weapon_shortblade_40) # Heart Strike
 	Texture(spell_deathknight_butcher2) # Death Strike
-	Texture(ability_deathknight_deathscaress) # Death's Caress
 	Texture(spell_deathknight_bloodboil) # Blood Boil
 	Texture(spell_deathknight_mindfreeze) # Mind Freeze
 	Texture(ability_deathknight_asphixiate) # Asphyxiate
@@ -27,7 +26,6 @@ AddIcon
 
 	# Talents
 	Texture(ability_animusdraw) # Blooddrinker (T1)
-	Texture(ability_ironmaidens_whirlofblood) # Soulgorge (T2)
 	Texture(spell_deathknight_bloodtap) # Blood Tap (T3)
 	Texture(ability_hunter_rapidkilling) # Mark of Blood (T4)
 	Texture(ability_fiegndead) # Tombstone (T4)
@@ -48,12 +46,6 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
 ]]
 
