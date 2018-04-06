@@ -2,92 +2,9 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_unholy"
-	local desc = "[Xel][7.3] Death Knight: Unholy"
+	local name = "xeltor_unholy_functions"
+	local desc = "[Xel][7.3] Death Knight: Unholy Functions"
 	local code = [[
-# Include Ovale Defaults (racials & trinkets).
-Include(ovale_common)
-Include(ovale_trinkets_mop)
-Include(ovale_trinkets_wod)
-Include(ovale_deathknight_spells)
-
-Define(path_of_frost 3714)
-Define(path_of_frost_buff 3714)
-Define(virulent_plague_debuff 191587)
-	SpellInfo(virulent_plague_debuff duration=21)
-
-# Unholy
-AddIcon specialization=3 help=main
-{
-	# Interrupt
-	if InCombat() InterruptActions()
-	
-    if target.InRange(festering_strike) and HasFullControl()
-    {
-		if not pet.Present() Spell(raise_dead)
-		if BuffStacks(dark_succor_buff) Spell(death_strike)
-		
-		# Cooldown
-		if Boss()
-		{
-			UnholyDefaultCdActions()
-		}
-
-		# Short cooldown
-		UnholyDefaultShortCdActions()
-		
-		# Rotation
-		UnholyDefaultMainActions()
-	}
-	
-	# Range rotation.
-	if InCombat() and target.InRange(outbreak) and not target.InRange(festering_strike)
-	{
-		if not pet.Present() Spell(raise_dead)
-		
-		# Cooldown
-		if Boss()
-		{
-			UnholyDefaultCdActions()
-		}
-
-		# Short cooldown
-		UnholyDefaultShortCdActions()
-		
-		if not target.DebuffPresent(virulent_plague_debuff) Spell(outbreak)
-		#death_coil,if=runic_power.deficit<10
-		if RunicPowerDeficit() < 10 Spell(death_coil)
-		#death_coil,if=!talent.dark_arbiter.enabled&buff.sudden_doom.up&!buff.necrosis.up&rune<=3
-		if not Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and not BuffPresent(necrosis_buff) and Rune() < 4 Spell(death_coil)
-		#death_coil,if=talent.dark_arbiter.enabled&buff.sudden_doom.up&cooldown.dark_arbiter.remains>5&rune<=3
-		if Talent(dark_arbiter_talent) and BuffPresent(sudden_doom_buff) and SpellCooldown(dark_arbiter) > 5 and Rune() < 4 Spell(death_coil)
-		#clawing_shadows,if=debuff.festering_wound.up
-        if target.DebuffPresent(festering_wound_debuff) Spell(clawing_shadows)
-	}
-}
-
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
-# Common functions.
-AddFunction InterruptActions
-{
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() } and InCombat()
-	{
-		if target.InRange(mind_freeze) Spell(mind_freeze)
-		if not target.Classification(worldboss)
-		{
-			if target.InRange(asphyxiate) Spell(asphyxiate)
-			if target.InRange(strangulate) Spell(strangulate)
-			if target.Distance(less 8) Spell(arcane_torrent_runicpower)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-			if target.Distance(less 8) Spell(war_stomp)
-		}
-	}
-}
-
 ### actions.default
 
 AddFunction UnholyDefaultMainActions
@@ -467,7 +384,7 @@ AddFunction UnholyPrecombatCdActions
  #augmentation
  #snapshot_stats
  #potion
- # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
 
  unless Spell(raise_dead)
  {
@@ -537,5 +454,5 @@ AddFunction UnholyValkyrCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("DEATHKNIGHT", "unholy", name, desc, code, "script")
+	OvaleScripts:RegisterScript("DEATHKNIGHT", nill, name, desc, code, "include")
 end

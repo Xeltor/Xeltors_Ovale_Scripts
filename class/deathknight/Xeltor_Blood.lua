@@ -2,56 +2,9 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_blood"
-	local desc = "[Xel][7.3.5] Death Knight: Blood"
+	local name = "xeltor_blood_functions"
+	local desc = "[Xel][7.3.5] Death Knight: Blood Functions"
 	local code = [[
-Include(ovale_common)
-Include(ovale_trinkets_mop)
-Include(ovale_trinkets_wod)
-Include(ovale_deathknight_spells)
-
-Define(path_of_frost 3714)
-	SpellInfo(path_of_frost runes=1)
-	SpellAddBuff(path_of_frost path_of_frost_buff=1)
-Define(path_of_frost_buff 3714)
-	SpellInfo(path_of_frost_buff duration=600)
-
-# Blood
-AddIcon specialization=1 help=main
-{
-	# Path o' Frost
-	if BuffExpires(path_of_frost_buff) and { mounted() or wet() } and not InCombat() Spell(path_of_frost)
-
-	if InCombat() InterruptActions()
-	
-	if target.InRange(heart_strike) and HasFullControl()
-    {
-		if BuffStacks(dark_succor_buff) Spell(death_strike)
-
-		BloodDefaultCdActions()
-
-		BloodDefaultShortCdActions()
-
-		BloodDefaultMainActions()
-	}
-}
-
-# Common functions.
-AddFunction InterruptActions
-{
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
-	{
-		if target.InRange(mind_freeze) Spell(mind_freeze)
-		if not target.Classification(worldboss)
-		{
-			if target.InRange(asphyxiate) Spell(asphyxiate)
-			if target.Distance(less 8) Spell(arcane_torrent_runicpower)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-			if target.Distance(less 8) Spell(war_stomp)
-		}
-	}
-}
-
 ### actions.default
 
 AddFunction BloodDefaultMainActions
@@ -210,5 +163,5 @@ AddFunction BloodStandardCdPostConditions
 
 ]]
 
-	OvaleScripts:RegisterScript("DEATHKNIGHT", "blood", name, desc, code, "script")
+	OvaleScripts:RegisterScript("DEATHKNIGHT", nil, name, desc, code, "include")
 end

@@ -31,29 +31,32 @@ AddIcon specialization=2 help=main
 	if HealthPercent() < 30 and not mounted() and not DebuffPresent(hypothermia_debuff) and not BuffPresent(ice_block_buff) and InCombat() Spell(ice_block)
 	if BuffExpires(blazing_barrier_buff) and not mounted() and InCombat() and target.istargetingplayer() Spell(blazing_barrier)
 	
-	if InCombat() and target.InRange(fireball) and HasFullControl()
+	unless { InFlightToTarget(fireball) or InFlightToTarget(phoenixs_flames) or InFlightToTarget(pyroblast) or Casting(fireball) } and BuffPresent(heating_up_buff)
 	{
-		if not { Speed() == 0 or CanMove() > 0 } Spell(ice_floes)
-		
-		# Cooldowns
-		if Boss() or target.Classification(worldboss)
+		if InCombat() and target.InRange(fireball) and HasFullControl()
 		{
-			if Speed() == 0 or CanMove() > 0 FireDefaultCdActions()
+			if not { Speed() == 0 or CanMove() > 0 } Spell(ice_floes)
+			
+			# Cooldowns
+			if Boss()
+			{
+				if Speed() == 0 or CanMove() > 0 FireDefaultCdActions()
+			}
+			
+			if Speed() == 0 or CanMove() > 0 FireDefaultShortCdActions()
+			if target.Distance(less 8) and not BuffPresent(ice_barrier) and target.istargetingplayer() Spell(dragons_breath)
+			if Speed() == 0 or CanMove() > 0 FireDefaultMainActions()
+			
+			#scorch,moving=1
+			if Speed() > 0 and BuffPresent(hot_streak_buff) Spell(pyroblast)
+			if Speed() > 0 Spell(scorch)
 		}
-		
-		if Speed() == 0 or CanMove() > 0 FireDefaultShortCdActions()
-		if target.Distance(less 8) and not BuffPresent(ice_barrier) and target.istargetingplayer() Spell(dragons_breath)
-		if Speed() == 0 or CanMove() > 0 FireDefaultMainActions()
-		
-		#scorch,moving=1
-		if Speed() > 0 and BuffPresent(hot_streak_buff) Spell(pyroblast)
-		if Speed() > 0 Spell(scorch)
 	}
 }
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction InterruptActions

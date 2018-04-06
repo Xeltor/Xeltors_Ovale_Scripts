@@ -2,53 +2,9 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_frost"
-	local desc = "[Xel][7.3] Death Knight: Frost"
+	local name = "xeltor_frost_functions"
+	local desc = "[Xel][7.3] Death Knight: Frost Functions"
 	local code = [[
-Include(ovale_common)
-Include(ovale_trinkets_mop)
-Include(ovale_trinkets_wod)
-Include(ovale_deathknight_spells)
-
-# Frost
-AddIcon specialization=2 help=main
-{
-	# Interrupt
-	if InCombat() InterruptActions()
-	
-    if target.InRange(obliterate) and HasFullControl()
-    {
-		# Custom - DO NOT REMOVE
-		if BuffStacks(dark_succor_buff) Spell(death_strike)
-		
-		# Cooldown
-		if Boss() FrostDefaultCdActions()
-		
-		# Short Cooldown
-		FrostDefaultShortCdActions()
-		
-		# Main rotation
-		FrostDefaultMainActions()
-    }
-}
-
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
-}
-
-# Common functions.
-AddFunction InterruptActions
-{
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
-	{
-        if target.InRange(mind_freeze) and target.IsInterruptible() Spell(mind_freeze)
-        if target.Distance(less 12) and not target.Classification(worldboss) Spell(blinding_sleet)
-        if target.Distance(less 8) and target.IsInterruptible() Spell(arcane_torrent_runicpower)
-        if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
-	}
-}
-
 ### actions.default
 
 AddFunction FrostDefaultMainActions
@@ -549,5 +505,5 @@ AddFunction FrostStandardCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("DEATHKNIGHT", "frost", name, desc, code, "script")
+	OvaleScripts:RegisterScript("DEATHKNIGHT", nill, name, desc, code, "include")
 end
