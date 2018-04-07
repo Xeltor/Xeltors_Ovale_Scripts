@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_survival"
-	local desc = "[Xel][7.3] Hunter: Survival"
+	local desc = "[Xel][7.3.5] Hunter: Survival"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -223,8 +223,8 @@ AddFunction SurvivalDefaultCdActions
  #variable,name=mokTalented,value=(talent.way_of_the_moknathal.enabled)
  #use_items
  # SurvivalUseItemActions()
- #muzzle,if=target.debuff.casting.react
- # if target.IsInterruptible() SurvivalInterruptActions()
+ #muzzle,if=equipped.sephuzs_secret&target.debuff.casting.react&cooldown.buff_sephuzs_secret.up&!buff.sephuzs_secret.up
+ if HasEquippedItem(sephuzs_secret) and target.IsInterruptible() and not SpellCooldown(buff_sephuzs_secret) > 0 and not BuffPresent(sephuzs_secret_buff) InterruptActions()
  #call_action_list,name=mokMaintain,if=variable.mokTalented
  if mokTalented() SurvivalMokmaintainCdActions()
 
@@ -522,7 +522,7 @@ AddFunction SurvivalPrecombatShortCdActions
 
 AddFunction SurvivalPrecombatShortCdPostConditions
 {
- # CheckBoxOn(opt_harpoon) and Spell(harpoon)
+ Spell(harpoon)
 }
 
 AddFunction SurvivalPrecombatCdActions
@@ -534,7 +534,7 @@ AddFunction SurvivalPrecombatCdActions
 
 AddFunction SurvivalPrecombatCdPostConditions
 {
- # Spell(explosive_trap) or Spell(steel_trap) or Spell(dragonsfire_grenade) or CheckBoxOn(opt_harpoon) and Spell(harpoon)
+ Spell(explosive_trap) or Spell(steel_trap) or Spell(dragonsfire_grenade)
 }
 ]]
 
