@@ -3,15 +3,13 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_shanky"
-	local desc = "[Xel][7.3] Blush: Shanky"
+	local desc = "[Xel][7.3.5] Blush: Shanky"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_rogue_spells)
 
-Define(tricks_of_the_trade 57934)
-	SpellInfo(tricks_of_the_trade cd=30 gcd=0)
 Define(crimson_vial 185311)
 	SpellInfo(crimson_vial cd=30 gcd=0 energy=30)
 
@@ -270,6 +268,12 @@ AddFunction SubtletyDefaultCdActions
         {
          #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold
          if EnergyDeficit() <= stealth_threshold() SubtletyBuildCdActions()
+
+         unless EnergyDeficit() <= stealth_threshold() and SubtletyBuildCdPostConditions()
+         {
+          #arcane_pulse
+          Spell(arcane_pulse)
+         }
         }
        }
       }
@@ -289,8 +293,8 @@ AddFunction SubtletyDefaultCdPostConditions
 
 AddFunction SubtletyBuildMainActions
 {
- #shuriken_storm,if=spell_targets.shuriken_storm>=2+buff.the_first_of_the_dead.up
- if Enemies(tagged=1) >= 2 + BuffPresent(the_first_of_the_dead_buff) Spell(shuriken_storm)
+ #shuriken_storm,if=spell_targets.shuriken_storm>=2+(buff.the_first_of_the_dead.up|buff.symbols_of_death.up|buff.master_of_subtlety.up)
+ if Enemies(tagged=1) >= 2 + { BuffPresent(the_first_of_the_dead_buff) or BuffPresent(symbols_of_death_buff) or BuffPresent(master_of_subtlety_buff) } Spell(shuriken_storm)
  #gloomblade
  Spell(gloomblade)
  #backstab
@@ -307,7 +311,7 @@ AddFunction SubtletyBuildShortCdActions
 
 AddFunction SubtletyBuildShortCdPostConditions
 {
- Enemies(tagged=1) >= 2 + BuffPresent(the_first_of_the_dead_buff) and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
+ Enemies(tagged=1) >= 2 + { BuffPresent(the_first_of_the_dead_buff) or BuffPresent(symbols_of_death_buff) or BuffPresent(master_of_subtlety_buff) } and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
 }
 
 AddFunction SubtletyBuildCdActions
@@ -316,7 +320,7 @@ AddFunction SubtletyBuildCdActions
 
 AddFunction SubtletyBuildCdPostConditions
 {
- Enemies(tagged=1) >= 2 + BuffPresent(the_first_of_the_dead_buff) and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
+ Enemies(tagged=1) >= 2 + { BuffPresent(the_first_of_the_dead_buff) or BuffPresent(symbols_of_death_buff) or BuffPresent(master_of_subtlety_buff) } and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
 }
 
 ### actions.cds
@@ -368,8 +372,8 @@ AddFunction SubtletyCdsCdActions
  if Stealthed() Spell(blood_fury_ap)
  #berserking,if=stealthed.rogue
  if Stealthed() Spell(berserking)
- #arcane_torrent,if=stealthed.rogue&energy.deficit>70
- if Stealthed() and EnergyDeficit() > 70 Spell(arcane_torrent_energy)
+ #arcane_torrent,if=energy.deficit>70
+ if EnergyDeficit() > 70 Spell(arcane_torrent_energy)
 
  unless not Talent(death_from_above_talent) and Spell(symbols_of_death) or { Talent(death_from_above_talent) and SpellCooldown(death_from_above) <= 1 and { target.DebuffRemaining(nightblade_debuff) >= SpellCooldown(death_from_above) + 3 or target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) <= 6 } and { TimeInCombat() >= 3 or ArmorSetBonus(T20 4) or HasEquippedItem(the_first_of_the_dead) } or target.TimeToDie() - BuffRemaining(symbols_of_death_buff) <= 10 } and Spell(symbols_of_death)
  {
@@ -389,8 +393,8 @@ AddFunction SubtletyFinishMainActions
 {
  #nightblade,if=(!talent.dark_shadow.enabled|!buff.shadow_dance.up)&target.time_to_die-remains>6&(mantle_duration=0|remains<=mantle_duration)&((refreshable&(!finality|buff.finality_nightblade.up|variable.dsh_dfa))|remains<tick_time*2)&(spell_targets.shuriken_storm<4&!variable.dsh_dfa|!buff.symbols_of_death.up)
  if { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } Spell(nightblade)
- #nightblade,cycle_targets=1,if=(!talent.death_from_above.enabled|set_bonus.tier19_2pc)&(!talent.dark_shadow.enabled|!buff.shadow_dance.up)&target.time_to_die-remains>12&mantle_duration=0&((refreshable&(!finality|buff.finality_nightblade.up|variable.dsh_dfa))|remains<tick_time*2)&(spell_targets.shuriken_storm<4&!variable.dsh_dfa|!buff.symbols_of_death.up)
- if { not Talent(death_from_above_talent) or ArmorSetBonus(T19 2) } and { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } Spell(nightblade)
+ #nightblade,cycle_targets=1,if=(!talent.dark_shadow.enabled|!buff.shadow_dance.up)&target.time_to_die-remains>12&mantle_duration=0&((refreshable&(!finality|buff.finality_nightblade.up|variable.dsh_dfa))|remains<tick_time*2)&(spell_targets.shuriken_storm<4&!variable.dsh_dfa|!buff.symbols_of_death.up)
+ if { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } Spell(nightblade)
  #nightblade,if=remains<cooldown.symbols_of_death.remains+10&cooldown.symbols_of_death.remains<=5+(combo_points=6)&target.time_to_die-remains>cooldown.symbols_of_death.remains+5
  if target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 Spell(nightblade)
  #death_from_above,if=!talent.dark_shadow.enabled|(!buff.shadow_dance.up|spell_targets>=4)&(buff.symbols_of_death.up|cooldown.symbols_of_death.remains>=10+set_bonus.tier20_4pc*5)&buff.the_first_of_the_dead.remains<1&(buff.finality_eviscerate.up|spell_targets.shuriken_storm<4)
@@ -409,7 +413,7 @@ AddFunction SubtletyFinishShortCdActions
 
 AddFunction SubtletyFinishShortCdPostConditions
 {
- { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or { not Talent(death_from_above_talent) or ArmorSetBonus(T19 2) } and { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or { not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } } and Spell(death_from_above) or Spell(eviscerate)
+ { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or { not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } } and Spell(death_from_above) or Spell(eviscerate)
 }
 
 AddFunction SubtletyFinishCdActions
@@ -418,7 +422,7 @@ AddFunction SubtletyFinishCdActions
 
 AddFunction SubtletyFinishCdPostConditions
 {
- { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or { not Talent(death_from_above_talent) or ArmorSetBonus(T19 2) } and { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or { not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } } and Spell(death_from_above) or Spell(eviscerate)
+ { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or { not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } } and Spell(death_from_above) or Spell(eviscerate)
 }
 
 ### actions.precombat
