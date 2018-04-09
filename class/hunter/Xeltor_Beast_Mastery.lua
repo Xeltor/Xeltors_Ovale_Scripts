@@ -24,7 +24,7 @@ AddIcon specialization=1 help=main
 		
 		# Survival
 		BeastMasterySummonPet()
-		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead and pet.HealthPercent() < 15 } Spell(exhilaration)
+		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
 		
 		# Cooldowns
 		if Boss()

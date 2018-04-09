@@ -22,7 +22,7 @@ AddIcon specialization=2 help=main
 		
 		# Tank stuff
 		if CheckBoxOn(tank) Spell(black_arrow)
-		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead and pet.HealthPercent() < 15 } Spell(exhilaration)
+		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
 		
 		# Cooldowns
 		if Boss() MarksmanshipDefaultCdActions()
