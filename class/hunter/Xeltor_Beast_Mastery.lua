@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_beast_mastery"
-	local desc = "[Xel][7.3] Hunter: Beast Mastery"
+	local desc = "[Xel][7.3.5] Hunter: Beast Mastery"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -17,7 +17,6 @@ Define(mend_pet 136)
 # Beast Master
 AddIcon specialization=1 help=main
 {
-
 	if InCombat() and HasFullControl() and target.Present() and target.InRange(cobra_shot)
 	{
 		# Silence
@@ -25,6 +24,7 @@ AddIcon specialization=1 help=main
 		
 		# Survival
 		BeastMasterySummonPet()
+		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead and pet.HealthPercent() < 15 } Spell(exhilaration)
 		
 		# Cooldowns
 		if Boss()
