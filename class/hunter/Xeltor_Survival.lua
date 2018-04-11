@@ -24,6 +24,7 @@ AddIcon specialization=3 help=main
 	{
 		# Pet we needs it.
 		SurvivalSummonPet()
+		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
 	
 		# Cooldowns
 		if Boss()
@@ -52,16 +53,13 @@ AddFunction Boss
 
 AddFunction SurvivalSummonPet
 {
-    if not Talent(lone_wolf_talent)
-    {
-        if pet.IsDead()
-        {
-            if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
-            if Speed() == 0 Spell(revive_pet)
-        }
-		if not pet.IsDead() and pet.HealthPercent() < 75 Spell(mend_pet)
-        # if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(ability_hunter_beastcall)
-    }
+	if pet.IsDead()
+	{
+		if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
+		if Speed() == 0 Spell(revive_pet)
+	}
+	if not pet.IsDead() and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
+	# if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(ability_hunter_beastcall)
 }
 
 AddFunction InterruptActions

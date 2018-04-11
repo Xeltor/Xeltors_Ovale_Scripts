@@ -52,6 +52,7 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	Texture(ability_racial_forceshield) # Arcane Pulse (Nightborne)
 }
 ]]
 
