@@ -168,7 +168,7 @@ AddFunction SubtletyDefaultShortCdActions
 {
  #variable,name=dsh_dfa,value=talent.death_from_above.enabled&talent.dark_shadow.enabled&spell_targets.death_from_above<4
  #shadow_dance,if=talent.dark_shadow.enabled&(!stealthed.all|buff.subterfuge.up)&buff.death_from_above.up&buff.death_from_above.remains<=0.15
- if Talent(dark_shadow_talent) and { not Stealthed() or BuffPresent(subterfuge_buff) } and BuffPresent(death_from_above_buff) and BuffRemaining(death_from_above_buff) <= 0.15 Spell(shadow_dance)
+ if Talent(dark_shadow_talent) and not BuffPresent(shadow_dance_buff) and { not Stealthed() or BuffPresent(subterfuge_buff) } and BuffPresent(death_from_above_buff) and BuffRemaining(death_from_above_buff) <= 0.15 Spell(shadow_dance)
  #wait,sec=0.1,if=buff.shadow_dance.up&gcd.remains>0
  #call_action_list,name=cds
  SubtletyCdsShortCdActions()
@@ -594,13 +594,13 @@ AddFunction SubtletyStealthCdsShortCdActions
  #vanish,if=!variable.dsh_dfa&mantle_duration=0&cooldown.shadow_dance.charges_fractional<variable.shd_fractional+(equipped.mantle_of_the_master_assassin&time<30)*0.3&(!equipped.mantle_of_the_master_assassin|buff.symbols_of_death.up)
  if not dsh_dfa() and BuffRemaining(master_assassins_initiative) == 0 and SpellCharges(shadow_dance count=0) < shd_fractional() + { HasEquippedItem(mantle_of_the_master_assassin) and TimeInCombat() < 30 } * 0.3 and { not HasEquippedItem(mantle_of_the_master_assassin) or BuffPresent(symbols_of_death_buff) } Spell(vanish)
  #shadow_dance,if=dot.nightblade.remains>=5&charges_fractional>=variable.shd_fractional|target.time_to_die<cooldown.symbols_of_death.remains
- if target.DebuffRemaining(nightblade_debuff) >= 5 and Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) Spell(shadow_dance)
+ if { target.DebuffRemaining(nightblade_debuff) >= 5 and Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) } and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
  #pool_resource,for_next=1,extra_amount=40
  #shadowmeld,if=energy>=40&energy.deficit>=10+variable.ssw_refund
  unless True(pool_energy 40) and EnergyDeficit() >= 10 + ssw_refund() and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(40)
  {
   #shadow_dance,if=!variable.dsh_dfa&combo_points.deficit>=2+talent.subterfuge.enabled*2&(buff.symbols_of_death.remains>=1.2|cooldown.symbols_of_death.remains>=12+(talent.dark_shadow.enabled&set_bonus.tier20_4pc)*3-(!talent.dark_shadow.enabled&set_bonus.tier20_4pc)*4|mantle_duration>0)&(spell_targets.shuriken_storm>=4|!buff.the_first_of_the_dead.up)
-  if not dsh_dfa() and ComboPointsDeficit() >= 2 + TalentPoints(subterfuge_talent) * 2 and { BuffRemaining(symbols_of_death_buff) >= 1.2 or SpellCooldown(symbols_of_death) >= 12 + { Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 3 - { not Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 4 or BuffRemaining(master_assassins_initiative) > 0 } and { Enemies(tagged=1) >= 4 or not BuffPresent(the_first_of_the_dead_buff) } Spell(shadow_dance)
+  if not dsh_dfa() and ComboPointsDeficit() >= 2 + TalentPoints(subterfuge_talent) * 2 and { BuffRemaining(symbols_of_death_buff) >= 1.2 or SpellCooldown(symbols_of_death) >= 12 + { Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 3 - { not Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 4 or BuffRemaining(master_assassins_initiative) > 0 } and { Enemies(tagged=1) >= 4 or not BuffPresent(the_first_of_the_dead_buff) } and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
  }
 }
 

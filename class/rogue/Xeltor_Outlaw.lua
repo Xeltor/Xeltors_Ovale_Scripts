@@ -14,9 +14,9 @@ Include(ovale_rogue_spells)
 AddIcon specialization=outlaw help=main
 {
 	# Precombat
+	if not Stealthed() and not InCombat() and not mounted() and not PlayerIsResting() Spell(stealth)
 	if not InCombat() and not target.IsDead() and not target.IsFriend() and not mounted() and not PlayerIsResting()
 	{
-		if not Stealthed() Spell(stealth)
 		#marked_for_death
 		if target.InRange(marked_for_death) Spell(marked_for_death)
 		#roll_the_bones,if=!talent.slice_and_dice.enabled
@@ -24,7 +24,7 @@ AddIcon specialization=outlaw help=main
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() <= 40 and not Boss() Spell(crimson_vial)
+	if HealthPercent() < 50 Spell(crimson_vial)
 	
 	BladeFlurryManager()
 	

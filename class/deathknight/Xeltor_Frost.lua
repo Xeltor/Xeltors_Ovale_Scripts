@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_frost_functions"
-	local desc = "[Xel][7.3] Death Knight: Frost Functions"
+	local desc = "[Xel][7.3.5] Death Knight: Frost Functions"
 	local code = [[
 ### actions.default
 
@@ -330,7 +330,7 @@ AddFunction FrostCooldownsCdActions
  # if BuffPresent(pillar_of_frost_buff) and { not Talent(breath_of_sindragosa_talent) or not SpellCooldown(breath_of_sindragosa) > 0 } FrostUseItemActions()
  #use_item,name=draught_of_souls,if=rune.time_to_5<3&(!dot.breath_of_sindragosa.ticking|runic_power>60)
  # if TimeToRunes(5) < 3 and { not BuffPresent(breath_of_sindragosa_buff) or RunicPower() > 60 } FrostUseItemActions()
- #use_item,name=feloiled_infernal_machine,if=!talent.obliteration.enabled|buff.obliteration.up
+ # use_item,name=feloiled_infernal_machine,if=!talent.obliteration.enabled|buff.obliteration.up
  # if not Talent(obliteration_talent) or BuffPresent(obliteration_buff) FrostUseItemActions()
  #potion,if=buff.pillar_of_frost.up&(dot.breath_of_sindragosa.ticking|buff.obliteration.up|talent.hungering_rune_weapon.enabled)
  # if BuffPresent(pillar_of_frost_buff) and { BuffPresent(breath_of_sindragosa_buff) or BuffPresent(obliteration_buff) or Talent(hungering_rune_weapon_talent) } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
@@ -361,8 +361,8 @@ AddFunction FrostObliterationMainActions
  if Talent(gathering_storm_talent) Spell(remorseless_winter)
  #frostscythe,if=(buff.killing_machine.up&(buff.killing_machine.react|prev_gcd.1.frost_strike|prev_gcd.1.howling_blast))&spell_targets.frostscythe>1
  if BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } and Enemies(tagged=1) > 1 Spell(frostscythe)
- #obliterate,if=(buff.killing_machine.up&(buff.killing_machine.react|prev_gcd.1.frost_strike|prev_gcd.1.howling_blast))|(spell_targets.howling_blast>=3&!buff.rime.up)
- if BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } or Enemies(tagged=1) >= 3 and not BuffPresent(rime_buff) Spell(obliterate)
+ #obliterate,if=(buff.killing_machine.up&(buff.killing_machine.react|prev_gcd.1.frost_strike|prev_gcd.1.howling_blast))|(spell_targets.howling_blast>=3&!buff.rime.up&!talent.frostscythe.enabled)
+ if BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } or Enemies(tagged=1) >= 3 and not BuffPresent(rime_buff) and not Talent(frostscythe_talent) Spell(obliterate)
  #howling_blast,if=buff.rime.up&spell_targets.howling_blast>1
  if BuffPresent(rime_buff) and Enemies(tagged=1) > 1 Spell(howling_blast)
  #howling_blast,if=!buff.rime.up&spell_targets.howling_blast>2&rune>3&talent.freezing_fog.enabled&talent.gathering_storm.enabled
@@ -385,7 +385,7 @@ AddFunction FrostObliterationShortCdActions
 
 AddFunction FrostObliterationShortCdPostConditions
 {
- Talent(gathering_storm_talent) and Spell(remorseless_winter) or BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } and Enemies(tagged=1) > 1 and Spell(frostscythe) or { BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } or Enemies(tagged=1) >= 3 and not BuffPresent(rime_buff) } and Spell(obliterate) or BuffPresent(rime_buff) and Enemies(tagged=1) > 1 and Spell(howling_blast) or not BuffPresent(rime_buff) and Enemies(tagged=1) > 2 and Rune() >= 4 and Talent(freezing_fog_talent) and Talent(gathering_storm_talent) and Spell(howling_blast) or { not BuffPresent(rime_buff) or TimeToRunes(1) >= GCD() or RunicPowerDeficit() < 20 } and Spell(frost_strike) or BuffPresent(rime_buff) and Spell(howling_blast) or Spell(obliterate)
+ Talent(gathering_storm_talent) and Spell(remorseless_winter) or BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } and Enemies(tagged=1) > 1 and Spell(frostscythe) or { BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } or Enemies(tagged=1) >= 3 and not BuffPresent(rime_buff) and not Talent(frostscythe_talent) } and Spell(obliterate) or BuffPresent(rime_buff) and Enemies(tagged=1) > 1 and Spell(howling_blast) or not BuffPresent(rime_buff) and Enemies(tagged=1) > 2 and Rune() >= 4 and Talent(freezing_fog_talent) and Talent(gathering_storm_talent) and Spell(howling_blast) or { not BuffPresent(rime_buff) or TimeToRunes(1) >= GCD() or RunicPowerDeficit() < 20 } and Spell(frost_strike) or BuffPresent(rime_buff) and Spell(howling_blast) or Spell(obliterate)
 }
 
 AddFunction FrostObliterationCdActions
@@ -394,7 +394,7 @@ AddFunction FrostObliterationCdActions
 
 AddFunction FrostObliterationCdPostConditions
 {
- Talent(gathering_storm_talent) and Spell(remorseless_winter) or BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } and Enemies(tagged=1) > 1 and Spell(frostscythe) or { BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } or Enemies(tagged=1) >= 3 and not BuffPresent(rime_buff) } and Spell(obliterate) or BuffPresent(rime_buff) and Enemies(tagged=1) > 1 and Spell(howling_blast) or not BuffPresent(rime_buff) and Enemies(tagged=1) > 2 and Rune() >= 4 and Talent(freezing_fog_talent) and Talent(gathering_storm_talent) and Spell(howling_blast) or { not BuffPresent(rime_buff) or TimeToRunes(1) >= GCD() or RunicPowerDeficit() < 20 } and Spell(frost_strike) or BuffPresent(rime_buff) and Spell(howling_blast) or Spell(obliterate)
+ Talent(gathering_storm_talent) and Spell(remorseless_winter) or BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } and Enemies(tagged=1) > 1 and Spell(frostscythe) or { BuffPresent(killing_machine_buff) and { BuffPresent(killing_machine_buff) or PreviousGCDSpell(frost_strike) or PreviousGCDSpell(howling_blast) } or Enemies(tagged=1) >= 3 and not BuffPresent(rime_buff) and not Talent(frostscythe_talent) } and Spell(obliterate) or BuffPresent(rime_buff) and Enemies(tagged=1) > 1 and Spell(howling_blast) or not BuffPresent(rime_buff) and Enemies(tagged=1) > 2 and Rune() >= 4 and Talent(freezing_fog_talent) and Talent(gathering_storm_talent) and Spell(howling_blast) or { not BuffPresent(rime_buff) or TimeToRunes(1) >= GCD() or RunicPowerDeficit() < 20 } and Spell(frost_strike) or BuffPresent(rime_buff) and Spell(howling_blast) or Spell(obliterate)
 }
 
 ### actions.precombat
