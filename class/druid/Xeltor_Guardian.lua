@@ -3,15 +3,9 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_guardian"
-	local desc = "[Xel][7.1] Druid: Guardian"
+	local desc = "[Xel][7.3.5] Druid: Guardian"
 	local code = [[
-# Based on SimulationCraft profile "Druid_Guardian_T19P".
-#	class=druid
-#	spec=guardian
-#	talents=3323323
-	
 Include(ovale_common)
-
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_druid_spells)
@@ -83,94 +77,196 @@ AddFunction InterruptActions
 	}
 }
 
+AddFunction thrash_over_mangle
+{
+ HasEquippedItem(luffa_wrappings) or ArtifactTraitRank(jagged_claws) > 5
+}
+
 ### actions.default
 
 AddFunction GuardianDefaultMainActions
 {
-	#ironfur,if=buff.ironfur.down|rage.deficit<25
-	if BuffExpires(ironfur_buff) or RageDeficit() < 25 Spell(ironfur)
-	#frenzied_regeneration,if=!ticking&incoming_damage_6s%health.max>0.25+(2-charges_fractional)*0.15
-	if not BuffPresent(frenzied_regeneration_buff) and IncomingDamage(6) / MaxHealth() > 0.25 + { 2 - Charges(frenzied_regeneration count=0) } * 0.15 Spell(frenzied_regeneration)
-	#pulverize,cycle_targets=1,if=buff.pulverize.down
-	if BuffExpires(pulverize_buff) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) Spell(pulverize)
-	#mangle
-	Spell(mangle)
-	#pulverize,cycle_targets=1,if=buff.pulverize.remains<gcd
-	if BuffRemaining(pulverize_buff) < GCD() and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) Spell(pulverize)
-	#thrash_bear,if=active_enemies>=2
-	if Enemies(tagged=1) >= 2 Spell(thrash_bear)
-	#pulverize,cycle_targets=1,if=buff.pulverize.remains<3.6
-	if BuffRemaining(pulverize_buff) < 3.6 and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) Spell(pulverize)
-	#thrash_bear,if=talent.pulverize.enabled&buff.pulverize.remains<3.6
-	if Talent(pulverize_talent) and BuffRemaining(pulverize_buff) < 3.6 Spell(thrash_bear)
-	#moonfire,cycle_targets=1,if=!ticking
-	if not target.DebuffPresent(moonfire_debuff) Spell(moonfire)
-	#moonfire,cycle_targets=1,if=remains<3.6
-	if target.DebuffRemaining(moonfire_debuff) < 3.6 Spell(moonfire)
-	#moonfire,cycle_targets=1,if=remains<7.2
-	if target.DebuffRemaining(moonfire_debuff) < 7.2 Spell(moonfire)
-	#moonfire
-	Spell(moonfire)
+ #call_action_list,name=cooldowns
+ GuardianCooldownsMainActions()
+
+ unless GuardianCooldownsMainPostConditions()
+ {
+  #call_action_list,name=st,if=active_enemies=1
+  if Enemies(tagged=1) == 1 GuardianStMainActions()
+
+  unless Enemies(tagged=1) == 1 and GuardianStMainPostConditions()
+  {
+   #call_action_list,name=aoe,if=active_enemies>1
+   if Enemies(tagged=1) > 1 GuardianAoeMainActions()
+  }
+ }
 }
 
 AddFunction GuardianDefaultMainPostConditions
 {
+ GuardianCooldownsMainPostConditions() or Enemies(tagged=1) == 1 and GuardianStMainPostConditions() or Enemies(tagged=1) > 1 and GuardianAoeMainPostConditions()
 }
 
 AddFunction GuardianDefaultShortCdActions
 {
-	#auto_attack
-	# GuardianGetInMeleeRange()
-	#barkskin
-	Spell(barkskin)
-	#bristling_fur,if=buff.ironfur.remains<2&rage<40
-	if BuffRemaining(ironfur_buff) < 2 and Rage() < 40 Spell(bristling_fur)
+ #auto_attack
+ # GuardianGetInMeleeRange()
+ #call_action_list,name=cooldowns
+ GuardianCooldownsShortCdActions()
 
-	unless { BuffExpires(ironfur_buff) or RageDeficit() < 25 } and Spell(ironfur) or not BuffPresent(frenzied_regeneration_buff) and IncomingDamage(6) / MaxHealth() > 0.25 + { 2 - Charges(frenzied_regeneration count=0) } * 0.15 and Spell(frenzied_regeneration) or BuffExpires(pulverize_buff) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Spell(mangle) or BuffRemaining(pulverize_buff) < GCD() and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize)
-	{
-		#lunar_beam
-		Spell(lunar_beam)
-	}
+ unless GuardianCooldownsShortCdPostConditions()
+ {
+  #call_action_list,name=st,if=active_enemies=1
+  if Enemies(tagged=1) == 1 GuardianStShortCdActions()
+
+  unless Enemies(tagged=1) == 1 and GuardianStShortCdPostConditions()
+  {
+   #call_action_list,name=aoe,if=active_enemies>1
+   if Enemies(tagged=1) > 1 GuardianAoeShortCdActions()
+  }
+ }
 }
 
 AddFunction GuardianDefaultShortCdPostConditions
 {
-	{ BuffExpires(ironfur_buff) or RageDeficit() < 25 } and Spell(ironfur) or not BuffPresent(frenzied_regeneration_buff) and IncomingDamage(6) / MaxHealth() > 0.25 + { 2 - Charges(frenzied_regeneration count=0) } * 0.15 and Spell(frenzied_regeneration) or BuffExpires(pulverize_buff) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Spell(mangle) or BuffRemaining(pulverize_buff) < GCD() and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Enemies(tagged=1) >= 2 and Spell(thrash_bear) or BuffRemaining(pulverize_buff) < 3.6 and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Talent(pulverize_talent) and BuffRemaining(pulverize_buff) < 3.6 and Spell(thrash_bear) or not target.DebuffPresent(moonfire_debuff) and Spell(moonfire) or target.DebuffRemaining(moonfire_debuff) < 3.6 and Spell(moonfire) or target.DebuffRemaining(moonfire_debuff) < 7.2 and Spell(moonfire) or Spell(moonfire)
+ GuardianCooldownsShortCdPostConditions() or Enemies(tagged=1) == 1 and GuardianStShortCdPostConditions() or Enemies(tagged=1) > 1 and GuardianAoeShortCdPostConditions()
 }
 
 AddFunction GuardianDefaultCdActions
 {
-	#skull_bash
-	# GuardianInterruptActions()
-	#blood_fury
-	Spell(blood_fury_apsp)
-	#berserking
-	Spell(berserking)
-	#arcane_torrent
-	Spell(arcane_torrent_energy)
-	#use_item,slot=trinket2
-	# GuardianUseItemActions()
+ #call_action_list,name=cooldowns
+ GuardianCooldownsCdActions()
 
-	unless { BuffExpires(ironfur_buff) or RageDeficit() < 25 } and Spell(ironfur) or not BuffPresent(frenzied_regeneration_buff) and IncomingDamage(6) / MaxHealth() > 0.25 + { 2 - Charges(frenzied_regeneration count=0) } * 0.15 and Spell(frenzied_regeneration) or BuffExpires(pulverize_buff) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Spell(mangle) or BuffRemaining(pulverize_buff) < GCD() and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Spell(lunar_beam)
-	{
-		#incarnation
-		Spell(incarnation_son_of_ursoc)
-	}
+ unless GuardianCooldownsCdPostConditions()
+ {
+  #call_action_list,name=st,if=active_enemies=1
+  if Enemies(tagged=1) == 1 GuardianStCdActions()
+
+  unless Enemies(tagged=1) == 1 and GuardianStCdPostConditions()
+  {
+   #call_action_list,name=aoe,if=active_enemies>1
+   if Enemies(tagged=1) > 1 GuardianAoeCdActions()
+  }
+ }
 }
 
 AddFunction GuardianDefaultCdPostConditions
 {
-	{ BuffExpires(ironfur_buff) or RageDeficit() < 25 } and Spell(ironfur) or not BuffPresent(frenzied_regeneration_buff) and IncomingDamage(6) / MaxHealth() > 0.25 + { 2 - Charges(frenzied_regeneration count=0) } * 0.15 and Spell(frenzied_regeneration) or BuffExpires(pulverize_buff) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Spell(mangle) or BuffRemaining(pulverize_buff) < GCD() and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Spell(lunar_beam) or Enemies(tagged=1) >= 2 and Spell(thrash_bear) or BuffRemaining(pulverize_buff) < 3.6 and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or Talent(pulverize_talent) and BuffRemaining(pulverize_buff) < 3.6 and Spell(thrash_bear) or not target.DebuffPresent(moonfire_debuff) and Spell(moonfire) or target.DebuffRemaining(moonfire_debuff) < 3.6 and Spell(moonfire) or target.DebuffRemaining(moonfire_debuff) < 7.2 and Spell(moonfire) or Spell(moonfire)
+ GuardianCooldownsCdPostConditions() or Enemies(tagged=1) == 1 and GuardianStCdPostConditions() or Enemies(tagged=1) > 1 and GuardianAoeCdPostConditions()
+}
+
+### actions.aoe
+
+AddFunction GuardianAoeMainActions
+{
+ #moonfire,target_if=buff.galactic_guardian.up&equipped.lady_and_the_child&cooldown.thrash_bear.remains<2*gcd&buff.galactic_guardian.remains<2*gcd&(active_enemies<4|equipped.fury_of_nature&active_enemies<5)
+ if BuffPresent(galactic_guardian_buff) and HasEquippedItem(lady_and_the_child) and SpellCooldown(thrash_bear) < 2 * GCD() and BuffRemaining(galactic_guardian_buff) < 2 * GCD() and { Enemies(tagged=1) < 4 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 5 } Spell(moonfire)
+ #pulverize,target_if=cooldown.thrash_bear.remains<2*gcd&dot.thrash_bear.stack=dot.thrash_bear.max_stacks
+ if SpellCooldown(thrash_bear) < 2 * GCD() and target.DebuffStacks(thrash_bear_debuff) == SpellData(thrash_bear_debuff max_stacks) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) Spell(pulverize)
+ #mangle,if=buff.incarnation.up&!variable.thrash_over_mangle&active_enemies<4
+ if BuffPresent(incarnation_guardian_of_ursoc_buff) and not thrash_over_mangle() and Enemies(tagged=1) < 4 Spell(mangle)
+ #thrash_bear
+ Spell(thrash_bear)
+ #moonfire,target_if=buff.galactic_guardian.up&equipped.lady_and_the_child&buff.galactic_guardian.remains<gcd&(active_enemies<4|equipped.fury_of_nature&active_enemies<5)
+ if BuffPresent(galactic_guardian_buff) and HasEquippedItem(lady_and_the_child) and BuffRemaining(galactic_guardian_buff) < GCD() and { Enemies(tagged=1) < 4 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 5 } Spell(moonfire)
+ #maul,if=rage.deficit<8&(!talent.incarnation.enabled&active_enemies<4|talent.incarnation.enabled&active_enemies<6)
+ if RageDeficit() < 8 and { not Talent(incarnation_talent) and Enemies(tagged=1) < 4 or Talent(incarnation_talent) and Enemies(tagged=1) < 6 } Spell(maul)
+ #mangle,if=!talent.galactic_guardian.enabled&active_enemies<5|talent.galactic_guardian.enabled&active_enemies<4
+ if not Talent(galactic_guardian_talent) and Enemies(tagged=1) < 5 or Talent(galactic_guardian_talent) and Enemies(tagged=1) < 4 Spell(mangle)
+ #moonfire,target_if=!talent.galactic_guardian.enabled&dot.moonfire.refreshable&(!equipped.fury_of_nature&active_enemies<8|equipped.fury_of_nature&active_enemies<11)|buff.galactic_guardian.up&!equipped.lady_and_the_child&active_enemies<3
+ if not Talent(galactic_guardian_talent) and target.DebuffRefreshable(moonfire_debuff) and { not HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 8 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 11 } or BuffPresent(galactic_guardian_buff) and not HasEquippedItem(lady_and_the_child) and Enemies(tagged=1) < 3 Spell(moonfire)
+ #maul,if=!talent.incarnation.enabled&active_enemies<5|talent.incarnation.enabled&active_enemies<6
+ if not Talent(incarnation_talent) and Enemies(tagged=1) < 5 or Talent(incarnation_talent) and Enemies(tagged=1) < 6 Spell(maul)
+ #moonfire,target_if=!equipped.lady_and_the_child&dot.moonfire.refreshable&active_enemies<3
+ if not HasEquippedItem(lady_and_the_child) and target.DebuffRefreshable(moonfire_debuff) and Enemies(tagged=1) < 3 Spell(moonfire)
+ #swipe_bear
+ Spell(swipe_bear)
+}
+
+AddFunction GuardianAoeMainPostConditions
+{
+}
+
+AddFunction GuardianAoeShortCdActions
+{
+}
+
+AddFunction GuardianAoeShortCdPostConditions
+{
+ BuffPresent(galactic_guardian_buff) and HasEquippedItem(lady_and_the_child) and SpellCooldown(thrash_bear) < 2 * GCD() and BuffRemaining(galactic_guardian_buff) < 2 * GCD() and { Enemies(tagged=1) < 4 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 5 } and Spell(moonfire) or SpellCooldown(thrash_bear) < 2 * GCD() and target.DebuffStacks(thrash_bear_debuff) == SpellData(thrash_bear_debuff max_stacks) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or BuffPresent(incarnation_guardian_of_ursoc_buff) and not thrash_over_mangle() and Enemies(tagged=1) < 4 and Spell(mangle) or Spell(thrash_bear) or BuffPresent(galactic_guardian_buff) and HasEquippedItem(lady_and_the_child) and BuffRemaining(galactic_guardian_buff) < GCD() and { Enemies(tagged=1) < 4 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 5 } and Spell(moonfire) or RageDeficit() < 8 and { not Talent(incarnation_talent) and Enemies(tagged=1) < 4 or Talent(incarnation_talent) and Enemies(tagged=1) < 6 } and Spell(maul) or { not Talent(galactic_guardian_talent) and Enemies(tagged=1) < 5 or Talent(galactic_guardian_talent) and Enemies(tagged=1) < 4 } and Spell(mangle) or { not Talent(galactic_guardian_talent) and target.DebuffRefreshable(moonfire_debuff) and { not HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 8 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 11 } or BuffPresent(galactic_guardian_buff) and not HasEquippedItem(lady_and_the_child) and Enemies(tagged=1) < 3 } and Spell(moonfire) or { not Talent(incarnation_talent) and Enemies(tagged=1) < 5 or Talent(incarnation_talent) and Enemies(tagged=1) < 6 } and Spell(maul) or not HasEquippedItem(lady_and_the_child) and target.DebuffRefreshable(moonfire_debuff) and Enemies(tagged=1) < 3 and Spell(moonfire) or Spell(swipe_bear)
+}
+
+AddFunction GuardianAoeCdActions
+{
+}
+
+AddFunction GuardianAoeCdPostConditions
+{
+ BuffPresent(galactic_guardian_buff) and HasEquippedItem(lady_and_the_child) and SpellCooldown(thrash_bear) < 2 * GCD() and BuffRemaining(galactic_guardian_buff) < 2 * GCD() and { Enemies(tagged=1) < 4 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 5 } and Spell(moonfire) or SpellCooldown(thrash_bear) < 2 * GCD() and target.DebuffStacks(thrash_bear_debuff) == SpellData(thrash_bear_debuff max_stacks) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or BuffPresent(incarnation_guardian_of_ursoc_buff) and not thrash_over_mangle() and Enemies(tagged=1) < 4 and Spell(mangle) or Spell(thrash_bear) or BuffPresent(galactic_guardian_buff) and HasEquippedItem(lady_and_the_child) and BuffRemaining(galactic_guardian_buff) < GCD() and { Enemies(tagged=1) < 4 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 5 } and Spell(moonfire) or RageDeficit() < 8 and { not Talent(incarnation_talent) and Enemies(tagged=1) < 4 or Talent(incarnation_talent) and Enemies(tagged=1) < 6 } and Spell(maul) or { not Talent(galactic_guardian_talent) and Enemies(tagged=1) < 5 or Talent(galactic_guardian_talent) and Enemies(tagged=1) < 4 } and Spell(mangle) or { not Talent(galactic_guardian_talent) and target.DebuffRefreshable(moonfire_debuff) and { not HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 8 or HasEquippedItem(fury_of_nature) and Enemies(tagged=1) < 11 } or BuffPresent(galactic_guardian_buff) and not HasEquippedItem(lady_and_the_child) and Enemies(tagged=1) < 3 } and Spell(moonfire) or { not Talent(incarnation_talent) and Enemies(tagged=1) < 5 or Talent(incarnation_talent) and Enemies(tagged=1) < 6 } and Spell(maul) or not HasEquippedItem(lady_and_the_child) and target.DebuffRefreshable(moonfire_debuff) and Enemies(tagged=1) < 3 and Spell(moonfire) or Spell(swipe_bear)
+}
+
+### actions.cooldowns
+
+AddFunction GuardianCooldownsMainActions
+{
+}
+
+AddFunction GuardianCooldownsMainPostConditions
+{
+}
+
+AddFunction GuardianCooldownsShortCdActions
+{
+ #rage_of_the_sleeper
+ Spell(rage_of_the_sleeper)
+ #lunar_beam,if=buff.rage_of_the_sleeper.up
+ if BuffPresent(rage_of_the_sleeper_buff) Spell(lunar_beam)
+ #barkskin,if=talent.brambles.enabled&(buff.rage_of_the_sleeper.up|talent.survival_of_the_fittest.enabled)
+ if Talent(brambles_talent) and { BuffPresent(rage_of_the_sleeper_buff) or Talent(survival_of_the_fittest_talent) } Spell(barkskin)
+}
+
+AddFunction GuardianCooldownsShortCdPostConditions
+{
+}
+
+AddFunction GuardianCooldownsCdActions
+{
+ unless Spell(rage_of_the_sleeper)
+ {
+  #potion,if=buff.rage_of_the_sleeper.up
+  # if BuffPresent(rage_of_the_sleeper_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war_potion usable=1)
+  #blood_fury
+  Spell(blood_fury_apsp)
+  #berserking
+  Spell(berserking)
+  #arcane_torrent
+  Spell(arcane_torrent_energy)
+
+  unless BuffPresent(rage_of_the_sleeper_buff) and Spell(lunar_beam)
+  {
+   #incarnation
+   Spell(incarnation_guardian_of_ursoc)
+   #use_items,if=cooldown.rage_of_the_sleeper.remains>12|buff.rage_of_the_sleeper.up|target.time_to_die<22
+   # if SpellCooldown(rage_of_the_sleeper) > 12 or BuffPresent(rage_of_the_sleeper_buff) or target.TimeToDie() < 22 GuardianUseItemActions()
+  }
+ }
+}
+
+AddFunction GuardianCooldownsCdPostConditions
+{
+ Spell(rage_of_the_sleeper) or BuffPresent(rage_of_the_sleeper_buff) and Spell(lunar_beam)
 }
 
 ### actions.precombat
 
 AddFunction GuardianPrecombatMainActions
 {
-	#flask,type=flask_of_the_seventh_demon
-	#food,type=azshari_salad
-	#bear_form
-	# Spell(bear_form)
+ #flask
+ #food
+ #augmentation
+ #variable,name=thrash_over_mangle,value=equipped.luffa_wrappings|artifact.jagged_claws.rank>5
+ #bear_form
+ Spell(bear_form)
 }
 
 AddFunction GuardianPrecombatMainPostConditions
@@ -183,16 +279,70 @@ AddFunction GuardianPrecombatShortCdActions
 
 AddFunction GuardianPrecombatShortCdPostConditions
 {
-	# Spell(bear_form)
+ Spell(bear_form)
 }
 
 AddFunction GuardianPrecombatCdActions
 {
+ unless Spell(bear_form)
+ {
+  #snapshot_stats
+  #potion
+  # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war_potion usable=1)
+ }
 }
 
 AddFunction GuardianPrecombatCdPostConditions
 {
-	# Spell(bear_form)
+ Spell(bear_form)
+}
+
+### actions.st
+
+AddFunction GuardianStMainActions
+{
+ #maul,if=rage.deficit<8
+ if RageDeficit() < 8 Spell(maul)
+ #moonfire,if=buff.incarnation.up&dot.moonfire.refreshable|!dot.moonfire.ticking
+ if BuffPresent(incarnation_guardian_of_ursoc_buff) and target.DebuffRefreshable(moonfire_debuff) or not target.DebuffPresent(moonfire_debuff) Spell(moonfire)
+ #pulverize,if=cooldown.thrash_bear.remains<2*gcd&dot.thrash_bear.stack=dot.thrash_bear.max_stacks
+ if SpellCooldown(thrash_bear) < 2 * GCD() and target.DebuffStacks(thrash_bear_debuff) == SpellData(thrash_bear_debuff max_stacks) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) Spell(pulverize)
+ #thrash_bear,if=variable.thrash_over_mangle|talent.rend_and_tear.enabled&dot.thrash_bear.stack<dot.thrash_bear.max_stacks
+ if thrash_over_mangle() or Talent(rend_and_tear_talent) and target.DebuffStacks(thrash_bear_debuff) < SpellData(thrash_bear_debuff max_stacks) Spell(thrash_bear)
+ #mangle
+ Spell(mangle)
+ #thrash_bear
+ Spell(thrash_bear)
+ #moonfire,if=buff.galactic_guardian.up|(!talent.galactic_guardian.enabled&dot.moonfire.refreshable)
+ if BuffPresent(galactic_guardian_buff) or not Talent(galactic_guardian_talent) and target.DebuffRefreshable(moonfire_debuff) Spell(moonfire)
+ #maul
+ Spell(maul)
+ #moonfire,if=dot.moonfire.refreshable&talent.galactic_guardian.enabled&!equipped.lady_and_the_child
+ if target.DebuffRefreshable(moonfire_debuff) and Talent(galactic_guardian_talent) and not HasEquippedItem(lady_and_the_child) Spell(moonfire)
+ #swipe_bear
+ Spell(swipe_bear)
+}
+
+AddFunction GuardianStMainPostConditions
+{
+}
+
+AddFunction GuardianStShortCdActions
+{
+}
+
+AddFunction GuardianStShortCdPostConditions
+{
+ RageDeficit() < 8 and Spell(maul) or { BuffPresent(incarnation_guardian_of_ursoc_buff) and target.DebuffRefreshable(moonfire_debuff) or not target.DebuffPresent(moonfire_debuff) } and Spell(moonfire) or SpellCooldown(thrash_bear) < 2 * GCD() and target.DebuffStacks(thrash_bear_debuff) == SpellData(thrash_bear_debuff max_stacks) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or { thrash_over_mangle() or Talent(rend_and_tear_talent) and target.DebuffStacks(thrash_bear_debuff) < SpellData(thrash_bear_debuff max_stacks) } and Spell(thrash_bear) or Spell(mangle) or Spell(thrash_bear) or { BuffPresent(galactic_guardian_buff) or not Talent(galactic_guardian_talent) and target.DebuffRefreshable(moonfire_debuff) } and Spell(moonfire) or Spell(maul) or target.DebuffRefreshable(moonfire_debuff) and Talent(galactic_guardian_talent) and not HasEquippedItem(lady_and_the_child) and Spell(moonfire) or Spell(swipe_bear)
+}
+
+AddFunction GuardianStCdActions
+{
+}
+
+AddFunction GuardianStCdPostConditions
+{
+ RageDeficit() < 8 and Spell(maul) or { BuffPresent(incarnation_guardian_of_ursoc_buff) and target.DebuffRefreshable(moonfire_debuff) or not target.DebuffPresent(moonfire_debuff) } and Spell(moonfire) or SpellCooldown(thrash_bear) < 2 * GCD() and target.DebuffStacks(thrash_bear_debuff) == SpellData(thrash_bear_debuff max_stacks) and target.DebuffGain(thrash_bear_debuff) <= BaseDuration(thrash_bear_debuff) and Spell(pulverize) or { thrash_over_mangle() or Talent(rend_and_tear_talent) and target.DebuffStacks(thrash_bear_debuff) < SpellData(thrash_bear_debuff max_stacks) } and Spell(thrash_bear) or Spell(mangle) or Spell(thrash_bear) or { BuffPresent(galactic_guardian_buff) or not Talent(galactic_guardian_talent) and target.DebuffRefreshable(moonfire_debuff) } and Spell(moonfire) or Spell(maul) or target.DebuffRefreshable(moonfire_debuff) and Talent(galactic_guardian_talent) and not HasEquippedItem(lady_and_the_child) and Spell(moonfire) or Spell(swipe_bear)
 }
 ]]
 	OvaleScripts:RegisterScript("DRUID", "guardian", name, desc, code, "script")

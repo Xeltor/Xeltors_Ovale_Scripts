@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_balance"
-	local desc = "[Xel][7.3] Druid: Balance"
+	local desc = "[Xel][7.3.5] Druid: Balance"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
