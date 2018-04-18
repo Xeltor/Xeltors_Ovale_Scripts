@@ -24,7 +24,7 @@ AddIcon specialization=outlaw help=main
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() < 50 Spell(crimson_vial)
+	if HealthPercent() < 50 or HealthPercent() < 100 and not InCombat() Spell(crimson_vial)
 	
 	BladeFlurryManager()
 	
@@ -44,6 +44,7 @@ AddIcon specialization=outlaw help=main
 AddFunction BladeFlurryManager
 {
 	# Boss fights.
+	if not InCombat() and Boss() and BuffPresent(blade_flurry_buff) Spell(blade_flurry)
 	if InCombat() and BuffPresent(blade_flurry_buff) and Boss() and Enemies(tagged=1) < 2 Spell(blade_flurry)
 	if InCombat() and not BuffPresent(blade_flurry_buff) and Boss() and Enemies(tagged=1) >= 2 Spell(blade_flurry)
 	
@@ -465,7 +466,7 @@ AddFunction OutlawStealthShortCdActions
  unless ambush_condition() and Spell(ambush)
  {
   #vanish,if=(variable.ambush_condition|equipped.mantle_of_the_master_assassin&!variable.rtb_reroll&!variable.ss_useable)&mantle_duration=0
-  if { ambush_condition() or HasEquippedItem(mantle_of_the_master_assassin) and not rtb_reroll() and not ss_useable() } and BuffRemaining(master_assassins_initiative) == 0 Spell(vanish)
+  if { ambush_condition() or HasEquippedItem(mantle_of_the_master_assassin) and not rtb_reroll() and not ss_useable() } and BuffRemaining(master_assassins_initiative) == 0 and not target.istargetingplayer() Spell(vanish)
  }
 }
 

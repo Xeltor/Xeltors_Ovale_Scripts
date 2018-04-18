@@ -16,7 +16,7 @@ Define(crimson_vial 185311)
 # Subtlety (Shanky)
 AddIcon specialization=3 help=main
 {
-	if not mounted() and not Stealthed() and not InCombat() and HealthPercent() > 0 and not PlayerIsResting() Spell(stealth)
+	if not mounted() and not Stealthed() and not InCombat() and not IsDead() and not PlayerIsResting() Spell(stealth)
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
 		#marked_for_death
@@ -28,7 +28,7 @@ AddIcon specialization=3 help=main
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() <= 40 and not Boss() Spell(crimson_vial)
+	if HealthPercent() <= 25 or HealthPercent() < 100 and not InCombat() Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()
 	{
@@ -42,12 +42,12 @@ AddIcon specialization=3 help=main
 		SubtletyDefaultMainActions()
 	}
 	
-	if InCombat() and target.Present() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } GetInMeleeRange()
+	if InCombat() and not target.IsDead() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } GetInMeleeRange()
 }
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction position_front
@@ -59,9 +59,9 @@ AddFunction GetInMeleeRange
 {
 	if not target.InRange(kick)
 	{
+		if target.InRange(shadowstep) Spell(shadowstrike)
 		if target.InRange(shadowstep) Spell(shadowstep)
-		if Stealthed() and target.InRange(shadowstrike) Spell(shadowstrike)
-		if target.InRange(shadowstrike) and not Stealthed() SubtletyStealthCdsShortCdActions()
+		if target.InRange(shadowstep) and not Stealthed() SubtletyStealthCdsShortCdActions()
 		# Texture(misc_arrowlup help=L(not_in_melee_range))
 	}
 }
