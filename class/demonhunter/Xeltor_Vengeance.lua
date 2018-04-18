@@ -2,60 +2,9 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_vengeance"
-	local desc = "[Xel][7.3.5] Demon Hunter: Vengeance"
+	local name = "xeltor_vengeance_functions"
+	local desc = "[Xel][7.3.5] Demon Hunter: Vengeance Functions"
 	local code = [[
-Include(ovale_common)
-Include(ovale_trinkets_mop)
-Include(ovale_trinkets_wod)
-Include(ovale_demonhunter_spells)
-
-Define(soulfragment 203981)
-	SpellInfo(soulfragment duration=20)
-
-AddIcon specialization=2 help=main
-{
-	# Interrupt
-	if InCombat() InterruptActions()
-	
-    if target.InRange(shear) and HasFullControl()
-    {
-		# Cooldown
-		VengeanceDefaultCdActions()
-		
-		# Short Cooldown
-		VengeanceDefaultShortCdActions()
-		
-		# Main rotation
-		VengeanceDefaultMainActions()
-    }
-	
-	if InCombat() and target.InRange(felblade) Spell(felblade)
-}
-
-AddFunction Boss
-{
-	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
-# Common functions.
-AddFunction InterruptActions
-{
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
-	{
-		if target.InRange(consume_magic) and target.IsInterruptible() Spell(consume_magic)
-		if target.InRange(fel_eruption) and not target.Classification(worldboss) Spell(fel_eruption)
-		if target.Distance(less 8) and target.IsInterruptible() Spell(arcane_torrent_dh)
-		if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) Spell(imprison)
-		if target.InRange(shear)
-		{
-			if target.IsInterruptible() and not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_silence)
-			if not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_misery)
-			if not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_chains)
-		}
-	}
-}
-
 AddFunction SigilOfFlameLock
 {
 	SpellCooldown(sigil_of_flame) > GCD() and TimeSincePreviousSpell(sigil_of_flame) > { 2 - Talent(concentrated_sigils) } and TimeSincePreviousSpell(infernal_strike) > { 1 + 2 - Talent(concentrated_sigils) } and DebuffRemainingOnAny(sigil_of_flame_debuff) < { 3 - Talent(concentrated_sigils) }
@@ -179,5 +128,5 @@ AddFunction VengeancePrecombatCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("DEMONHUNTER", "vengeance", name, desc, code, "script")
+	OvaleScripts:RegisterScript("DEMONHUNTER", nil, name, desc, code, "include")
 end

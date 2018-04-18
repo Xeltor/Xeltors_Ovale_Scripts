@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_shadow"
-	local desc = "[Xel][7.3] Priest: Shadow"
+	local desc = "[Xel][7.3.5] Priest: Shadow"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -33,7 +33,7 @@ AddIcon specialization=3 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction InterruptActions
@@ -48,6 +48,18 @@ AddFunction InterruptActions
 			if target.Distance(less 8) Spell(war_stomp)
 		}
 	}
+}
+
+AddFunction ShadowInterruptActions
+{
+ if not target.IsFriend() and target.Casting()
+ {
+  if target.InRange(silence) and target.IsInterruptible() Spell(silence)
+  if target.InRange(mind_bomb) and not target.Classification(worldboss) and target.RemainingCastTime() > 2 Spell(mind_bomb)
+  if target.Distance(less 8) and target.IsInterruptible() Spell(arcane_torrent_mana)
+  if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
+  if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
+ }
 }
 
 AddFunction haste_eval_value
@@ -418,12 +430,12 @@ AddFunction ShadowS2mShortCdPostConditions
 AddFunction ShadowS2mCdActions
 {
  #silence,if=equipped.sephuzs_secret&(target.is_add|target.debuff.casting.react)&cooldown.buff_sephuzs_secret.up&!buff.sephuzs_secret.up,cycle_targets=1
- # if HasEquippedItem(sephuzs_secret) and { not target.Classification(worldboss) or target.IsInterruptible() } and not SpellCooldown(buff_sephuzs_secret) > 0 and not BuffPresent(sephuzs_secret_buff) ShadowInterruptActions()
+ if HasEquippedItem(sephuzs_secret) and { not target.Classification(worldboss) or target.IsInterruptible() } and not SpellCooldown(buff_sephuzs_secret) > 0 and not BuffPresent(sephuzs_secret_buff) ShadowInterruptActions()
 
  unless BuffAmount(insanity_drain_stacks_buff) < 6 and ArmorSetBonus(T19 4) and Spell(void_bolt)
  {
   #mind_bomb,if=equipped.sephuzs_secret&target.is_add&cooldown.buff_sephuzs_secret.remains<1&!buff.sephuzs_secret.up,cycle_targets=1
-  # if HasEquippedItem(sephuzs_secret) and not target.Classification(worldboss) and BuffCooldown(sephuzs_secret_buff) < 1 and not BuffPresent(sephuzs_secret_buff) ShadowInterruptActions()
+  if HasEquippedItem(sephuzs_secret) and not target.Classification(worldboss) and BuffCooldown(sephuzs_secret_buff) < 1 and not BuffPresent(sephuzs_secret_buff) ShadowInterruptActions()
 
   unless Talent(shadow_crash_talent) and Spell(shadow_crash) or SpellCharges(shadow_word_death) == 0 and BuffStacks(voidform_buff) > 45 + 25 * ArmorSetBonus(T20 4) and Spell(mindbender) or { target.DebuffRemaining(shadow_word_pain_debuff) > 5.5 and target.DebuffRemaining(vampiric_touch_debuff) > 5.5 and not BuffPresent(power_infusion_buff) or BuffStacks(voidform_buff) < 5 } and Spell(void_torrent)
   {
@@ -525,12 +537,12 @@ AddFunction ShadowVfCdActions
  #surrender_to_madness,if=talent.surrender_to_madness.enabled&insanity>=25&(cooldown.void_bolt.up|cooldown.void_torrent.up|cooldown.shadow_word_death.up|buff.shadowy_insight.up)&target.time_to_die<=variable.s2mcheck-(buff.insanity_drain_stacks.value)
  if Talent(surrender_to_madness_talent) and Insanity() >= 25 and { not SpellCooldown(void_bolt) > 0 or not SpellCooldown(void_torrent) > 0 or not SpellCooldown(shadow_word_death) > 0 or BuffPresent(shadowy_insight_buff) } and target.TimeToDie() <= s2mcheck() - BuffAmount(insanity_drain_stacks_buff) Spell(surrender_to_madness)
  #silence,if=equipped.sephuzs_secret&(target.is_add|target.debuff.casting.react)&cooldown.buff_sephuzs_secret.up&!buff.sephuzs_secret.up&buff.insanity_drain_stacks.value>10,cycle_targets=1
- # if HasEquippedItem(sephuzs_secret) and { not target.Classification(worldboss) or target.IsInterruptible() } and not SpellCooldown(buff_sephuzs_secret) > 0 and not BuffPresent(sephuzs_secret_buff) and BuffAmount(insanity_drain_stacks_buff) > 10 ShadowInterruptActions()
+ if HasEquippedItem(sephuzs_secret) and { not target.Classification(worldboss) or target.IsInterruptible() } and not SpellCooldown(buff_sephuzs_secret) > 0 and not BuffPresent(sephuzs_secret_buff) and BuffAmount(insanity_drain_stacks_buff) > 10 ShadowInterruptActions()
 
  unless Spell(void_bolt) or HasEquippedItem(zeks_exterminatus) and HasEquippedItem(mangazas_madness) and BuffPresent(zeks_exterminatus_buff) and Spell(shadow_word_death)
  {
   #mind_bomb,if=equipped.sephuzs_secret&target.is_add&cooldown.buff_sephuzs_secret.remains<1&!buff.sephuzs_secret.up&buff.insanity_drain_stacks.value>10,cycle_targets=1
-  # if HasEquippedItem(sephuzs_secret) and not target.Classification(worldboss) and BuffCooldown(sephuzs_secret_buff) < 1 and not BuffPresent(sephuzs_secret_buff) and BuffAmount(insanity_drain_stacks_buff) > 10 ShadowInterruptActions()
+  if HasEquippedItem(sephuzs_secret) and not target.Classification(worldboss) and BuffCooldown(sephuzs_secret_buff) < 1 and not BuffPresent(sephuzs_secret_buff) and BuffAmount(insanity_drain_stacks_buff) > 10 ShadowInterruptActions()
 
   unless Talent(shadow_crash_talent) and Spell(shadow_crash) or target.DebuffRemaining(shadow_word_pain_debuff) > 5.5 and target.DebuffRemaining(vampiric_touch_debuff) > 5.5 and { not Talent(surrender_to_madness_talent) or Talent(surrender_to_madness_talent) and target.TimeToDie() > s2mcheck() - BuffAmount(insanity_drain_stacks_buff) + 60 } and Spell(void_torrent) or BuffAmount(insanity_drain_stacks_buff) >= cd_time() + haste_eval() * { not ArmorSetBonus(T20 4) } - 3 * ArmorSetBonus(T20 4) * { 600 < 15 } * { Enemies(tagged=1) - 0 * { 0 > 0 } == 1 } + { 5 - 3 * ArmorSetBonus(T20 4) } * BuffPresent(burst_haste_buff any=1) + 2 * TalentPoints(fortress_of_the_mind_talent) * ArmorSetBonus(T20 4) and { not Talent(surrender_to_madness_talent) or Talent(surrender_to_madness_talent) and target.TimeToDie() > s2mcheck() - BuffAmount(insanity_drain_stacks_buff) } and Spell(mindbender)
   {
