@@ -22,7 +22,7 @@ AddIcon specialization=3 help=main
 		#marked_for_death
 		if target.InRange(marked_for_death) Spell(marked_for_death)
 		#symbols_of_death
-		if not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
+		if not Talent(death_from_above_talent) and not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
 		#nightblade
 		if target.InRange(nightblade) Spell(nightblade)
 	}
