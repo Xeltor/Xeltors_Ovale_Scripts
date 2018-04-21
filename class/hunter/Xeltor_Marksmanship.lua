@@ -95,6 +95,16 @@ AddFunction can_gcd
  vuln_window() < CastTime(aimed_shot) or vuln_window() > vuln_aim_casts() * ExecuteTime(aimed_shot) + GCD() + 0.1
 }
 
+AddFunction aimed_shot_move
+{
+	Speed() == 0 or CanMove() > 0 or CastTime(aimed_shot) <= 0
+}
+
+AddFunction windburst_move
+{
+	Speed() == 0 or CanMove() > 0 or CastTime(windburst) <= 0
+}
+
 ### actions.default
 
 AddFunction MarksmanshipDefaultMainActions
@@ -211,9 +221,9 @@ AddFunction MarksmanshipCooldownsCdPostConditions
 AddFunction MarksmanshipNonPatientSniperMainActions
 {
  #aimed_shot,if=spell_targets>1&debuff.vulnerability.remains>cast_time&(talent.trick_shot.enabled|buff.lock_and_load.up)&buff.sentinels_sight.stack=20
- if Enemies(tagged=1) > 1 and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and { Talent(trick_shot_talent) or BuffPresent(lock_and_load_buff) } and BuffStacks(sentinels_sight_buff) == 20 Spell(aimed_shot)
+ if Enemies(tagged=1) > 1 and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and { Talent(trick_shot_talent) or BuffPresent(lock_and_load_buff) } and BuffStacks(sentinels_sight_buff) == 20 and aimed_shot_move() Spell(aimed_shot)
  #aimed_shot,if=spell_targets>1&debuff.vulnerability.remains>cast_time&talent.trick_shot.enabled&set_bonus.tier20_2pc&!buff.t20_2p_critical_aimed_damage.up&action.aimed_shot.in_flight
- if Enemies(tagged=1) > 1 and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and Talent(trick_shot_talent) and ArmorSetBonus(T20 2) and not BuffPresent(t20_2p_critical_aimed_damage_buff) and InFlightToTarget(aimed_shot) Spell(aimed_shot)
+ if Enemies(tagged=1) > 1 and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and Talent(trick_shot_talent) and ArmorSetBonus(T20 2) and not BuffPresent(t20_2p_critical_aimed_damage_buff) and InFlightToTarget(aimed_shot) and aimed_shot_move() Spell(aimed_shot)
  #marked_shot,if=spell_targets>1
  if Enemies(tagged=1) > 1 Spell(marked_shot)
  #multishot,if=spell_targets>1&(buff.marking_targets.up|buff.trueshot.up)
@@ -221,19 +231,19 @@ AddFunction MarksmanshipNonPatientSniperMainActions
  #black_arrow,if=talent.sidewinders.enabled|spell_targets.multishot<6
  if Talent(sidewinders_talent) or Enemies(tagged=1) < 6 Spell(black_arrow)
  #windburst
- Spell(windburst)
+ if windburst_move() Spell(windburst)
  #marked_shot,if=buff.marking_targets.up|buff.trueshot.up
  if BuffPresent(marking_targets_buff) or BuffPresent(trueshot_buff) Spell(marked_shot)
  #sidewinders,if=!variable.waiting_for_sentinel&(debuff.hunters_mark.down|(buff.trueshot.down&buff.marking_targets.down))&((buff.marking_targets.up|buff.trueshot.up)|charges_fractional>1.8)&(focus.deficit>cast_regen)
  if not waiting_for_sentinel() and { target.DebuffExpires(hunters_mark_debuff) or BuffExpires(trueshot_buff) and BuffExpires(marking_targets_buff) } and { BuffPresent(marking_targets_buff) or BuffPresent(trueshot_buff) or Charges(sidewinders count=0) > 1.8 } and FocusDeficit() > FocusCastingRegen(sidewinders) Spell(sidewinders)
  #aimed_shot,if=talent.sidewinders.enabled&debuff.vulnerability.remains>cast_time
- if Talent(sidewinders_talent) and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) Spell(aimed_shot)
+ if Talent(sidewinders_talent) and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and aimed_shot_move() Spell(aimed_shot)
  #aimed_shot,if=!talent.sidewinders.enabled&debuff.vulnerability.remains>cast_time&(!variable.pooling_for_piercing|(buff.lock_and_load.up&lowest_vuln_within.5>gcd.max))&(spell_targets.multishot<5|talent.trick_shot.enabled|buff.sentinels_sight.stack=20)
- if not Talent(sidewinders_talent) and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and { not pooling_for_piercing() or BuffPresent(lock_and_load_buff) and target.DebuffRemaining(vulnerable) > GCD() } and { Enemies(tagged=1) < 5 or Talent(trick_shot_talent) or BuffStacks(sentinels_sight_buff) == 20 } Spell(aimed_shot)
+ if not Talent(sidewinders_talent) and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and { not pooling_for_piercing() or BuffPresent(lock_and_load_buff) and target.DebuffRemaining(vulnerable) > GCD() } and { Enemies(tagged=1) < 5 or Talent(trick_shot_talent) or BuffStacks(sentinels_sight_buff) == 20 } and aimed_shot_move() Spell(aimed_shot)
  #marked_shot
  Spell(marked_shot)
  #aimed_shot,if=focus+cast_regen>focus.max&!buff.sentinels_sight.up
- if Focus() + FocusCastingRegen(aimed_shot) > MaxFocus() and not BuffPresent(sentinels_sight_buff) Spell(aimed_shot)
+ if Focus() + FocusCastingRegen(aimed_shot) > MaxFocus() and not BuffPresent(sentinels_sight_buff) and aimed_shot_move() Spell(aimed_shot)
  #multishot,if=spell_targets.multishot>1&!variable.waiting_for_sentinel
  if Enemies(tagged=1) > 1 and not waiting_for_sentinel() Spell(multishot)
  #arcane_shot,if=spell_targets.multishot=1&!variable.waiting_for_sentinel
@@ -298,33 +308,33 @@ AddFunction MarksmanshipPatientSniperMainActions
  unless target.TimeToDie() < vuln_window() and Enemies(tagged=1) == 1 and MarksmanshipTargetdieMainPostConditions()
  {
   #aimed_shot,if=spell_targets.multishot>1&talent.trick_shot.enabled&debuff.vulnerability.remains>cast_time&(buff.sentinels_sight.stack>=spell_targets.multishot*5|buff.sentinels_sight.stack+(spell_targets.multishot%2)>20|(set_bonus.tier20_2pc&!buff.t20_2p_critical_aimed_damage.up&prev.aimed_shot)|buff.lock_and_load.up&spell_targets.multishot<3)
-  if Enemies(tagged=1) > 1 and Talent(trick_shot_talent) and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and { BuffStacks(sentinels_sight_buff) >= Enemies(tagged=1) * 5 or BuffStacks(sentinels_sight_buff) + Enemies(tagged=1) / 2 > 20 or ArmorSetBonus(T20 2) and not BuffPresent(t20_2p_critical_aimed_damage_buff) and PreviousSpell(aimed_shot) or BuffPresent(lock_and_load_buff) and Enemies(tagged=1) < 3 } Spell(aimed_shot)
+  if Enemies(tagged=1) > 1 and Talent(trick_shot_talent) and target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and { BuffStacks(sentinels_sight_buff) >= Enemies(tagged=1) * 5 or BuffStacks(sentinels_sight_buff) + Enemies(tagged=1) / 2 > 20 or ArmorSetBonus(T20 2) and not BuffPresent(t20_2p_critical_aimed_damage_buff) and PreviousSpell(aimed_shot) or BuffPresent(lock_and_load_buff) and Enemies(tagged=1) < 3 } and aimed_shot_move() Spell(aimed_shot)
   #marked_shot,if=spell_targets>1
   if Enemies(tagged=1) > 1 Spell(marked_shot)
   #multishot,if=spell_targets>1&(buff.marking_targets.up|buff.trueshot.up)
   if Enemies(tagged=1) > 1 and { BuffPresent(marking_targets_buff) or BuffPresent(trueshot_buff) } Spell(multishot)
   #windburst,if=variable.vuln_aim_casts<1&!variable.pooling_for_piercing
-  if vuln_aim_casts() < 1 and not pooling_for_piercing() Spell(windburst)
+  if vuln_aim_casts() < 1 and not pooling_for_piercing() and windburst_move() Spell(windburst)
   #black_arrow,if=variable.can_gcd&(!variable.pooling_for_piercing|(lowest_vuln_within.5>gcd.max&focus>85))
   if can_gcd() and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > GCD() and Focus() > 85 } Spell(black_arrow)
   #aimed_shot,if=debuff.vulnerability.up&buff.lock_and_load.up&(!variable.pooling_for_piercing|lowest_vuln_within.5>gcd.max)
-  if target.DebuffPresent(vulnerability_debuff) and BuffPresent(lock_and_load_buff) and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > GCD() } Spell(aimed_shot)
+  if target.DebuffPresent(vulnerability_debuff) and BuffPresent(lock_and_load_buff) and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > GCD() } and aimed_shot_move() Spell(aimed_shot)
   #aimed_shot,if=spell_targets.multishot>1&debuff.vulnerability.remains>execute_time&(!variable.pooling_for_piercing|(focus>100&lowest_vuln_within.5>(execute_time+gcd.max)))
-  if Enemies(tagged=1) > 1 and target.DebuffRemaining(vulnerability_debuff) > ExecuteTime(aimed_shot) and { not pooling_for_piercing() or Focus() > 100 and target.DebuffRemaining(vulnerable) > ExecuteTime(aimed_shot) + GCD() } Spell(aimed_shot)
+  if Enemies(tagged=1) > 1 and target.DebuffRemaining(vulnerability_debuff) > ExecuteTime(aimed_shot) and { not pooling_for_piercing() or Focus() > 100 and target.DebuffRemaining(vulnerable) > ExecuteTime(aimed_shot) + GCD() } and aimed_shot_move() Spell(aimed_shot)
   #multishot,if=spell_targets>1&variable.can_gcd&focus+cast_regen+action.aimed_shot.cast_regen<focus.max&(!variable.pooling_for_piercing|lowest_vuln_within.5>gcd.max)
   if Enemies(tagged=1) > 1 and can_gcd() and Focus() + FocusCastingRegen(multishot) + FocusCastingRegen(aimed_shot) < MaxFocus() and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > GCD() } Spell(multishot)
   #arcane_shot,if=spell_targets.multishot=1&(!set_bonus.tier20_2pc|!action.aimed_shot.in_flight|buff.t20_2p_critical_aimed_damage.remains>action.aimed_shot.cast_time+gcd)&(variable.vuln_aim_casts>0|action.windburst.in_flight&!set_bonus.tier21_4pc)&variable.can_gcd&focus+cast_regen+action.aimed_shot.cast_regen<focus.max&(!variable.pooling_for_piercing|lowest_vuln_within.5>gcd)
   if Enemies(tagged=1) == 1 and { not ArmorSetBonus(T20 2) or not InFlightToTarget(aimed_shot) or BuffRemaining(t20_2p_critical_aimed_damage_buff) > CastTime(aimed_shot) + GCD() } and { vuln_aim_casts() > 0 or InFlightToTarget(windburst) and not ArmorSetBonus(T21 4) } and can_gcd() and Focus() + FocusCastingRegen(arcane_shot) + FocusCastingRegen(aimed_shot) < MaxFocus() and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > GCD() } Spell(arcane_shot)
   #aimed_shot,if=talent.sidewinders.enabled&(debuff.vulnerability.remains>cast_time|(buff.lock_and_load.down&action.windburst.in_flight))&(variable.vuln_window-(execute_time*variable.vuln_aim_casts)<1|focus.deficit<=cast_regen|buff.trueshot.up)&(spell_targets.multishot=1|focus>100)
-  if Talent(sidewinders_talent) and { target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) or BuffExpires(lock_and_load_buff) and InFlightToTarget(windburst) } and { vuln_window() - ExecuteTime(aimed_shot) * vuln_aim_casts() < 1 or FocusDeficit() <= FocusCastingRegen(aimed_shot) or BuffPresent(trueshot_buff) } and { Enemies(tagged=1) == 1 or Focus() > 100 } Spell(aimed_shot)
+  if Talent(sidewinders_talent) and { target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) or BuffExpires(lock_and_load_buff) and InFlightToTarget(windburst) } and { vuln_window() - ExecuteTime(aimed_shot) * vuln_aim_casts() < 1 or FocusDeficit() <= FocusCastingRegen(aimed_shot) or BuffPresent(trueshot_buff) } and { Enemies(tagged=1) == 1 or Focus() > 100 } and aimed_shot_move() Spell(aimed_shot)
   #aimed_shot,if=!talent.sidewinders.enabled&(debuff.vulnerability.remains>cast_time|(buff.lock_and_load.down&action.windburst.in_flight&(!set_bonus.tier21_4pc|debuff.hunters_mark.down)))&(!variable.pooling_for_piercing|lowest_vuln_within.5>execute_time+gcd.max)
-  if not Talent(sidewinders_talent) and { target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) or BuffExpires(lock_and_load_buff) and InFlightToTarget(windburst) and { not ArmorSetBonus(T21 4) or target.DebuffExpires(hunters_mark_debuff) } } and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > ExecuteTime(aimed_shot) + GCD() } Spell(aimed_shot)
+  if not Talent(sidewinders_talent) and { target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) or BuffExpires(lock_and_load_buff) and InFlightToTarget(windburst) and { not ArmorSetBonus(T21 4) or target.DebuffExpires(hunters_mark_debuff) } } and { not pooling_for_piercing() or target.DebuffRemaining(vulnerable) > ExecuteTime(aimed_shot) + GCD() } and aimed_shot_move() Spell(aimed_shot)
   #marked_shot,if=!talent.sidewinders.enabled&((buff.lock_and_load.up&debuff.vulnerability.down)|(variable.vuln_window<action.aimed_shot.cast_time&!variable.pooling_for_piercing&(!action.windburst.in_flight|set_bonus.tier21_4pc)&((focus>65|buff.trueshot.up|(1%attack_haste)>1.217|(1%attack_haste)>1.171&set_bonus.tier20_4pc)|set_bonus.tier21_4pc&!set_bonus.tier20_2pc)))
   if not Talent(sidewinders_talent) and { BuffPresent(lock_and_load_buff) and target.DebuffExpires(vulnerability_debuff) or vuln_window() < CastTime(aimed_shot) and not pooling_for_piercing() and { not InFlightToTarget(windburst) or ArmorSetBonus(T21 4) } and { Focus() > 65 or BuffPresent(trueshot_buff) or 1 / { 100 / { 100 + MeleeHaste() } } > 1.217 or 1 / { 100 / { 100 + MeleeHaste() } } > 1.171 and ArmorSetBonus(T20 4) or ArmorSetBonus(T21 4) and not ArmorSetBonus(T20 2) } } Spell(marked_shot)
   #marked_shot,if=talent.sidewinders.enabled&(variable.vuln_aim_casts<1|buff.trueshot.up|variable.vuln_window<action.aimed_shot.cast_time)
   if Talent(sidewinders_talent) and { vuln_aim_casts() < 1 or BuffPresent(trueshot_buff) or vuln_window() < CastTime(aimed_shot) } Spell(marked_shot)
   #aimed_shot,if=focus+cast_regen>focus.max&buff.lock_and_load.down&!buff.sentinels_sight.up
-  if Focus() + FocusCastingRegen(aimed_shot) > MaxFocus() and BuffExpires(lock_and_load_buff) and not BuffPresent(sentinels_sight_buff) Spell(aimed_shot)
+  if Focus() + FocusCastingRegen(aimed_shot) > MaxFocus() and BuffExpires(lock_and_load_buff) and not BuffPresent(sentinels_sight_buff) and aimed_shot_move() Spell(aimed_shot)
   #sidewinders,if=(!debuff.hunters_mark.up|(!buff.marking_targets.up&!buff.trueshot.up))&((buff.marking_targets.up&variable.vuln_aim_casts<1)|buff.trueshot.up|charges_fractional>1.9)
   if { not target.DebuffPresent(hunters_mark_debuff) or not BuffPresent(marking_targets_buff) and not BuffPresent(trueshot_buff) } and { BuffPresent(marking_targets_buff) and vuln_aim_casts() < 1 or BuffPresent(trueshot_buff) or Charges(sidewinders count=0) > 1.9 } Spell(sidewinders)
   #arcane_shot,if=spell_targets.multishot=1&(!variable.pooling_for_piercing|lowest_vuln_within.5>gcd.max)
@@ -388,7 +398,7 @@ AddFunction MarksmanshipPatientSniperCdPostConditions
 AddFunction MarksmanshipPrecombatMainActions
 {
  #windburst
- Spell(windburst)
+ if windburst_move() Spell(windburst)
 }
 
 AddFunction MarksmanshipPrecombatMainPostConditions
@@ -426,9 +436,9 @@ AddFunction MarksmanshipPrecombatCdPostConditions
 AddFunction MarksmanshipTargetdieMainActions
 {
  #windburst
- Spell(windburst)
+ if windburst_move() Spell(windburst)
  #aimed_shot,if=debuff.vulnerability.remains>cast_time&target.time_to_die>cast_time
- if target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and target.TimeToDie() > CastTime(aimed_shot) Spell(aimed_shot)
+ if target.DebuffRemaining(vulnerability_debuff) > CastTime(aimed_shot) and target.TimeToDie() > CastTime(aimed_shot) and aimed_shot_move() Spell(aimed_shot)
  #marked_shot
  Spell(marked_shot)
  #arcane_shot
