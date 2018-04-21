@@ -28,7 +28,7 @@ AddIcon specialization=3 help=main
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() <= 25 or HealthPercent() < 100 and not InCombat() Spell(crimson_vial)
+	if HealthPercent() <= 25 or HealthPercent() < 100 and not InCombat() and not mounted() Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()
 	{
