@@ -25,13 +25,17 @@ AddIcon specialization=2 help=main
 		#healing_touch,if=talent.bloodtalons.enabled
 		#if Talent(bloodtalons_talent) Spell(healing_touch)
 		# if Talent(bloodtalons_talent) and BuffRemaining(bloodtalons_buff) < 20 and not InCombat() and Speed() == 0 Spell(healing_touch)
-		if target.Present() and target.Exists() and not target.IsFriend()
+		if target.Present() and not target.IsDead() and not target.IsFriend()
 		{
+			#bloodtalons_talent
+			if Talent(bloodtalons_talent) and BuffRemains(bloodtalons_buff) <= CastTime(regrowth) and not InCombat() and { Speed() == 0 or CanMove() > 0 } Spell(regrowth)
 			#cat_form
 			if not BuffPresent(cat_form) Spell(cat_form)
 			#prowl
-			if not (BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff)) and not InCombat() Spell(prowl)
+			if not { BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff) } and not InCombat() Spell(prowl)
 		}
+		#not bloodtalons_talent
+		if not { BuffPresent(prowl_buff) or BuffPresent(shadowmeld_buff) } and not Talent(bloodtalons_talent) and { HealthPercent() < 100 and { not BuffPresent(regrowth_buff) or not InCombat() } or HealthPercent() < 80 } and CastTime(regrowth) <= 0 Spell(regrowth)
 	}
 	
 	# Interrupt
@@ -40,6 +44,9 @@ AddIcon specialization=2 help=main
 	# Rotation
 	if target.InRange(rake) and HasFullControl() and target.Present()
 	{
+		#cat_form
+		if not BuffPresent(cat_form) Spell(cat_form)
+
 		# Cooldowns
 		if Boss()
 		{
@@ -59,7 +66,7 @@ AddCheckBox(travers "Auto-travel")
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 # Travel!
@@ -67,7 +74,8 @@ AddFunction Travel
 {
 	if not InCombat() and Speed() > 0 and {not target.Present() or target.IsFriend()}
 	{
-		if not BuffPresent(travel_form) and not Indoors() and { Wet() or Falling() } Spell(travel_form)
+		if not BuffPresent(travel_form_buff) and not Indoors() and { Wet() or Falling() } Spell(travel_form)
+		if not BuffPresent(cat_form_buff) and Indoors() Spell(cat_form)
 	}
 }
 
@@ -201,7 +209,7 @@ AddFunction FeralCooldownsShortCdPostConditions
 AddFunction FeralCooldownsCdActions
 {
  #dash,if=!buff.cat_form.up
- if not BuffPresent(cat_form_buff) Spell(dash)
+ # if not BuffPresent(cat_form_buff) Spell(dash)
  #berserk,if=energy>=30&(cooldown.tigers_fury.remains>5|buff.tigers_fury.up)
  if Energy() >= 30 and { SpellCooldown(tigers_fury) > 5 or BuffPresent(tigers_fury_buff) } Spell(berserk_cat)
  #berserking
@@ -429,7 +437,7 @@ AddFunction FeralStGeneratorsMainActions
  #regrowth,if=equipped.ailuro_pouncers&talent.bloodtalons.enabled&(buff.predatory_swiftness.stack>2|(buff.predatory_swiftness.stack>1&dot.rake.remains<3))&buff.bloodtalons.down
  if HasEquippedItem(ailuro_pouncers) and Talent(bloodtalons_talent) and { BuffStacks(predatory_swiftness_buff) > 2 or BuffStacks(predatory_swiftness_buff) > 1 and target.DebuffRemaining(rake_debuff) < 3 } and BuffExpires(bloodtalons_buff) Spell(regrowth)
  #brutal_slash,if=spell_targets.brutal_slash>desired_targets
- if Enemies(tagged=1) > Enemies(tagged=1) Spell(brutal_slash)
+ if Enemies() > Enemies(tagged=1) Spell(brutal_slash)
  #pool_resource,for_next=1
  #thrash_cat,if=refreshable&(spell_targets.thrash_cat>2)
  if target.Refreshable(thrash_cat_debuff) and Enemies(tagged=1) > 2 Spell(thrash_cat)
