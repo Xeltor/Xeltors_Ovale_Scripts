@@ -74,8 +74,8 @@ AddFunction aimed_shots_focus
 
 AddFunction aimed_shots_vuln
 {
-	if target.DebuffPresent(vulnerability_debuff) and CastTime(aimed_shot) < 1 target.DebuffRemaining(vulnerability_debuff) / GCD()
-	if target.DebuffPresent(vulnerability_debuff) and CastTime(aimed_shot) > 0 CastTime(aimed_shot) / target.DebuffRemaining(vulnerability_debuff)
+	if target.DebuffPresent(vulnerability_debuff) > GCD() and CastTime(aimed_shot) < GCD() target.DebuffRemaining(vulnerability_debuff) / GCD()
+	if target.DebuffRemains(vulnerability_debuff) > GCD() and CastTime(aimed_shot) > GCD() target.DebuffRemaining(vulnerability_debuff) / CastTime(aimed_shot)
 	0
 }
 
