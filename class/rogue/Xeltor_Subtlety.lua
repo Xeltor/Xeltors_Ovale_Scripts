@@ -28,7 +28,7 @@ AddIcon specialization=3 help=main
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() <= 25 or HealthPercent() < 100 and not InCombat() and not mounted() Spell(crimson_vial)
+	if HealthPercent() <= 25 and HealthPercent() > 0 or HealthPercent() < 100 and HealthPercent() > 0 and not InCombat() and not mounted() Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()
 	{
@@ -73,8 +73,8 @@ AddFunction InterruptActions
 		if target.InRange(kick) and not Stealthed() Spell(kick)
 		if target.Classification(worldboss no)
 		{
-			# if target.InRange(cheap_shot) and Stealthed() Spell(cheap_shot)
-			# if target.InRange(deadly_throw) and ComboPoints() == 5 and not {BuffPresent(stealthed_buff any=1) and BuffPresent(vanish_buff)} Spell(deadly_throw)
+			if target.InRange(cheap_shot) and Stealthed() Spell(cheap_shot)
+			if target.InRange(blind) and not Stealthed() Spell(blind)
 			if target.InRange(kidney_shot) and not Stealthed() Spell(kidney_shot)
 			if target.InRange(kidney_shot) and not Stealthed() Spell(arcane_torrent_energy)
 			if target.InRange(quaking_palm) and not Stealthed() Spell(quaking_palm)
