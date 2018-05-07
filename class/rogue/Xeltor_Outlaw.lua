@@ -17,6 +17,7 @@ AddIcon specialization=outlaw help=main
 	if not Stealthed() and not InCombat() and not mounted() and not PlayerIsResting() Spell(stealth)
 	if not InCombat() and not target.IsDead() and not target.IsFriend() and not mounted() and not PlayerIsResting()
 	{
+		if not InCombat() and Boss() and BuffPresent(blade_flurry_buff) Spell(blade_flurry)
 		#marked_for_death
 		if target.InRange(marked_for_death) Spell(marked_for_death)
 		#roll_the_bones,if=!talent.slice_and_dice.enabled
@@ -25,8 +26,6 @@ AddIcon specialization=outlaw help=main
 	
 	if InCombat() InterruptActions()
 	if HealthPercent() < 50 or HealthPercent() < 100 and not InCombat() Spell(crimson_vial)
-	
-	BladeFlurryManager()
 	
 	if target.InRange(saber_slash) and HasFullControl()
 	{
@@ -37,19 +36,15 @@ AddIcon specialization=outlaw help=main
 		OutlawDefaultShortCdActions()
 		
 		# Default Actions
+		BladeFlurryManager()
 		OutlawDefaultMainActions()
 	}
 }
 
 AddFunction BladeFlurryManager
 {
-	# Boss fights.
-	if not InCombat() and Boss() and BuffPresent(blade_flurry_buff) Spell(blade_flurry)
-	if InCombat() and BuffPresent(blade_flurry_buff) and Boss() and Enemies(tagged=1) < 2 Spell(blade_flurry)
-	if InCombat() and not BuffPresent(blade_flurry_buff) and Boss() and Enemies(tagged=1) >= 2 Spell(blade_flurry)
-	
-	# AoE in all trash fights.
-	if InCombat() and not BuffPresent(blade_flurry_buff) and not Boss() Spell(blade_flurry)
+	if InCombat() and BuffPresent(blade_flurry_buff) and Enemies(tagged=1) < 2 Spell(blade_flurry)
+	if InCombat() and not BuffPresent(blade_flurry_buff) and Enemies(tagged=1) >= 2 Spell(blade_flurry)
 }
 
 AddFunction Boss
