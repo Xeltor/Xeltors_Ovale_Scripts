@@ -27,6 +27,7 @@
 	<Script file="rogue_subtlety_helper.lua" />
 	<Script file="shaman_elemental_helper.lua" />
 	<Script file="shaman_enhancement_helper.lua" />
+	<Script file="shaman_restoration_helper.lua" />
 	<Script file="warlock_affliction_helper.lua" />
 	<Script file="warlock_demonology_helper.lua" />
 	<Script file="warlock_destruction_helper.lua" />

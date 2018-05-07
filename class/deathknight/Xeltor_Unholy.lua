@@ -3,14 +3,14 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_unholy_functions"
-	local desc = "[Xel][7.3] Death Knight: Unholy Functions"
+	local desc = "[Xel][7.3.5] Death Knight: Unholy Functions"
 	local code = [[
 ### actions.default
 
 AddFunction UnholyDefaultMainActions
 {
  #outbreak,target_if=(dot.virulent_plague.tick_time_remains+tick_time<=dot.virulent_plague.remains)&dot.virulent_plague.remains<=gcd
- if target.TickTimeRemaining(virulent_plague_debuff) + target.TickTime(virulent_plague_debuff) <= target.DebuffRemaining(virulent_plague_debuff) and target.DebuffRemaining(virulent_plague_debuff) <= GCD() or not target.DebuffPresent(virulent_plague_debuff) Spell(outbreak)
+ if target.TickTimeRemaining(virulent_plague_debuff) + target.TickTime(virulent_plague_debuff) <= target.DebuffRemaining(virulent_plague_debuff) and target.DebuffRemaining(virulent_plague_debuff) <= GCD() Spell(outbreak)
  #call_action_list,name=cooldowns
  UnholyCooldownsMainActions()
 
@@ -150,8 +150,6 @@ AddFunction UnholyColdHeartMainActions
 {
  #chains_of_ice,if=buff.unholy_strength.remains<gcd&buff.unholy_strength.react&buff.cold_heart.stack>16
  if BuffRemaining(unholy_strength_buff) < GCD() and BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 16 Spell(chains_of_ice)
- #chains_of_ice,if=buff.master_of_ghouls.remains<gcd&buff.master_of_ghouls.up&buff.cold_heart.stack>17
- if BuffRemaining(master_of_ghouls_buff) < GCD() and BuffPresent(master_of_ghouls_buff) and BuffStacks(cold_heart_buff) > 17 Spell(chains_of_ice)
  #chains_of_ice,if=buff.cold_heart.stack=20&buff.unholy_strength.react
  if BuffStacks(cold_heart_buff) == 20 and BuffPresent(unholy_strength_buff) Spell(chains_of_ice)
 }
@@ -166,7 +164,7 @@ AddFunction UnholyColdHeartShortCdActions
 
 AddFunction UnholyColdHeartShortCdPostConditions
 {
- BuffRemaining(unholy_strength_buff) < GCD() and BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 16 and Spell(chains_of_ice) or BuffRemaining(master_of_ghouls_buff) < GCD() and BuffPresent(master_of_ghouls_buff) and BuffStacks(cold_heart_buff) > 17 and Spell(chains_of_ice) or BuffStacks(cold_heart_buff) == 20 and BuffPresent(unholy_strength_buff) and Spell(chains_of_ice)
+ BuffRemaining(unholy_strength_buff) < GCD() and BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 16 and Spell(chains_of_ice) or BuffStacks(cold_heart_buff) == 20 and BuffPresent(unholy_strength_buff) and Spell(chains_of_ice)
 }
 
 AddFunction UnholyColdHeartCdActions
@@ -175,7 +173,7 @@ AddFunction UnholyColdHeartCdActions
 
 AddFunction UnholyColdHeartCdPostConditions
 {
- BuffRemaining(unholy_strength_buff) < GCD() and BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 16 and Spell(chains_of_ice) or BuffRemaining(master_of_ghouls_buff) < GCD() and BuffPresent(master_of_ghouls_buff) and BuffStacks(cold_heart_buff) > 17 and Spell(chains_of_ice) or BuffStacks(cold_heart_buff) == 20 and BuffPresent(unholy_strength_buff) and Spell(chains_of_ice)
+ BuffRemaining(unholy_strength_buff) < GCD() and BuffPresent(unholy_strength_buff) and BuffStacks(cold_heart_buff) > 16 and Spell(chains_of_ice) or BuffStacks(cold_heart_buff) == 20 and BuffPresent(unholy_strength_buff) and Spell(chains_of_ice)
 }
 
 ### actions.cooldowns
@@ -384,7 +382,7 @@ AddFunction UnholyPrecombatCdActions
  #augmentation
  #snapshot_stats
  #potion
- if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
 
  unless Spell(raise_dead)
  {

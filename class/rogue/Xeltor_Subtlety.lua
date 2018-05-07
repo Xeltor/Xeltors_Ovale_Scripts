@@ -16,19 +16,19 @@ Define(crimson_vial 185311)
 # Subtlety (Shanky)
 AddIcon specialization=3 help=main
 {
-	if not mounted() and not Stealthed() and not InCombat() and HealthPercent() > 0 and not PlayerIsResting() Spell(stealth)
+	if not mounted() and not Stealthed() and not InCombat() and not IsDead() and not PlayerIsResting() Spell(stealth)
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
 		#marked_for_death
 		if target.InRange(marked_for_death) Spell(marked_for_death)
 		#symbols_of_death
-		if not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
+		if not Talent(death_from_above_talent) and not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
 		#nightblade
 		if target.InRange(nightblade) Spell(nightblade)
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() <= 40 and not Boss() Spell(crimson_vial)
+	if HealthPercent() <= 25 or HealthPercent() < 100 and not InCombat() and not mounted() Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()
 	{
@@ -42,12 +42,12 @@ AddIcon specialization=3 help=main
 		SubtletyDefaultMainActions()
 	}
 	
-	if InCombat() and target.Present() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } GetInMeleeRange()
+	if InCombat() and not target.IsDead() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } GetInMeleeRange()
 }
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction position_front
@@ -59,9 +59,9 @@ AddFunction GetInMeleeRange
 {
 	if not target.InRange(kick)
 	{
+		if target.InRange(shadowstep) Spell(shadowstrike)
 		if target.InRange(shadowstep) Spell(shadowstep)
-		if Stealthed() and target.InRange(shadowstrike) Spell(shadowstrike)
-		if target.InRange(shadowstrike) and not Stealthed() SubtletyStealthCdsShortCdActions()
+		if target.InRange(shadowstep) and not Stealthed() SubtletyStealthCdsShortCdActions()
 		# Texture(misc_arrowlup help=L(not_in_melee_range))
 	}
 }
@@ -168,7 +168,7 @@ AddFunction SubtletyDefaultShortCdActions
 {
  #variable,name=dsh_dfa,value=talent.death_from_above.enabled&talent.dark_shadow.enabled&spell_targets.death_from_above<4
  #shadow_dance,if=talent.dark_shadow.enabled&(!stealthed.all|buff.subterfuge.up)&buff.death_from_above.up&buff.death_from_above.remains<=0.15
- if Talent(dark_shadow_talent) and { not Stealthed() or BuffPresent(subterfuge_buff) } and BuffPresent(death_from_above_buff) and BuffRemaining(death_from_above_buff) <= 0.15 Spell(shadow_dance)
+ if Talent(dark_shadow_talent) and not BuffPresent(shadow_dance_buff) and { not Stealthed() or BuffPresent(subterfuge_buff) } and BuffPresent(death_from_above_buff) and BuffRemaining(death_from_above_buff) <= 0.15 Spell(shadow_dance)
  #wait,sec=0.1,if=buff.shadow_dance.up&gcd.remains>0
  #call_action_list,name=cds
  SubtletyCdsShortCdActions()
@@ -594,13 +594,13 @@ AddFunction SubtletyStealthCdsShortCdActions
  #vanish,if=!variable.dsh_dfa&mantle_duration=0&cooldown.shadow_dance.charges_fractional<variable.shd_fractional+(equipped.mantle_of_the_master_assassin&time<30)*0.3&(!equipped.mantle_of_the_master_assassin|buff.symbols_of_death.up)
  if not dsh_dfa() and BuffRemaining(master_assassins_initiative) == 0 and SpellCharges(shadow_dance count=0) < shd_fractional() + { HasEquippedItem(mantle_of_the_master_assassin) and TimeInCombat() < 30 } * 0.3 and { not HasEquippedItem(mantle_of_the_master_assassin) or BuffPresent(symbols_of_death_buff) } Spell(vanish)
  #shadow_dance,if=dot.nightblade.remains>=5&charges_fractional>=variable.shd_fractional|target.time_to_die<cooldown.symbols_of_death.remains
- if target.DebuffRemaining(nightblade_debuff) >= 5 and Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) Spell(shadow_dance)
+ if { target.DebuffRemaining(nightblade_debuff) >= 5 and Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) } and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
  #pool_resource,for_next=1,extra_amount=40
  #shadowmeld,if=energy>=40&energy.deficit>=10+variable.ssw_refund
  unless True(pool_energy 40) and EnergyDeficit() >= 10 + ssw_refund() and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(40)
  {
   #shadow_dance,if=!variable.dsh_dfa&combo_points.deficit>=2+talent.subterfuge.enabled*2&(buff.symbols_of_death.remains>=1.2|cooldown.symbols_of_death.remains>=12+(talent.dark_shadow.enabled&set_bonus.tier20_4pc)*3-(!talent.dark_shadow.enabled&set_bonus.tier20_4pc)*4|mantle_duration>0)&(spell_targets.shuriken_storm>=4|!buff.the_first_of_the_dead.up)
-  if not dsh_dfa() and ComboPointsDeficit() >= 2 + TalentPoints(subterfuge_talent) * 2 and { BuffRemaining(symbols_of_death_buff) >= 1.2 or SpellCooldown(symbols_of_death) >= 12 + { Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 3 - { not Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 4 or BuffRemaining(master_assassins_initiative) > 0 } and { Enemies(tagged=1) >= 4 or not BuffPresent(the_first_of_the_dead_buff) } Spell(shadow_dance)
+  if not dsh_dfa() and ComboPointsDeficit() >= 2 + TalentPoints(subterfuge_talent) * 2 and { BuffRemaining(symbols_of_death_buff) >= 1.2 or SpellCooldown(symbols_of_death) >= 12 + { Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 3 - { not Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 4 or BuffRemaining(master_assassins_initiative) > 0 } and { Enemies(tagged=1) >= 4 or not BuffPresent(the_first_of_the_dead_buff) } and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
  }
 }
 

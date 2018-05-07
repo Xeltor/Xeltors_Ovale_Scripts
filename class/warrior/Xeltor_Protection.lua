@@ -3,13 +3,8 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_protection"
-	local desc = "[Xel][7.3] Warrior: Protection"
+	local desc = "[Xel][7.3.5] Warrior: Protection"
 	local code = [[
-# Based on SimulationCraft profile "Warrior_Protection_T19P".
-#    class=warrior
-#    spec=protection
-#    talents=0111201
-
 Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
@@ -28,12 +23,14 @@ AddIcon specialization=3 help=main
 		
 		# Short Cooldowns
 		ProtectionDefaultShortCdActions()
+		
 		# Default rotation
 		ProtectionDefaultMainActions()
 	}
+
 	# Move to the target!
-	if target.InRange(heroic_throw) and not PreviousGCDSpell(intercept) and target.InRange(intercept) and InCombat() and HasFullControl() and Falling() Spell(intercept)
-	if target.InRange(heroic_throw) and InCombat() and HasFullControl() Spell(heroic_throw usable=1)
+	if target.InRange(heroic_throw) and not PreviousGCDSpell(intercept) and target.InRange(intercept) and InCombat() and Falling() Spell(intercept)
+	if target.InRange(heroic_throw) and InCombat() Spell(heroic_throw usable=1)
 }
 
 AddFunction ProtectionHealMe

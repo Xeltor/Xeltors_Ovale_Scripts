@@ -17,6 +17,7 @@ AddIcon
 	Texture(spell_nature_earthshock) # Earth Shock
 	Texture(spell_frost_frostshock) # Frost Shock
 	Texture(spell_nature_cyclone) # Wind Shear
+	Texture(spell_shaman_hex) # Hex
 
 	# Buffs
 	Texture(spell_fire_elemental_totem) # Fire Elemental Totem
@@ -36,7 +37,7 @@ AddIcon
 	Texture(shaman_talent_elementalblast) # Elemental Blast (T4)
 	Texture(spell_frost_iceshard) # Icefury (T5)
 	Texture(spell_nature_wispheal) # Elemental Mastery (T6)
-	Texture(spell_shaman_measuredinsight) # Storm Elemental (T6)
+	Texture(spell_shaman_measuredinsight) # Storm Elemental (T6)(Replaces Fire Elemental Totem)
 	Texture(spell_fire_elementaldevastation) # Ascendance (T7)
 	Texture(spell_shaman_spewlava) # Liquid Magma Totem (T7)
 
@@ -49,12 +50,6 @@ AddIcon
 	Texture(pandarenracial_quiveringpain) # Quaking Palm (Pandaren)
 	Texture(spell_shadow_unholystrength) # Stoneform (Dwarf)
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
 ]]
 

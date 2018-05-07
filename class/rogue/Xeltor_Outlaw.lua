@@ -10,16 +10,14 @@ Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_rogue_spells)
 
-Define(crimson_vial 185311)
-	SpellInfo(crimson_vial cd=30 gcd=0 energy=30)
-
 # Outlaw
 AddIcon specialization=outlaw help=main
 {
 	# Precombat
-	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
+	if not Stealthed() and not InCombat() and not mounted() and not PlayerIsResting() Spell(stealth)
+	if not InCombat() and not target.IsDead() and not target.IsFriend() and not mounted() and not PlayerIsResting()
 	{
-		if BuffExpires(stealthed_buff any=1) Spell(stealth)
+		if not InCombat() and Boss() and BuffPresent(blade_flurry_buff) Spell(blade_flurry)
 		#marked_for_death
 		if target.InRange(marked_for_death) Spell(marked_for_death)
 		#roll_the_bones,if=!talent.slice_and_dice.enabled
@@ -27,7 +25,7 @@ AddIcon specialization=outlaw help=main
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() <= 40 and not Boss() Spell(crimson_vial)
+	if HealthPercent() < 50 or HealthPercent() < 100 and not InCombat() Spell(crimson_vial)
 	
 	if target.InRange(saber_slash) and HasFullControl()
 	{
@@ -38,13 +36,20 @@ AddIcon specialization=outlaw help=main
 		OutlawDefaultShortCdActions()
 		
 		# Default Actions
+		BladeFlurryManager()
 		OutlawDefaultMainActions()
 	}
 }
 
+AddFunction BladeFlurryManager
+{
+	if InCombat() and BuffPresent(blade_flurry_buff) and Enemies(tagged=1) < 2 Spell(blade_flurry)
+	if InCombat() and not BuffPresent(blade_flurry_buff) and Enemies(tagged=1) >= 2 Spell(blade_flurry)
+}
+
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction InterruptActions
@@ -54,9 +59,7 @@ AddFunction InterruptActions
 		if target.InRange(kick) and not Stealthed() Spell(kick)
 		if target.Classification(worldboss no)
 		{
-			# if target.InRange(cheap_shot) and Stealthed() Spell(cheap_shot)
-			# if target.InRange(deadly_throw) and ComboPoints() == 5 and not {BuffPresent(stealthed_buff any=1) and BuffPresent(vanish_buff)} Spell(deadly_throw)
-			if target.InRange(kidney_shot) and not Stealthed() Spell(kidney_shot)
+			if target.InRange(gouge) and not Stealthed() Spell(gouge)
 			if target.InRange(kidney_shot) and not Stealthed() Spell(arcane_torrent_energy)
 			if target.InRange(quaking_palm) and not Stealthed() Spell(quaking_palm)
 		}
@@ -248,11 +251,11 @@ AddFunction OutlawBfMainPostConditions
 AddFunction OutlawBfShortCdActions
 {
  #cancel_buff,name=blade_flurry,if=spell_targets.blade_flurry<2&buff.blade_flurry.up
- if Enemies(tagged=1) < 2 and BuffPresent(blade_flurry_buff) and BuffPresent(blade_flurry_buff) Texture(blade_flurry)
+ # if Enemies(tagged=1) < 2 and BuffPresent(blade_flurry_buff) and BuffPresent(blade_flurry_buff) Texture(blade_flurry)
  #cancel_buff,name=blade_flurry,if=equipped.shivarran_symmetry&cooldown.blade_flurry.up&buff.blade_flurry.up&spell_targets.blade_flurry>=2
- if HasEquippedItem(shivarran_symmetry) and not SpellCooldown(blade_flurry) > 0 and BuffPresent(blade_flurry_buff) and Enemies(tagged=1) >= 2 and BuffPresent(blade_flurry_buff) Texture(blade_flurry)
+ # if HasEquippedItem(shivarran_symmetry) and not SpellCooldown(blade_flurry) > 0 and BuffPresent(blade_flurry_buff) and Enemies(tagged=1) >= 2 and BuffPresent(blade_flurry_buff) Texture(blade_flurry)
  #blade_flurry,if=spell_targets.blade_flurry>=2&!buff.blade_flurry.up
- if Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) Spell(blade_flurry)
+ # if Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) Spell(blade_flurry)
 }
 
 AddFunction OutlawBfShortCdPostConditions
@@ -458,7 +461,7 @@ AddFunction OutlawStealthShortCdActions
  unless ambush_condition() and Spell(ambush)
  {
   #vanish,if=(variable.ambush_condition|equipped.mantle_of_the_master_assassin&!variable.rtb_reroll&!variable.ss_useable)&mantle_duration=0
-  if { ambush_condition() or HasEquippedItem(mantle_of_the_master_assassin) and not rtb_reroll() and not ss_useable() } and BuffRemaining(master_assassins_initiative) == 0 Spell(vanish)
+  if { ambush_condition() or HasEquippedItem(mantle_of_the_master_assassin) and not rtb_reroll() and not ss_useable() } and BuffRemaining(master_assassins_initiative) == 0 and not target.istargetingplayer() Spell(vanish)
  }
 }
 

@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_fire"
-	local desc = "[Xel][7.3] Mage: Fire"
+	local desc = "[Xel][7.3.5] Mage: Fire"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -31,7 +31,7 @@ AddIcon specialization=2 help=main
 	if HealthPercent() < 30 and not mounted() and not DebuffPresent(hypothermia_debuff) and not BuffPresent(ice_block_buff) and InCombat() Spell(ice_block)
 	if BuffExpires(blazing_barrier_buff) and not mounted() and InCombat() and target.istargetingplayer() Spell(blazing_barrier)
 	
-	unless { InFlightToTarget(fireball) or InFlightToTarget(phoenixs_flames) or InFlightToTarget(pyroblast) or Casting(fireball) } and BuffPresent(heating_up_buff)
+	unless { InFlightToTarget(fireball) or InFlightToTarget(phoenixs_flames) or InFlightToTarget(pyroblast) } and BuffPresent(heating_up_buff)
 	{
 		if InCombat() and target.InRange(fireball) and HasFullControl()
 		{
@@ -66,6 +66,7 @@ AddFunction InterruptActions
 		if target.InRange(counterspell) Spell(counterspell)
 		if not target.Classification(worldboss)
 		{
+			if target.Distance(less 8) Spell(dragons_breath)
 			if target.Distance(less 8) Spell(arcane_torrent_mana)
 			if target.InRange(quaking_palm) Spell(quaking_palm)
 		}
@@ -199,7 +200,7 @@ AddFunction FireActiveTalentsCdActions
 
 AddFunction FireActiveTalentsCdPostConditions
 {
- { BuffExpires(combustion_buff) or BuffPresent(combustion_buff) and Charges(fire_blast) < 1 and Charges(phoenixs_flames) < 1 } and Spell(blast_wave) or { SpellCooldown(combustion) > 40 or SpellCooldown(combustion) > target.TimeToDie() or BuffPresent(rune_of_power_buff) or Talent(firestarter_talent) and target.HealthPercent() >= 90 } and Spell(meteor) or { SpellCooldown(combustion) < CastTime(cinderstorm) and { BuffPresent(rune_of_power_buff) or not Talent(rune_of_power_talent) } or SpellCooldown(combustion) > 10 * { 100 / { 100 + SpellHaste() } } and not BuffPresent(combustion_buff) } and Spell(cinderstorm) or { HasEquippedItem(132863) or Talent(alexstraszas_fury_talent) and not BuffPresent(hot_streak_buff) } and Spell(dragons_breath) or Enemies(tagged=1) > 1 and BuffExpires(combustion_buff) and Spell(living_bomb)
+ { BuffExpires(combustion_buff) or BuffPresent(combustion_buff) and Charges(fire_blast) < 1 and Charges(phoenixs_flames) < 1 } and Spell(blast_wave) or { SpellCooldown(combustion) > 40 or SpellCooldown(combustion) > target.TimeToDie() or BuffPresent(rune_of_power_buff) or Talent(firestarter_talent) and target.HealthPercent() >= 90 } and Spell(meteor) or { SpellCooldown(combustion) < CastTime(cinderstorm) and { BuffPresent(rune_of_power_buff) or not Talent(rune_of_power_talent) } or SpellCooldown(combustion) > 10 * { 100 / { 100 + SpellHaste() } } and not BuffPresent(combustion_buff) } and Spell(cinderstorm) or { HasEquippedItem(132863) or Talent(alexstraszas_fury_talent) and not BuffPresent(hot_streak_buff) } and target.Distance(less 8) and Spell(dragons_breath) or Enemies(tagged=1) > 1 and BuffExpires(combustion_buff) and Spell(living_bomb)
 }
 
 ### actions.combustion_phase
@@ -283,7 +284,7 @@ AddFunction FireCombustionPhaseCdActions
 
 AddFunction FireCombustionPhaseCdPostConditions
 {
- BuffExpires(combustion_buff) and Spell(rune_of_power) or FireActiveTalentsCdPostConditions() or { Talent(flame_patch_talent) and Enemies(tagged=1) > 2 or Enemies(tagged=1) > 4 } and BuffPresent(hot_streak_buff) and Spell(flamestrike) or BuffPresent(kaelthas_ultimate_ability_buff) and BuffRemaining(combustion_buff) > ExecuteTime(pyroblast) and Spell(pyroblast) or BuffPresent(hot_streak_buff) and Spell(pyroblast) or Spell(phoenixs_flames) or BuffRemaining(combustion_buff) > CastTime(scorch) and Spell(scorch) or not BuffPresent(hot_streak_buff) and Charges(fire_blast) < 1 and Charges(phoenixs_flames) < 1 and Spell(dragons_breath) or target.HealthPercent() <= 30 and HasEquippedItem(132454) and Spell(scorch)
+ BuffExpires(combustion_buff) and Spell(rune_of_power) or FireActiveTalentsCdPostConditions() or { Talent(flame_patch_talent) and Enemies(tagged=1) > 2 or Enemies(tagged=1) > 4 } and BuffPresent(hot_streak_buff) and Spell(flamestrike) or BuffPresent(kaelthas_ultimate_ability_buff) and BuffRemaining(combustion_buff) > ExecuteTime(pyroblast) and Spell(pyroblast) or BuffPresent(hot_streak_buff) and Spell(pyroblast) or Spell(phoenixs_flames) or BuffRemaining(combustion_buff) > CastTime(scorch) and Spell(scorch) or not BuffPresent(hot_streak_buff) and Charges(fire_blast) < 1 and Charges(phoenixs_flames) < 1 and target.Distance(less 8) and Spell(dragons_breath) or target.HealthPercent() <= 30 and HasEquippedItem(132454) and Spell(scorch)
 }
 
 ### actions.precombat
@@ -406,7 +407,7 @@ AddFunction FireRopPhaseCdActions
 
 AddFunction FireRopPhaseCdPostConditions
 {
- Spell(rune_of_power) or { Talent(flame_patch_talent) and Enemies(tagged=1) > 1 or Enemies(tagged=1) > 3 } and BuffPresent(hot_streak_buff) and Spell(flamestrike) or BuffPresent(hot_streak_buff) and Spell(pyroblast) or FireActiveTalentsCdPostConditions() or BuffPresent(kaelthas_ultimate_ability_buff) and ExecuteTime(pyroblast) < BuffRemaining(kaelthas_ultimate_ability_buff) and TotemRemaining(rune_of_power) > CastTime(pyroblast) and Spell(pyroblast) or not PreviousGCDSpell(phoenixs_flames) and Charges(phoenixs_flames count=0) > 2.7 and Talent(firestarter_talent) and target.HealthPercent() >= 90 and Spell(phoenixs_flames) or not PreviousGCDSpell(phoenixs_flames) and Spell(phoenixs_flames) or target.HealthPercent() <= 30 and HasEquippedItem(132454) and Spell(scorch) or Enemies(tagged=1) > 2 and Spell(dragons_breath) or { Talent(flame_patch_talent) and Enemies(tagged=1) > 2 or Enemies(tagged=1) > 5 } and Spell(flamestrike) or Spell(fireball)
+ Spell(rune_of_power) or { Talent(flame_patch_talent) and Enemies(tagged=1) > 1 or Enemies(tagged=1) > 3 } and BuffPresent(hot_streak_buff) and Spell(flamestrike) or BuffPresent(hot_streak_buff) and Spell(pyroblast) or FireActiveTalentsCdPostConditions() or BuffPresent(kaelthas_ultimate_ability_buff) and ExecuteTime(pyroblast) < BuffRemaining(kaelthas_ultimate_ability_buff) and TotemRemaining(rune_of_power) > CastTime(pyroblast) and Spell(pyroblast) or not PreviousGCDSpell(phoenixs_flames) and Charges(phoenixs_flames count=0) > 2.7 and Talent(firestarter_talent) and target.HealthPercent() >= 90 and Spell(phoenixs_flames) or not PreviousGCDSpell(phoenixs_flames) and Spell(phoenixs_flames) or target.HealthPercent() <= 30 and HasEquippedItem(132454) and Spell(scorch) or Enemies(tagged=1) > 2 and target.Distance(less 8) and Spell(dragons_breath) or { Talent(flame_patch_talent) and Enemies(tagged=1) > 2 or Enemies(tagged=1) > 5 } and Spell(flamestrike) or Spell(fireball)
 }
 
 ### actions.standard_rotation

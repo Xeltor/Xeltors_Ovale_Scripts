@@ -23,15 +23,14 @@ Define(greater_blessing_of_wisdom_buff 203539)
 AddIcon specialization=3 help=main
 {
 	# Buffs
-	if not BuffPresent(greater_blessing_of_kings_buff) and not mounted() Spell(greater_blessing_of_kings)
-	if not BuffPresent(greater_blessing_of_wisdom_buff) and not mounted() Spell(greater_blessing_of_wisdom)
+	if not BuffCountOnAny(greater_blessing_of_kings_buff) and not mounted() Spell(greater_blessing_of_kings)
+	if not BuffCountOnAny(greater_blessing_of_wisdom_buff) and not mounted() Spell(greater_blessing_of_wisdom)
 	
 	# Interrupt
 	if InCombat() InterruptActions()
 	
 	if target.InRange(crusader_strike) and HasFullControl()
     {
-		# Cooldowns
 		RetributionDefaultCdActions()
 		RetributionDefaultShortCdActions()
 		RetributionDefaultMainActions()
@@ -40,7 +39,7 @@ AddIcon specialization=3 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction InterruptActions
