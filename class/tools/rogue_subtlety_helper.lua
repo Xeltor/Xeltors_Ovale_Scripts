@@ -14,8 +14,10 @@ AddIcon
 	Texture(ability_rogue_eviscerate) # Eviscerate
 	Texture(ability_rogue_nightblade) # Nightblade
 	Texture(ability_rogue_shurikenstorm) # Shuriken Storm
-	Texture(ability_rogue_kidneyshot) # Kidney Shot
 	Texture(ability_kick) # Kick
+	Texture(ability_rogue_kidneyshot) # Kidney Shot
+	Texture(ability_cheapshot) # Cheap Shot
+	Texture(spell_shadow_mindsteal) # Blind
 
 	# Buffs
 	Texture(ability_stealth) # Stealth
