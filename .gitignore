@@ -1,0 +1,5 @@
+/@tools/Source/AHK_Builder/WindowsApplication1/bin
+/@tools/Source/AHK_Builder/WindowsApplication1/obj
+/@tools/Source/AHK_Builder/WindowsApplication1/Objects
+/@tools/Source/AHK_Builder/.vs/AHK Builder/v14/*.suo
+*.suo
