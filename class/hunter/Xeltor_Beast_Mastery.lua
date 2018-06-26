@@ -17,6 +17,11 @@ Define(mend_pet 136)
 # Beast Master
 AddIcon specialization=1 help=main
 {
+	if not Mounted()
+	{
+		if not BuffPresent(volley_buff) Spell(volley)
+	}
+
 	if InCombat() and HasFullControl() and target.Present() and target.InRange(cobra_shot)
 	{
 		# Silence
