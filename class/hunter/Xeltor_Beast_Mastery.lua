@@ -17,7 +17,7 @@ Define(mend_pet 136)
 # Beast Master
 AddIcon specialization=1 help=main
 {
-	if not Mounted()
+	if not Mounted() and HealthPercent() > 0
 	{
 		if not BuffPresent(volley_buff) Spell(volley)
 	}
