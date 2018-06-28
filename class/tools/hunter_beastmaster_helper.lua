@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Xelhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Beastmaster"
+	local desc = "[Xel][7.x] Spellhelper: Beastmaster"
 	local code = [[
 AddIcon
 {
@@ -17,15 +17,12 @@ AddIcon
 
 	# Buffs
 	Texture(spell_nature_protectionformnature) # Aspect of the Wild
-	Texture(ability_hunter_pet_turtle) # Aspect of the Turtle
-	Texture(ability_mount_jungletiger) # Aspect of the Cheetah
 	Texture(ability_druid_ferociousbite) # Bestial Wrath
 	Texture(ability_hunter_onewithnature) # Exhilaration
-	Texture(ability_hunter_misdirection) # Misdirection
 	Texture(ability_hunter_mendpet) # Mend Pet
 	Texture(inv_misc_pheonixpet_01) # Heart of the Phoenix
 	Texture(ability_hunter_beastsoothe) # Revive Pet
-	Texture(ability_physical_taunt) # Pet Growl
+	Texture(icon_orangebird_toy) # Call Pet
 	
 	# Artifact
 	Texture(inv_firearm_2h_artifactlegion_d_01) # Titan's Thunder

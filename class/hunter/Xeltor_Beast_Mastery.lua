@@ -32,26 +32,20 @@ AddIcon specialization=1 help=main
 		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
 		
 		# Cooldowns
-		if Boss()
-		{
-			BeastMasteryDefaultCdActions()
-		}
+		if Boss() BeastMasteryDefaultCdActions()
 		
 		# Short Cooldowns
 		BeastMasteryDefaultShortCdActions()
 		
-		if {Enemies(tagged=1) > 1 and not BuffPresent(volley_buff)} or {Enemies(tagged=1) < 2 and BuffPresent(volley_buff)} Spell(volley)
 		# Default Actions
 		BeastMasteryDefaultMainActions()
 	}
 }
-
-# AddCheckBox(aoe "Genocide mode")
-# AddCheckBox(tonk "Tank mode")
+AddCheckBox(NoAoE "No-AoE")
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction BeastMasterySummonPet
@@ -62,7 +56,7 @@ AddFunction BeastMasterySummonPet
   Spell(revive_pet)
  }
  if not pet.IsDead() and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
- # if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(ability_hunter_beastcall help=L(summon_pet))
+ if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
 }
 
 AddFunction InterruptActions
@@ -72,6 +66,7 @@ AddFunction InterruptActions
 		if target.InRange(counter_shot) Spell(counter_shot)
 		if not target.Classification(worldboss)
 		{
+			if target.InRange(counter_shot) spell(intimidation)
 			if target.Distance(less 8) Spell(arcane_torrent_focus)
 			if target.InRange(quaking_palm) Spell(quaking_palm)
 			if target.Distance(less 8) Spell(war_stomp)
@@ -88,23 +83,23 @@ AddFunction BeastMasteryDefaultMainActions
  #kill_command,target_if=min:bestial_ferocity.remains,if=!talent.dire_frenzy.enabled|(pet.cat.buff.dire_frenzy.remains>gcd.max*1.2|(!pet.cat.buff.dire_frenzy.up&!talent.one_with_the_pack.enabled))
  if { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() Spell(kill_command)
  #cobra_shot,if=set_bonus.tier20_2pc&spell_targets.multishot=1&!equipped.qapla_eredun_war_order&(buff.bestial_wrath.up&buff.bestial_wrath.remains<gcd.max*2)&(!talent.dire_frenzy.enabled|pet.cat.buff.dire_frenzy.remains>gcd.max*1.2)
- if ArmorSetBonus(T20 2) and Enemies(tagged=1) == 1 and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } Spell(cobra_shot)
+ if ArmorSetBonus(T20 2) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } Spell(cobra_shot)
  #dire_beast,if=cooldown.bestial_wrath.remains>2&((!equipped.qapla_eredun_war_order|cooldown.kill_command.remains>=1)|full_recharge_time<gcd.max|cooldown.titans_thunder.up|spell_targets>1)
- if SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 } Spell(dire_beast)
+ if SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) } Spell(dire_beast)
  #dire_frenzy,if=pet.cat.buff.dire_frenzy.remains<=gcd.max*1.2|(talent.one_with_the_pack.enabled&(cooldown.bestial_wrath.remains>3&charges_fractional>1.2))|full_recharge_time<gcd.max|target.time_to_die<9
  if pet.BuffRemaining(pet_dire_frenzy_buff) <= GCD() * 1.2 or Talent(one_with_the_pack_talent) and SpellCooldown(bestial_wrath) > 3 and Charges(dire_frenzy count=0) > 1.2 or SpellFullRecharge(dire_frenzy) < GCD() or target.TimeToDie() < 9 Spell(dire_frenzy)
  #multishot,if=spell_targets>4&(pet.cat.buff.beast_cleave.remains<gcd.max|pet.cat.buff.beast_cleave.down)
- if Enemies(tagged=1) > 4 and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } Spell(multishot)
+ if Enemies(tagged=1) > 4 and CheckBoxOff(NoAoE) and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } Spell(multishot)
  #kill_command
  if pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() Spell(kill_command)
  #multishot,if=spell_targets>1&(pet.cat.buff.beast_cleave.remains<gcd.max|pet.cat.buff.beast_cleave.down)
- if Enemies(tagged=1) > 1 and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } Spell(multishot)
+ if Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } Spell(multishot)
  #chimaera_shot,if=focus<90
  if Focus() < 90 Spell(chimaera_shot)
  #cobra_shot,if=equipped.roar_of_the_seven_lions&spell_targets.multishot=1&(cooldown.kill_command.remains>focus.time_to_max*0.85&cooldown.bestial_wrath.remains>focus.time_to_max*0.85)
- if HasEquippedItem(roar_of_the_seven_lions) and Enemies(tagged=1) == 1 and SpellCooldown(kill_command) > TimeToMaxFocus() * 0.85 and SpellCooldown(bestial_wrath) > TimeToMaxFocus() * 0.85 Spell(cobra_shot)
+ if HasEquippedItem(roar_of_the_seven_lions) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and SpellCooldown(kill_command) > TimeToMaxFocus() * 0.85 and SpellCooldown(bestial_wrath) > TimeToMaxFocus() * 0.85 Spell(cobra_shot)
  #cobra_shot,if=(cooldown.kill_command.remains>focus.time_to_max&cooldown.bestial_wrath.remains>focus.time_to_max)|(buff.bestial_wrath.up&(spell_targets.multishot=1|focus.regen*cooldown.kill_command.remains>action.kill_command.cost))|target.time_to_die<cooldown.kill_command.remains|(equipped.parsels_tongue&buff.parsels_tongue.remains<=gcd.max*2)
- if SpellCooldown(kill_command) > TimeToMaxFocus() and SpellCooldown(bestial_wrath) > TimeToMaxFocus() or BuffPresent(bestial_wrath_buff) and { Enemies(tagged=1) == 1 or FocusRegenRate() * SpellCooldown(kill_command) > PowerCost(kill_command) } or target.TimeToDie() < SpellCooldown(kill_command) or HasEquippedItem(parsels_tongue) and BuffRemaining(parsels_tongue_buff) <= GCD() * 2 Spell(cobra_shot)
+ if SpellCooldown(kill_command) > TimeToMaxFocus() and SpellCooldown(bestial_wrath) > TimeToMaxFocus() or BuffPresent(bestial_wrath_buff) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) or FocusRegenRate() * SpellCooldown(kill_command) > PowerCost(kill_command) } or target.TimeToDie() < SpellCooldown(kill_command) or HasEquippedItem(parsels_tongue) and BuffRemaining(parsels_tongue_buff) <= GCD() * 2 Spell(cobra_shot)
  #dire_beast,if=buff.bestial_wrath.up
  if BuffPresent(bestial_wrath_buff) Spell(dire_beast)
 }
@@ -122,7 +117,7 @@ AddFunction BeastMasteryDefaultShortCdActions
   #bestial_wrath,if=!buff.bestial_wrath.up
   if not BuffPresent(bestial_wrath_buff) Spell(bestial_wrath)
 
-  unless { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or ArmorSetBonus(T20 2) and Enemies(tagged=1) == 1 and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } and Spell(cobra_shot) or SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 } and Spell(dire_beast)
+  unless { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or ArmorSetBonus(T20 2) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } and Spell(cobra_shot) or SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) } and Spell(dire_beast)
   {
    #titans_thunder,if=buff.bestial_wrath.up
    if BuffPresent(bestial_wrath_buff) Spell(titans_thunder)
@@ -130,7 +125,7 @@ AddFunction BeastMasteryDefaultShortCdActions
    unless { pet.BuffRemaining(pet_dire_frenzy_buff) <= GCD() * 1.2 or Talent(one_with_the_pack_talent) and SpellCooldown(bestial_wrath) > 3 and Charges(dire_frenzy count=0) > 1.2 or SpellFullRecharge(dire_frenzy) < GCD() or target.TimeToDie() < 9 } and Spell(dire_frenzy)
    {
     #barrage,if=spell_targets.barrage>1
-    if Enemies(tagged=1) > 1 Spell(barrage)
+    if Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) Spell(barrage)
    }
   }
  }
@@ -138,7 +133,7 @@ AddFunction BeastMasteryDefaultShortCdActions
 
 AddFunction BeastMasteryDefaultShortCdPostConditions
 {
- Spell(volley) or { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or ArmorSetBonus(T20 2) and Enemies(tagged=1) == 1 and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } and Spell(cobra_shot) or SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 } and Spell(dire_beast) or { pet.BuffRemaining(pet_dire_frenzy_buff) <= GCD() * 1.2 or Talent(one_with_the_pack_talent) and SpellCooldown(bestial_wrath) > 3 and Charges(dire_frenzy count=0) > 1.2 or SpellFullRecharge(dire_frenzy) < GCD() or target.TimeToDie() < 9 } and Spell(dire_frenzy) or Enemies(tagged=1) > 4 and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or Enemies(tagged=1) > 1 and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or Focus() < 90 and Spell(chimaera_shot) or HasEquippedItem(roar_of_the_seven_lions) and Enemies(tagged=1) == 1 and SpellCooldown(kill_command) > TimeToMaxFocus() * 0.85 and SpellCooldown(bestial_wrath) > TimeToMaxFocus() * 0.85 and Spell(cobra_shot) or { SpellCooldown(kill_command) > TimeToMaxFocus() and SpellCooldown(bestial_wrath) > TimeToMaxFocus() or BuffPresent(bestial_wrath_buff) and { Enemies(tagged=1) == 1 or FocusRegenRate() * SpellCooldown(kill_command) > PowerCost(kill_command) } or target.TimeToDie() < SpellCooldown(kill_command) or HasEquippedItem(parsels_tongue) and BuffRemaining(parsels_tongue_buff) <= GCD() * 2 } and Spell(cobra_shot) or BuffPresent(bestial_wrath_buff) and Spell(dire_beast)
+ Spell(volley) or { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or ArmorSetBonus(T20 2) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } and Spell(cobra_shot) or SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) } and Spell(dire_beast) or { pet.BuffRemaining(pet_dire_frenzy_buff) <= GCD() * 1.2 or Talent(one_with_the_pack_talent) and SpellCooldown(bestial_wrath) > 3 and Charges(dire_frenzy count=0) > 1.2 or SpellFullRecharge(dire_frenzy) < GCD() or target.TimeToDie() < 9 } and Spell(dire_frenzy) or Enemies(tagged=1) > 4 and CheckBoxOff(NoAoE) and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or Focus() < 90 and Spell(chimaera_shot) or HasEquippedItem(roar_of_the_seven_lions) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and SpellCooldown(kill_command) > TimeToMaxFocus() * 0.85 and SpellCooldown(bestial_wrath) > TimeToMaxFocus() * 0.85 and Spell(cobra_shot) or { SpellCooldown(kill_command) > TimeToMaxFocus() and SpellCooldown(bestial_wrath) > TimeToMaxFocus() or BuffPresent(bestial_wrath_buff) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) or FocusRegenRate() * SpellCooldown(kill_command) > PowerCost(kill_command) } or target.TimeToDie() < SpellCooldown(kill_command) or HasEquippedItem(parsels_tongue) and BuffRemaining(parsels_tongue_buff) <= GCD() * 2 } and Spell(cobra_shot) or BuffPresent(bestial_wrath_buff) and Spell(dire_beast)
 }
 
 AddFunction BeastMasteryDefaultCdActions
@@ -172,7 +167,7 @@ AddFunction BeastMasteryDefaultCdActions
 
 AddFunction BeastMasteryDefaultCdPostConditions
 {
- Spell(volley) or { SpellCooldown(bestial_wrath) < 3 or target.TimeToDie() < 16 } and Spell(a_murder_of_crows) or { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or ArmorSetBonus(T20 2) and Enemies(tagged=1) == 1 and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } and Spell(cobra_shot) or SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 } and Spell(dire_beast) or BuffPresent(bestial_wrath_buff) and Spell(titans_thunder) or { pet.BuffRemaining(pet_dire_frenzy_buff) <= GCD() * 1.2 or Talent(one_with_the_pack_talent) and SpellCooldown(bestial_wrath) > 3 and Charges(dire_frenzy count=0) > 1.2 or SpellFullRecharge(dire_frenzy) < GCD() or target.TimeToDie() < 9 } and Spell(dire_frenzy) or Enemies(tagged=1) > 1 and Spell(barrage) or Enemies(tagged=1) > 4 and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or Enemies(tagged=1) > 1 and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or Focus() < 90 and Spell(chimaera_shot) or HasEquippedItem(roar_of_the_seven_lions) and Enemies(tagged=1) == 1 and SpellCooldown(kill_command) > TimeToMaxFocus() * 0.85 and SpellCooldown(bestial_wrath) > TimeToMaxFocus() * 0.85 and Spell(cobra_shot) or { SpellCooldown(kill_command) > TimeToMaxFocus() and SpellCooldown(bestial_wrath) > TimeToMaxFocus() or BuffPresent(bestial_wrath_buff) and { Enemies(tagged=1) == 1 or FocusRegenRate() * SpellCooldown(kill_command) > PowerCost(kill_command) } or target.TimeToDie() < SpellCooldown(kill_command) or HasEquippedItem(parsels_tongue) and BuffRemaining(parsels_tongue_buff) <= GCD() * 2 } and Spell(cobra_shot) or BuffPresent(bestial_wrath_buff) and Spell(dire_beast)
+ Spell(volley) or { SpellCooldown(bestial_wrath) < 3 or target.TimeToDie() < 16 } and Spell(a_murder_of_crows) or { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 or not pet.BuffPresent(pet_dire_frenzy_buff) and not Talent(one_with_the_pack_talent) } and pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or ArmorSetBonus(T20 2) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and not HasEquippedItem(qapla_eredun_war_order) and BuffPresent(bestial_wrath_buff) and BuffRemaining(bestial_wrath_buff) < GCD() * 2 and { not Talent(dire_frenzy_talent) or pet.BuffRemaining(pet_dire_frenzy_buff) > GCD() * 1.2 } and Spell(cobra_shot) or SpellCooldown(bestial_wrath) > 2 and { not HasEquippedItem(qapla_eredun_war_order) or SpellCooldown(kill_command) >= 1 or SpellFullRecharge(dire_beast) < GCD() or not SpellCooldown(titans_thunder) > 0 or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) } and Spell(dire_beast) or BuffPresent(bestial_wrath_buff) and Spell(titans_thunder) or { pet.BuffRemaining(pet_dire_frenzy_buff) <= GCD() * 1.2 or Talent(one_with_the_pack_talent) and SpellCooldown(bestial_wrath) > 3 and Charges(dire_frenzy count=0) > 1.2 or SpellFullRecharge(dire_frenzy) < GCD() or target.TimeToDie() < 9 } and Spell(dire_frenzy) or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) and Spell(barrage) or Enemies(tagged=1) > 4 and CheckBoxOff(NoAoE) and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or pet.Present() and not pet.IsIncapacitated() and not pet.IsFeared() and not pet.IsStunned() and Spell(kill_command) or Enemies(tagged=1) > 1 and CheckBoxOff(NoAoE) and { pet.BuffRemaining(pet_beast_cleave_buff) < GCD() or pet.BuffExpires(pet_beast_cleave_buff) } and Spell(multishot) or Focus() < 90 and Spell(chimaera_shot) or HasEquippedItem(roar_of_the_seven_lions) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) } and SpellCooldown(kill_command) > TimeToMaxFocus() * 0.85 and SpellCooldown(bestial_wrath) > TimeToMaxFocus() * 0.85 and Spell(cobra_shot) or { SpellCooldown(kill_command) > TimeToMaxFocus() and SpellCooldown(bestial_wrath) > TimeToMaxFocus() or BuffPresent(bestial_wrath_buff) and { Enemies(tagged=1) == 1 or CheckBoxOn(NoAoE) or FocusRegenRate() * SpellCooldown(kill_command) > PowerCost(kill_command) } or target.TimeToDie() < SpellCooldown(kill_command) or HasEquippedItem(parsels_tongue) and BuffRemaining(parsels_tongue_buff) <= GCD() * 2 } and Spell(cobra_shot) or BuffPresent(bestial_wrath_buff) and Spell(dire_beast)
 }
 
 ### actions.precombat
