@@ -19,45 +19,42 @@ AddIcon specialization=2 help=main
     if target.InRange(rampage) and HasFullControl()
 	{
 		if not target.IsFriend() and HealthPercent() < 60 and Spell(bloodthirst) Spell(enraged_regeneration)
+		
 		# Cooldowns
-		if Boss()
-		{
-			FuryDefaultCdActions()
-		}
+		if Boss() FuryDefaultCdActions()
 		
 		# Short Cooldowns
 		FuryDefaultShortCdActions()
 		
 		# Default rotation
 		FuryDefaultMainActions()
-	
 	}
 	
 	# On the move
 	if not target.InRange(rampage) and InCombat() and HasFullControl()
 	{
 		if target.InRange(heroic_throw) Spell(heroic_throw)
-		if target.InRange(charge) and { TimeInCombat() < 6 or Falling() } Spell(charge)
 		if target.InRange(storm_bolt) Spell(storm_bolt)
+		if target.InRange(charge) and { TimeInCombat() < 6 or Falling() } Spell(charge)
 	}
 }
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if not target.IsFriend()
 	{
-		if target.InRange(pummel) Spell(pummel)
-		if not target.Classification(worldboss)
+		if target.InRange(pummel) and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() } Spell(pummel)
+		if not target.Classification(worldboss) and { target.MustBeInterrupted() or Level() < 100 and target.IsInterruptible() or target.IsPVP() and target.IsInterruptible() }
 		{
+			if target.InRange(storm_bolt) Spell(storm_bolt)
 			if target.Distance(less 8) Spell(arcane_torrent_rage)
 			if target.InRange(quaking_palm) Spell(quaking_palm)
 			if target.Distance(less 8) Spell(war_stomp)
-			if target.InRange(storm_bolt) Spell(storm_bolt)
 		}
 	}
 }
@@ -66,41 +63,48 @@ AddFunction InterruptActions
 
 AddFunction FuryDefaultMainActions
 {
-	#dragon_roar,if=(equipped.convergence_of_fates&cooldown.battle_cry.remains<2)|!equipped.convergence_of_fates&(!cooldown.battle_cry.remains<=10|cooldown.battle_cry.remains<2)|(talent.bloodbath.enabled&(cooldown.bloodbath.remains<1|buff.bloodbath.up))
-	if HasEquippedItem(convergence_of_fates) and SpellCooldown(battle_cry) < 2 or not HasEquippedItem(convergence_of_fates) and { not SpellCooldown(battle_cry) <= 10 or SpellCooldown(battle_cry) < 2 } or Talent(bloodbath_talent) and { SpellCooldown(bloodbath) < 1 or BuffPresent(bloodbath_buff) } Spell(dragon_roar)
-	#rampage,if=cooldown.battle_cry.remains<1&cooldown.bloodbath.remains<1&target.health.pct>20
-	if SpellCooldown(battle_cry) < 1 and SpellCooldown(bloodbath) < 1 and target.HealthPercent() > 20 Spell(rampage)
-	#furious_slash,if=talent.frenzy.enabled&(buff.frenzy.stack<3|buff.frenzy.remains<3|(cooldown.battle_cry.remains<1&buff.frenzy.remains<9))
-	if Talent(frenzy_talent) and { BuffStacks(frenzy_buff) < 3 or BuffRemaining(frenzy_buff) < 3 or SpellCooldown(battle_cry) < 1 and BuffRemaining(frenzy_buff) < 9 } Spell(furious_slash)
-	#bloodthirst,if=equipped.kazzalax_fujiedas_fury&buff.fujiedas_fury.down
-	if HasEquippedItem(kazzalax_fujiedas_fury) and BuffExpires(fujiedas_fury_buff) Spell(bloodthirst)
-	#bloodbath,if=buff.battle_cry.up|(target.time_to_die<14)|(cooldown.battle_cry.remains<2&prev_gcd.1.rampage)
-	if BuffPresent(battle_cry_buff) or target.TimeToDie() < 14 or SpellCooldown(battle_cry) < 2 and PreviousGCDSpell(rampage) Spell(bloodbath)
-	#run_action_list,name=cooldowns,if=buff.battle_cry.up&spell_targets.whirlwind=1
-	if BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 FuryCooldownsMainActions()
+ #run_action_list,name=movement,if=movement.distance>5
+ # if target.Distance() > 5 FuryMovementMainActions()
 
-	unless BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 and FuryCooldownsMainPostConditions()
-	{
-		#run_action_list,name=three_targets,if=target.health.pct>20&(spell_targets.whirlwind=3|spell_targets.whirlwind=4)
-		if target.HealthPercent() > 20 and { Enemies(tagged=1) == 3 or Enemies(tagged=1) == 4 } FuryThreeTargetsMainActions()
+ # unless target.Distance() > 5 and FuryMovementMainPostConditions()
+ # {
+  #dragon_roar,if=(equipped.convergence_of_fates&cooldown.battle_cry.remains<2)|!equipped.convergence_of_fates&(!cooldown.battle_cry.remains<=10|cooldown.battle_cry.remains<2)|(talent.bloodbath.enabled&(cooldown.bloodbath.remains<1|buff.bloodbath.up))
+  if HasEquippedItem(convergence_of_fates) and SpellCooldown(battle_cry) < 2 or not HasEquippedItem(convergence_of_fates) and { not SpellCooldown(battle_cry) <= 10 or SpellCooldown(battle_cry) < 2 } or Talent(bloodbath_talent) and { SpellCooldown(bloodbath) < 1 or BuffPresent(bloodbath_buff) } Spell(dragon_roar)
+  #rampage,if=cooldown.battle_cry.remains<1&cooldown.bloodbath.remains<1&target.health.pct>20
+  if SpellCooldown(battle_cry) < 1 and SpellCooldown(bloodbath) < 1 and target.HealthPercent() > 20 Spell(rampage)
+  #furious_slash,if=talent.frenzy.enabled&(buff.frenzy.stack<3|buff.frenzy.remains<3|(cooldown.battle_cry.remains<1&buff.frenzy.remains<9))
+  if Talent(frenzy_talent) and { BuffStacks(frenzy_buff) < 3 or BuffRemaining(frenzy_buff) < 3 or SpellCooldown(battle_cry) < 1 and BuffRemaining(frenzy_buff) < 9 } Spell(furious_slash)
+  #bloodthirst,if=equipped.kazzalax_fujiedas_fury&buff.fujiedas_fury.down
+  if HasEquippedItem(kazzalax_fujiedas_fury) and BuffExpires(fujiedas_fury_buff) Spell(bloodthirst)
+  #bloodbath,if=buff.battle_cry.up|(target.time_to_die<14)|(cooldown.battle_cry.remains<2&prev_gcd.1.rampage)
+  if BuffPresent(battle_cry_buff) or target.TimeToDie() < 14 or SpellCooldown(battle_cry) < 2 and PreviousGCDSpell(rampage) Spell(bloodbath)
+  #run_action_list,name=cooldowns,if=buff.battle_cry.up&spell_targets.whirlwind=1
+  if BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 FuryCooldownsMainActions()
 
-		unless target.HealthPercent() > 20 and { Enemies(tagged=1) == 3 or Enemies(tagged=1) == 4 } and FuryThreeTargetsMainPostConditions()
-		{
-		#run_action_list,name=aoe,if=spell_targets.whirlwind>4
-		if Enemies(tagged=1) > 4 FuryAoeMainActions()
+  unless BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 and FuryCooldownsMainPostConditions()
+  {
+   #run_action_list,name=three_targets,if=target.health.pct>20&(spell_targets.whirlwind=3|spell_targets.whirlwind=4)
+   if target.HealthPercent() > 20 and { Enemies(tagged=1) == 3 or Enemies(tagged=1) == 4 } FuryThreeTargetsMainActions()
 
-		unless Enemies(tagged=1) > 4 and FuryAoeMainPostConditions()
-		{
-			#run_action_list,name=execute,if=target.health.pct<20
-			if target.HealthPercent() < 20 FuryExecuteMainActions()
-				unless target.HealthPercent() < 20 and FuryExecuteMainPostConditions()
-				{
-					#run_action_list,name=single_target,if=target.health.pct>20
-					if target.HealthPercent() > 20 FurySingleTargetMainActions()
-				}
-			}
-		}
-	}
+   unless target.HealthPercent() > 20 and { Enemies(tagged=1) == 3 or Enemies(tagged=1) == 4 } and FuryThreeTargetsMainPostConditions()
+   {
+    #run_action_list,name=aoe,if=spell_targets.whirlwind>4
+    if Enemies(tagged=1) > 4 FuryAoeMainActions()
+
+    unless Enemies(tagged=1) > 4 and FuryAoeMainPostConditions()
+    {
+     #run_action_list,name=execute,if=target.health.pct<20
+     if target.HealthPercent() < 20 FuryExecuteMainActions()
+
+     unless target.HealthPercent() < 20 and FuryExecuteMainPostConditions()
+     {
+      #run_action_list,name=single_target,if=target.health.pct>20
+      if target.HealthPercent() > 20 FurySingleTargetMainActions()
+     }
+    }
+   }
+  }
+ # }
 }
 
 AddFunction FuryDefaultMainPostConditions
@@ -253,7 +257,7 @@ AddFunction FuryAoeShortCdActions
  unless { not IsEnraged() or Rage() < 90 } and Spell(bloodthirst)
  {
   #bladestorm,if=buff.enrage.remains>2&(raid_event.adds.in>90|!raid_event.adds.exists|spell_targets.bladestorm_mh>desired_targets)
-  if EnrageRemaining() > 2 and { 600 > 90 or not False(raid_event_adds_exists) or Enemies(tagged=1) > Enemies(tagged=1) } Spell(bladestorm_fury)
+  if EnrageRemaining() > 2 and { 600 > 90 or not False(raid_event_adds_exists) or Enemies(tagged=1) > 4 } Spell(bladestorm_fury)
  }
 }
 

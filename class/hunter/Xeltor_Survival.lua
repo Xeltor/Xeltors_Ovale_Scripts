@@ -27,10 +27,7 @@ AddIcon specialization=3 help=main
 		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
 	
 		# Cooldowns
-		if Boss()
-		{
-			SurvivalDefaultCdActions()
-		}
+		if Boss() SurvivalDefaultCdActions()
 		
 		# Short Cooldowns
 		SurvivalDefaultShortCdActions()
@@ -59,15 +56,15 @@ AddFunction SurvivalSummonPet
 		if Speed() == 0 Spell(revive_pet)
 	}
 	if not pet.IsDead() and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
-	# if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(ability_hunter_beastcall)
+	if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
 }
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if not target.IsFriend()
 	{
-		if target.InRange(muzzle) Spell(muzzle)
-		if not target.Classification(worldboss)
+		if target.InRange(muzzle) and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() } Spell(muzzle)
+		if not target.Classification(worldboss) and { target.MustBeInterrupted() or Level() < 100 and target.IsInterruptible() or target.IsPVP() and target.IsInterruptible() }
 		{
 			if target.Distance(less 8) Spell(arcane_torrent_focus)
 			if target.InRange(quaking_palm) Spell(quaking_palm)

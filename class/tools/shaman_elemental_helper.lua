@@ -16,6 +16,7 @@ AddIcon
 	Texture(spell_fire_flameshock) # Flame Shock
 	Texture(spell_nature_earthshock) # Earth Shock
 	Texture(spell_frost_frostshock) # Frost Shock
+	Texture(spell_shaman_earthquake) # Earthquake
 	Texture(spell_nature_cyclone) # Wind Shear
 	Texture(spell_shaman_hex) # Hex
 

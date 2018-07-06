@@ -63,16 +63,16 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if not target.IsFriend()
 	{
-		if target.InRange(kick) and not Stealthed() Spell(kick)
+		if target.InRange(kick) and target.IsInterruptible() and target.MustBeInterrupted() and not Stealthed() Spell(kick)
 		if not target.Classification(worldboss)
 		{
-			if target.InRange(gouge) and not Stealthed() Spell(gouge)
-			if target.InRange(blind) and not Stealthed() Spell(blind)
-			if target.InRange(kidney_shot) and not Stealthed() Spell(kidney_shot)
-			if target.InRange(kidney_shot) and not Stealthed() Spell(arcane_torrent_energy)
-			if target.InRange(quaking_palm) and not Stealthed() Spell(quaking_palm)
+			if target.InRange(gouge) and not Stealthed() and target.MustBeInterrupted() Spell(gouge)
+			if target.InRange(blind) and not Stealthed() and target.MustBeInterrupted() Spell(blind)
+			if target.InRange(cheap_shot) and Stealthed() and target.MustBeInterrupted() Spell(cheap_shot)
+			if target.InRange(cheap_shot) and not Stealthed() and target.IsInterruptible() and target.MustBeInterrupted() Spell(arcane_torrent_energy)
+			if target.InRange(quaking_palm) and not Stealthed() and target.MustBeInterrupted() Spell(quaking_palm)
 		}
 	}
 }
