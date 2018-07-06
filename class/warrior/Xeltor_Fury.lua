@@ -21,7 +21,7 @@ AddIcon specialization=2 help=main
 		if not target.IsFriend() and HealthPercent() < 60 and Spell(bloodthirst) Spell(enraged_regeneration)
 		
 		# Cooldowns
-		if Boss() FuryDefaultCdActions()
+		FuryDefaultCdActions()
 		
 		# Short Cooldowns
 		FuryDefaultShortCdActions()
@@ -181,21 +181,21 @@ AddFunction FuryDefaultCdActions
    unless HasEquippedItem(kazzalax_fujiedas_fury) and BuffExpires(fujiedas_fury_buff) and Spell(bloodthirst)
    {
     #avatar,if=((buff.battle_cry.remains>5|cooldown.battle_cry.remains<12)&target.time_to_die>80)|((target.time_to_die<40)&(buff.battle_cry.remains>6|cooldown.battle_cry.remains<12|(target.time_to_die<20)))
-    if { BuffRemaining(battle_cry_buff) > 5 or SpellCooldown(battle_cry) < 12 } and target.TimeToDie() > 80 or target.TimeToDie() < 40 and { BuffRemaining(battle_cry_buff) > 6 or SpellCooldown(battle_cry) < 12 or target.TimeToDie() < 20 } Spell(avatar)
+    if { BuffRemaining(battle_cry_buff) > 5 or SpellCooldown(battle_cry) < 12 } and Boss() and target.TimeToDie() > 80 or target.TimeToDie() < 40 and { BuffRemaining(battle_cry_buff) > 6 or SpellCooldown(battle_cry) < 12 or target.TimeToDie() < 20 } and Boss() Spell(avatar)
     #battle_cry,if=gcd.remains=0&talent.reckless_abandon.enabled&!talent.bloodbath.enabled&(equipped.umbral_moonglaives&(prev_off_gcd.umbral_moonglaives|(trinket.cooldown.remains>3&trinket.cooldown.remains<90))|!equipped.umbral_moonglaives)
-    if not 0 > 0 and Talent(reckless_abandon_talent) and not Talent(bloodbath_talent) and { HasEquippedItem(umbral_moonglaives) and { PreviousOffGCDSpell(umbral_moonglaives) or { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } > 3 and { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } < 90 } or not HasEquippedItem(umbral_moonglaives) } Spell(battle_cry)
+    if Talent(reckless_abandon_talent) and not Talent(bloodbath_talent) and { HasEquippedItem(umbral_moonglaives) and { PreviousOffGCDSpell(umbral_moonglaives) or { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } > 3 and { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } < 90 } or not HasEquippedItem(umbral_moonglaives) } Spell(battle_cry)
     #battle_cry,if=gcd.remains=0&talent.bladestorm.enabled&(raid_event.adds.in>90|!raid_event.adds.exists|spell_targets.bladestorm_mh>desired_targets)
-    if not 0 > 0 and Talent(bladestorm_talent) and { 600 > 90 or not False(raid_event_adds_exists) or Enemies(tagged=1) > Enemies(tagged=1) } Spell(battle_cry)
+    if Talent(bladestorm_talent) and { 600 > 90 or not False(raid_event_adds_exists) or Enemies(tagged=1) > Enemies(tagged=1) } Spell(battle_cry)
     #battle_cry,if=gcd.remains=0&buff.dragon_roar.up&(cooldown.bloodthirst.remains=0|buff.enrage.remains>cooldown.bloodthirst.remains)
-    if not 0 > 0 and BuffPresent(dragon_roar_buff) and { not SpellCooldown(bloodthirst) > 0 or EnrageRemaining() > SpellCooldown(bloodthirst) } Spell(battle_cry)
+    if BuffPresent(dragon_roar_buff) and { not SpellCooldown(bloodthirst) > 0 or EnrageRemaining() > SpellCooldown(bloodthirst) } Spell(battle_cry)
     #battle_cry,if=(gcd.remains=0|gcd.remains<=0.4&prev_gcd.1.rampage)&(cooldown.bloodbath.remains=0|buff.bloodbath.up|!talent.bloodbath.enabled|(target.time_to_die<12))&(equipped.umbral_moonglaives&(prev_off_gcd.umbral_moonglaives|(trinket.cooldown.remains>3&trinket.cooldown.remains<90))|!equipped.umbral_moonglaives)
-    if { not 0 > 0 or 0 <= 0.4 and PreviousGCDSpell(rampage) } and { not SpellCooldown(bloodbath) > 0 or BuffPresent(bloodbath_buff) or not Talent(bloodbath_talent) or target.TimeToDie() < 12 } and { HasEquippedItem(umbral_moonglaives) and { PreviousOffGCDSpell(umbral_moonglaives) or { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } > 3 and { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } < 90 } or not HasEquippedItem(umbral_moonglaives) } Spell(battle_cry)
+    if PreviousGCDSpell(rampage) and { not SpellCooldown(bloodbath) > 0 or BuffPresent(bloodbath_buff) or not Talent(bloodbath_talent) or target.TimeToDie() < 12 } and { HasEquippedItem(umbral_moonglaives) and { PreviousOffGCDSpell(umbral_moonglaives) or { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } > 3 and { ItemCooldown(Trinket0Slot) and ItemCooldown(Trinket1Slot) } < 90 } or not HasEquippedItem(umbral_moonglaives) } Spell(battle_cry)
     #blood_fury,if=buff.battle_cry.up
-    if BuffPresent(battle_cry_buff) Spell(blood_fury_ap)
+    if BuffPresent(battle_cry_buff) and Boss() Spell(blood_fury_ap)
     #berserking,if=(buff.battle_cry.up&(buff.avatar.up|!talent.avatar.enabled))|(buff.battle_cry.up&target.time_to_die<40)
-    if BuffPresent(battle_cry_buff) and { BuffPresent(avatar_buff) or not Talent(avatar_talent) } or BuffPresent(battle_cry_buff) and target.TimeToDie() < 40 Spell(berserking)
+    if { BuffPresent(battle_cry_buff) and { BuffPresent(avatar_buff) or not Talent(avatar_talent) } or BuffPresent(battle_cry_buff) and target.TimeToDie() < 40 } and Boss() Spell(berserking)
     #arcane_torrent,if=rage<rage.max-40
-    if Rage() < MaxRage() - 40 Spell(arcane_torrent_rage)
+    if Rage() < MaxRage() - 40 and Boss() Spell(arcane_torrent_rage)
     #run_action_list,name=cooldowns,if=buff.battle_cry.up&spell_targets.whirlwind=1
     if BuffPresent(battle_cry_buff) and Enemies(tagged=1) == 1 FuryCooldownsCdActions()
 
