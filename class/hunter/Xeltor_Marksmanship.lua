@@ -2,63 +2,10 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_marksmanship"
-	local desc = "[Xel][7.3.5] Hunter: Marksmanship"
+	local name = "xeltor_marksmanship_functions"
+	local desc = "[Xel][7.3.5] Hunter: Marksmanship Functions"
 	local code = [[
-Include(ovale_common)
-Include(ovale_trinkets_mop)
-Include(ovale_trinkets_wod)
-Include(ovale_hunter_spells)
-
-Define(counter_shot 147362)
-
-# Marksman
-AddIcon specialization=2 help=main
-{
-	if not Mounted() and HealthPercent() > 0
-	{
-		if not BuffPresent(volley_buff) Spell(volley)
-	}
-
-	if InCombat() and HasFullControl() and target.Present() and target.InRange(arcane_shot)
-	{
-		# Silence
-		if InCombat() InterruptActions()
-		
-		# Tank stuff
-		if CheckBoxOn(tank) Spell(black_arrow)
-		if not IsDead() and HealthPercent() < 50 Spell(exhilaration)
-		
-		# Cooldowns
-		if Boss() MarksmanshipDefaultCdActions()
-		
-		# Short Cooldowns
-		MarksmanshipDefaultShortCdActions()
-		
-		# Rotation
-		MarksmanshipDefaultMainActions()
-	}
-}
-AddCheckBox(tank "Tank")
-
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
-AddFunction InterruptActions
-{
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
-	{
-		if target.InRange(counter_shot) Spell(counter_shot)
-		if not target.Classification(worldboss)
-		{
-			if target.Distance(less 8) Spell(arcane_torrent_focus)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-			if target.Distance(less 8) Spell(war_stomp)
-		}
-	}
-}
+### Functions
 
 AddFunction pooling_for_piercing
 {
@@ -421,7 +368,7 @@ AddFunction MarksmanshipPrecombatCdActions
 {
  #snapshot_stats
  #potion
- if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
 }
 
 AddFunction MarksmanshipPrecombatCdPostConditions
@@ -470,5 +417,5 @@ AddFunction MarksmanshipTargetdieCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("HUNTER", "marksmanship", name, desc, code, "script")
+	OvaleScripts:RegisterScript("HUNTER", nil, name, desc, code, "include")
 end
