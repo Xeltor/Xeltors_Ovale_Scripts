@@ -1,11 +1,11 @@
 ## Title: Xel's Ovale Scripts
 ## Notes: Ovale script manager that allows choosing between scripts contributed by various authors.
 ##
-## Version: 7.3.0.0
+## Version: 8.0.0.0
 ## Author: Xeltor
 ##
-## Interface: 70300
-## X-Min-Interface: 70100
+## Interface: 80000
+## X-Min-Interface: 80000
 ## Dependencies: Ovale, LibRangeCheck-2.0
 
 Core.lua
