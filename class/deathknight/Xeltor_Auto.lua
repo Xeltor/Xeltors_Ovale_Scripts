@@ -61,6 +61,9 @@ AddIcon specialization=3 help=main
 	# Interrupt
 	if InCombat() InterruptActions()
 	
+	# if 
+	if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 and InCombat() and target.InRange(outbreak) and target.HealthPercent() < 100 Spell(outbreak)
+	
     if target.InRange(festering_strike) and HasFullControl()
     {
 		if not pet.Present() Spell(raise_dead)
@@ -73,6 +76,7 @@ AddIcon specialization=3 help=main
 		UnholyDefaultShortCdActions()
 		
 		# Rotation
+		if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 Spell(outbreak)
 		UnholyDefaultMainActions()
 	}
 }
