@@ -13,8 +13,8 @@ Include(ovale_hunter_spells)
 
 # Class specific functions.
 Include(xeltor_beast_mastery_functions)
-Include(xeltor_marksmanship_functions)
-Include(xeltor_survival_functions)
+# Include(xeltor_marksmanship_functions)
+# Include(xeltor_survival_functions)
 
 # Beast Master
 AddIcon specialization=1 help=main
@@ -63,13 +63,13 @@ AddIcon specialization=2 help=main
 		if not IsDead() and HealthPercent() < 50 Spell(exhilaration)
 		
 		# Cooldowns
-		if Boss() MarksmanshipDefaultCdActions()
+		# if Boss() MarksmanshipDefaultCdActions()
 		
 		# Short Cooldowns
-		MarksmanshipDefaultShortCdActions()
+		# MarksmanshipDefaultShortCdActions()
 		
 		# Rotation
-		MarksmanshipDefaultMainActions()
+		# MarksmanshipDefaultMainActions()
 	}
 }
 AddCheckBox(tank "Tank" specialization=marksmanship)
@@ -87,13 +87,13 @@ AddIcon specialization=3 help=main
 		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
 	
 		# Cooldowns
-		if Boss() SurvivalDefaultCdActions()
+		# if Boss() SurvivalDefaultCdActions()
 		
 		# Short Cooldowns
-		SurvivalDefaultShortCdActions()
+		# SurvivalDefaultShortCdActions()
 		
 		# Default Actions
-		SurvivalDefaultMainActions()
+		# SurvivalDefaultMainActions()
 	}
 	
 	# Go forth and murder
