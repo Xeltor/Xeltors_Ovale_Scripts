@@ -3,5 +3,4 @@
 	<Script file="Xeltor_Arms.lua" />
 	<Script file="Xeltor_Fury.lua" />
 	<Script file="Xeltor_Protection.lua" />
-	<Script file="Hooves_Protection.lua" />
 </Ui>

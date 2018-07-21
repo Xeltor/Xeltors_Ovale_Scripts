@@ -6,7 +6,7 @@
 ##
 ## Interface: 80000
 ## X-Min-Interface: 80000
-## Dependencies: Ovale, LibRangeCheck-2.0
+## Dependencies: Ovale
 
 Core.lua
 class\class.xml
