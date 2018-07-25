@@ -13,7 +13,7 @@ Include(ovale_deathknight_spells)
 
 # Class specific functions.
 # Include(xeltor_blood_functions)
-# Include(xeltor_frost_functions)
+Include(xeltor_frost_functions)
 Include(xeltor_unholy_functions)
 
 # Blood
@@ -45,13 +45,13 @@ AddIcon specialization=2 help=main
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
 		
 		# Cooldown
-		# if Boss() FrostDefaultCdActions()
+		if Boss() FrostDefaultCdActions()
 		
 		# Short Cooldown
-		# FrostDefaultShortCdActions()
+		FrostDefaultShortCdActions()
 		
 		# Main rotation
-		# FrostDefaultMainActions()
+		FrostDefaultMainActions()
     }
 }
 
