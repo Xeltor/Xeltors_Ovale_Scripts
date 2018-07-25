@@ -31,8 +31,8 @@ AddIcon
 	Texture(ability_deathknight_soulreaper) # Wraith Walk (T5)
 	Texture(ability_deathknight_soulreaper) # Death Pact (T5)
 	Texture(spell_deathknight_defile) # Defile (T6)
-	Texture(spell_deathknight_unholypresence) # Epidemic (T6)
-	Texture(achievement_boss_svalasorrowgrave) # Unholy Frenzy (T7)
+	Texture(spell_nature_nullifydisease) # Epidemic (T6)
+	Texture(spell_shadow_unholyfrenzy) # Unholy Frenzy (T7)
 	Texture(ability_deathknight_summongargoyle) # Summon Gargoyle (T7)
 
 	# Racials
