@@ -12,8 +12,8 @@ Include(ovale_trinkets_wod)
 Include(ovale_deathknight_spells)
 
 # Class specific functions.
-Include(xeltor_blood_functions)
-Include(xeltor_frost_functions)
+# Include(xeltor_blood_functions)
+# Include(xeltor_frost_functions)
 Include(xeltor_unholy_functions)
 
 # Blood
@@ -25,11 +25,11 @@ AddIcon specialization=1 help=main
     {
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
 
-		if CheckBoxOn(opt_cooldowns) BloodDefaultCdActions()
+		# if CheckBoxOn(opt_cooldowns) BloodDefaultCdActions()
 
-		if CheckBoxOn(opt_cooldowns) BloodDefaultShortCdActions()
+		# if CheckBoxOn(opt_cooldowns) BloodDefaultShortCdActions()
 
-		BloodDefaultMainActions()
+		# BloodDefaultMainActions()
 	}
 }
 AddCheckBox(opt_cooldowns "Use cooldowns" default specialization=blood)
@@ -45,13 +45,13 @@ AddIcon specialization=2 help=main
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
 		
 		# Cooldown
-		if Boss() FrostDefaultCdActions()
+		# if Boss() FrostDefaultCdActions()
 		
 		# Short Cooldown
-		FrostDefaultShortCdActions()
+		# FrostDefaultShortCdActions()
 		
 		# Main rotation
-		FrostDefaultMainActions()
+		# FrostDefaultMainActions()
     }
 }
 

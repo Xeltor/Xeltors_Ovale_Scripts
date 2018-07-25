@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "DKUhelp"
-	local desc = "[Xel][7.1.5] Spellhelper: Unholy"
+	local desc = "[Xel][8.0] Spellhelper: Unholy"
 	local code = [[
 AddIcon
 {
@@ -13,29 +13,27 @@ AddIcon
 	Texture(spell_deathknight_scourgestrike) # Scourge Strike
 	Texture(spell_shadow_deathcoil) # Death Coil
 	Texture(spell_deathvortex) # Outbreak
+	Texture(artifactability_unholydeathknight_deathsembrace) # Apocalypse
+	Texture(spell_shadow_deathanddecay) # Death and Decay
 	Texture(spell_deathknight_butcher2) # Death Strike
 	Texture(spell_deathknight_mindfreeze) # Mind Freeze
-	Texture(spell_shadow_deathanddecay) # Death and Decay
 
 	# Buffs
-	Texture(spell_shadow_animatedead) # Raise Dead
+	Texture(inv_pet_ghoul) # Raise Dead
 	Texture(achievement_boss_festergutrotface) # Dark Transformation
-	Texture(ability_deathknight_summongargoyle) # Summon Gargoyle
-	Texture(spell_deathknight_iceboundfortitude) # Icebound Fortitude
 	Texture(spell_deathknight_armyofthedead) # Army of the Dead
-	
-	# Artifact
-	Texture(artifactability_unholydeathknight_deathsembrace) # Apocalypse
 
 	# Talents
-	Texture(spell_deathknight_unholypresence) # Epidemic (T2)
-	Texture(spell_deathknight_plaguestrike) # Blighted Rune Weapon (T2)
-	Texture(warlock_curse_shadow) # Clawing Shadows (T3)
-	Texture(ability_deathknight_asphixiate) # Asphyxiate (T4)
-	Texture(inv_pet_ghoul) # Corpse Shield (T5)
-	Texture(achievement_boss_svalasorrowgrave) # Dark Arbiter (T7)
-	Texture(spell_deathknight_defile) # Defile (T7)
-	Texture(ability_deathknight_soulreaper) # Soul Reaper (T7)
+	Texture(warlock_curse_shadow) # Clawing Shadows (T1)
+	Texture() # Unholy Blight (T2)
+	Texture(ability_deathknight_asphixiate) # Asphyxiate (T3)
+	Texture(ability_deathknight_soulreaper) # Soul Reaper (T4)
+	Texture(ability_deathknight_soulreaper) # Wraith Walk (T5)
+	Texture(ability_deathknight_soulreaper) # Death Pact (T5)
+	Texture(spell_deathknight_defile) # Defile (T6)
+	Texture(spell_deathknight_unholypresence) # Epidemic (T6)
+	Texture(achievement_boss_svalasorrowgrave) # Unholy Frenzy (T7)
+	Texture(ability_deathknight_summongargoyle) # Summon Gargoyle (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -50,13 +48,38 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ]]
 
 	OvaleScripts:RegisterScript("DEATHKNIGHT", "unholy", name, desc, code, "script")
