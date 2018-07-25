@@ -25,7 +25,7 @@ AddIcon
 
 	# Talents
 	Texture(warlock_curse_shadow) # Clawing Shadows (T1)
-	Texture() # Unholy Blight (T2)
+	Texture(spell_shadow_contagion) # Unholy Blight (T2)
 	Texture(ability_deathknight_asphixiate) # Asphyxiate (T3)
 	Texture(ability_deathknight_soulreaper) # Soul Reaper (T4)
 	Texture(ability_deathknight_soulreaper) # Wraith Walk (T5)
