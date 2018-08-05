@@ -72,7 +72,7 @@ AddFunction InterruptActions
 		if target.InRange(fel_eruption) and not target.Classification(worldboss) Spell(fel_eruption)
 		if target.Distance(less 8) and target.IsInterruptible() Spell(arcane_torrent_dh)
 		if target.Distance(less 8) and not target.Classification(worldboss) Spell(chaos_nova)
-		if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) Spell(imprison)
+		# if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) Spell(imprison)
 		if target.InRange(shear)
 		{
 			if target.IsInterruptible() and not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_silence)

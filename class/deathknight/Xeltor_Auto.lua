@@ -12,7 +12,7 @@ Include(ovale_trinkets_wod)
 Include(ovale_deathknight_spells)
 
 # Class specific functions.
-Include(xeltor_blood_functions)
+# Include(xeltor_blood_functions)
 Include(xeltor_frost_functions)
 Include(xeltor_unholy_functions)
 
@@ -25,11 +25,11 @@ AddIcon specialization=1 help=main
     {
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
 
-		if CheckBoxOn(opt_cooldowns) BloodDefaultCdActions()
+		# if CheckBoxOn(opt_cooldowns) BloodDefaultCdActions()
 
-		if CheckBoxOn(opt_cooldowns) BloodDefaultShortCdActions()
+		# if CheckBoxOn(opt_cooldowns) BloodDefaultShortCdActions()
 
-		BloodDefaultMainActions()
+		# BloodDefaultMainActions()
 	}
 }
 AddCheckBox(opt_cooldowns "Use cooldowns" default specialization=blood)
@@ -61,6 +61,9 @@ AddIcon specialization=3 help=main
 	# Interrupt
 	if InCombat() InterruptActions()
 	
+	# if 
+	if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 and InCombat() and target.InRange(outbreak) and target.HealthPercent() < 100 Spell(outbreak)
+	
     if target.InRange(festering_strike) and HasFullControl()
     {
 		if not pet.Present() Spell(raise_dead)
@@ -73,6 +76,7 @@ AddIcon specialization=3 help=main
 		UnholyDefaultShortCdActions()
 		
 		# Rotation
+		if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 Spell(outbreak)
 		UnholyDefaultMainActions()
 	}
 }

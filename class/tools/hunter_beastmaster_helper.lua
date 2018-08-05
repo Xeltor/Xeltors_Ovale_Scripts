@@ -3,43 +3,37 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Xelhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Beastmaster"
+	local desc = "[Xel][8.x] Spellhelper: Beastmaster"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
 	Texture(ability_hunter_cobrashot) # Cobra Shot
+	Texture(ability_hunter_barbedshot) # Barbed Shot
 	Texture(ability_hunter_killcommand) # Kill Command
 	Texture(ability_upgrademoonglaive) # Multi-Shot
-	Texture(ability_hunter_longevity) # Dire Beast
-	Texture(inv_ammo_arrow_03) # Counter Shot
+	Texture(inv_ammo_arrow_03) # Counter Shot (silence)
+	Texture(ability_devour) # Intimidation (stun)
 
 	# Buffs
 	Texture(spell_nature_protectionformnature) # Aspect of the Wild
-	Texture(ability_hunter_pet_turtle) # Aspect of the Turtle
-	Texture(ability_mount_jungletiger) # Aspect of the Cheetah
 	Texture(ability_druid_ferociousbite) # Bestial Wrath
 	Texture(ability_hunter_onewithnature) # Exhilaration
-	Texture(ability_hunter_misdirection) # Misdirection
 	Texture(ability_hunter_mendpet) # Mend Pet
 	Texture(inv_misc_pheonixpet_01) # Heart of the Phoenix
 	Texture(ability_hunter_beastsoothe) # Revive Pet
-	Texture(ability_physical_taunt) # Pet Growl
-	
-	# Artifact
-	Texture(inv_firearm_2h_artifactlegion_d_01) # Titan's Thunder
+	Texture(icon_orangebird_toy) # Call Pet
 
 	# Talents
-	Texture(ability_druid_mangle) # Dire Frenzy (T2)
+	Texture(ability_hunter_longevity) # Dire Beast (T1)
 	Texture(ability_hunter_chimerashot2) # Chimaera Shot (T2)
+	Texture(ability_hunter_camouflage) # Camouflage (T3)
+	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T4)
 	Texture(spell_shaman_bindelemental) # Binding Shot (T5)
-	Texture(inv_spear_02) # Wyvern Sting (T5)
-	Texture(ability_devour) # Intimidation (T5)
-	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T6)
 	Texture(ability_hunter_rapidregeneration) # Barrage (T6)
-	Texture(ability_marksmanship) # Volley (T6)
-	Texture(ability_hunter_bestialdiscipline) # Stampede (T7)
+	Texture(ability_hunter_bestialdiscipline) # Stampede (T6)
+	Texture(ability_hunter_cobrastrikes) # Spitting Cobra (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -54,21 +48,36 @@ AddIcon
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
-	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
-	
-	###
-	### Beast Mastery
-	###
-	# Based on SimulationCraft profile "Hunter_BM_T17M".
-	#	class=hunter
-	#	spec=beast_mastery
-	#	talents=0002133
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ]]
 
 	OvaleScripts:RegisterScript("HUNTER", "beast_mastery", name, desc, code, "script")

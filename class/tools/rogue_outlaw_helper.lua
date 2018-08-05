@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "ROGUEPOKEY"
-	local desc = "[Xel][7.1.5] Spellhelper: Pokey (Outlaw)"
+	local desc = "[Xel][7.x] Spellhelper: Pokey (Outlaw)"
 	local code = [[
 AddIcon
 {
@@ -17,6 +17,8 @@ AddIcon
 	Texture(ability_rogue_waylay) # Run Through
 	Texture(ability_kick) # Kick
 	Texture(ability_gouge) # Gouge
+	Texture(ability_cheapshot) # Cheap Shot
+	Texture(spell_shadow_mindsteal) # Blind
 
 	# Artifact
 	Texture(inv_sword_1h_artifactskywall_d_01dual) # Curse of the Dreadblades

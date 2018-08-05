@@ -14,18 +14,22 @@ Include(ovale_rogue_spells)
 AddIcon specialization=outlaw help=main
 {
 	# Precombat
-	if not Stealthed() and not InCombat() and not mounted() and not PlayerIsResting() Spell(stealth)
-	if not InCombat() and not target.IsDead() and not target.IsFriend() and not mounted() and not PlayerIsResting()
+	if not InCombat() and not target.IsDead() and not target.IsFriend() and not mounted() and not PlayerIsResting() and not IsDead()
 	{
-		if not InCombat() and Boss() and BuffPresent(blade_flurry_buff) Spell(blade_flurry)
-		#marked_for_death
-		if target.InRange(marked_for_death) Spell(marked_for_death)
+		if not Stealthed() and { not target.InRange(saber_slash) and target.InRange(marked_for_death) or CheckBoxOn(auto_st) } Spell(stealth)
+		if Boss() and BuffPresent(blade_flurry_buff) Spell(blade_flurry)
 		#roll_the_bones,if=!talent.slice_and_dice.enabled
 		if not Talent(slice_and_dice_talent) and not ss_useable() and { BuffRemaining(roll_the_bones_buff) <= 3 or rtb_reroll() } Spell(roll_the_bones)
+		
+		unless not Talent(slice_and_dice_talent) and not ss_useable() and { BuffRemaining(roll_the_bones_buff) <= 3 or rtb_reroll() }
+		{
+			#marked_for_death
+			if target.InRange(marked_for_death) Spell(marked_for_death)
+		}
 	}
 	
 	if InCombat() InterruptActions()
-	if HealthPercent() < 50 or HealthPercent() < 100 and not InCombat() Spell(crimson_vial)
+	if HealthPercent() <= 25 and HealthPercent() > 0 or HealthPercent() <= 58 and HealthPercent() > 0 and not InCombat() and not mounted() Spell(crimson_vial)
 	
 	if target.InRange(saber_slash) and HasFullControl()
 	{
@@ -36,10 +40,15 @@ AddIcon specialization=outlaw help=main
 		OutlawDefaultShortCdActions()
 		
 		# Default Actions
-		BladeFlurryManager()
+		# BladeFlurryManager()
 		OutlawDefaultMainActions()
 	}
+	if InCombat() and not target.InRange(saber_slash) and target.InRange(pistol_shot) and not Stealthed()
+	{
+		if ComboPointsDeficit() >= 1 or TimeToMaxEnergy() <= GCD() or BuffPresent(opportunity_buff) Spell(pistol_shot)
+	}
 }
+AddCheckBox(auto_st "Stealth")
 
 AddFunction BladeFlurryManager
 {
@@ -54,14 +63,16 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if not target.IsFriend()
 	{
-		if target.InRange(kick) and not Stealthed() Spell(kick)
-		if target.Classification(worldboss no)
+		if target.InRange(kick) and target.IsInterruptible() and target.MustBeInterrupted() and not Stealthed() Spell(kick)
+		if not target.Classification(worldboss)
 		{
-			if target.InRange(gouge) and not Stealthed() Spell(gouge)
-			if target.InRange(kidney_shot) and not Stealthed() Spell(arcane_torrent_energy)
-			if target.InRange(quaking_palm) and not Stealthed() Spell(quaking_palm)
+			if target.InRange(gouge) and not Stealthed() and target.MustBeInterrupted() Spell(gouge)
+			if target.InRange(blind) and not Stealthed() and target.MustBeInterrupted() Spell(blind)
+			if target.InRange(cheap_shot) and Stealthed() and target.MustBeInterrupted() Spell(cheap_shot)
+			if target.InRange(cheap_shot) and not Stealthed() and target.IsInterruptible() and target.MustBeInterrupted() Spell(arcane_torrent_energy)
+			if target.InRange(quaking_palm) and not Stealthed() and target.MustBeInterrupted() Spell(quaking_palm)
 		}
 	}
 }

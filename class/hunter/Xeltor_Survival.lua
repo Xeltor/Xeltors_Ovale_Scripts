@@ -2,79 +2,10 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_survival"
-	local desc = "[Xel][7.3.5] Hunter: Survival"
+	local name = "xeltor_survival_functions"
+	local desc = "[Xel][7.3.5] Hunter: Survival Functions"
 	local code = [[
-Include(ovale_common)
-Include(ovale_trinkets_mop)
-Include(ovale_trinkets_wod)
-Include(ovale_hunter_spells)
-
-Define(mend_pet 136)
-	SpellInfo(mend_pet cd=10 duration=10)
-	SpellAddBuff(mend_pet mend_pet=1)
-
-# Survival
-AddIcon specialization=3 help=main
-{
-	# Silence
-	if InCombat() InterruptActions()
-	
-	if HasFullControl() and target.Present() and target.InRange(raptor_strike)
-	{
-		# Pet we needs it.
-		SurvivalSummonPet()
-		if { not IsDead() and HealthPercent() < 50 } or { not pet.IsDead() and pet.HealthPercent() < 15 } Spell(exhilaration)
-	
-		# Cooldowns
-		if Boss()
-		{
-			SurvivalDefaultCdActions()
-		}
-		
-		# Short Cooldowns
-		SurvivalDefaultShortCdActions()
-		
-		# Default Actions
-		SurvivalDefaultMainActions()
-	}
-	
-	# Go forth and murder
-	if InCombat() and HasFullControl() and target.Present() and not target.InRange(raptor_strike) and { TimeInCombat() < 6 or Falling() }
-	{
-		if target.InRange(harpoon) Spell(harpoon)
-	}
-}
-
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
-AddFunction SurvivalSummonPet
-{
-	if pet.IsDead()
-	{
-		if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
-		if Speed() == 0 Spell(revive_pet)
-	}
-	if not pet.IsDead() and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
-	# if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(ability_hunter_beastcall)
-}
-
-AddFunction InterruptActions
-{
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
-	{
-		if target.InRange(muzzle) Spell(muzzle)
-		if not target.Classification(worldboss)
-		{
-			if target.Distance(less 8) Spell(arcane_torrent_focus)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-			if target.Distance(less 8) Spell(war_stomp)
-		}
-	}
-}
+### Functions
 
 AddFunction mokTalented
 {
@@ -536,5 +467,5 @@ AddFunction SurvivalPrecombatCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("HUNTER", "survival", name, desc, code, "script")
+	OvaleScripts:RegisterScript("HUNTER", nil, name, desc, code, "include")
 end

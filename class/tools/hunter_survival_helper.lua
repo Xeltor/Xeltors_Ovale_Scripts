@@ -21,11 +21,11 @@ AddIcon
 	# Buffs
 	Texture(spell_hunter_aspectoftheironhawk) # Aspect of the Eagle
 	Texture(ability_hunter_onewithnature) # Exhilaration
-	Texture(ability_hunter_misdirection) # Misdirection
 	Texture(ability_hunter_mendpet) # Mend Pet
 	Texture(inv_misc_pheonixpet_01) # Heart of the Phoenix
 	Texture(ability_hunter_beastsoothe) # Revive Pet
 	Texture(ability_physical_taunt) # Pet Growl
+	Texture(icon_orangebird_toy) # Call Pet
 	
 	# Artifact
 	Texture(inv_polearm_2h_artifacteagle_d_01) # Fury of the Eagle

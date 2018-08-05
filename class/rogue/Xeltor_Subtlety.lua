@@ -10,9 +10,6 @@ Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_rogue_spells)
 
-Define(crimson_vial 185311)
-	SpellInfo(crimson_vial cd=30 gcd=0 energy=30)
-
 # Subtlety (Shanky)
 AddIcon specialization=3 help=main
 {
@@ -71,7 +68,7 @@ AddFunction InterruptActions
 	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
 	{
 		if target.InRange(kick) and not Stealthed() Spell(kick)
-		if target.Classification(worldboss no)
+		if not target.Classification(worldboss)
 		{
 			if target.InRange(cheap_shot) and Stealthed() Spell(cheap_shot)
 			if target.InRange(blind) and not Stealthed() Spell(blind)

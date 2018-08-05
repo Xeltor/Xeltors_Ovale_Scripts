@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "DKFhelp"
-	local desc = "[Xel][7.x] Spellhelper: Frost"
+	local desc = "[Xel][8.0] Spellhelper: Frost"
 	local code = [[
 AddIcon
 {
@@ -14,25 +14,21 @@ AddIcon
 	Texture(spell_frost_arcticwinds) # Howling Blast
 	Texture(spell_frost_chainsofice) # Chains of Ice
 	Texture(ability_deathknight_remorselesswinters2) # Remorseless Winter
-	Texture(spell_deathknight_mindfreeze) # Mind Freeze
 	Texture(spell_deathknight_butcher2) # Death Strike
+	Texture(spell_deathknight_mindfreeze) # Mind Freeze
 
 	# Buffs
 	Texture(ability_deathknight_pillaroffrost) # Pillar of Frost
-	Texture(spell_deathknight_iceboundfortitude) # Icebound Fortitude
 	Texture(inv_sword_62) # Empower Rune Weapon
-	
-	# Artifact
-	Texture(achievement_boss_sindragosa) # Sindragosa's Fury
 
 	# Talents
 	Texture(inv_misc_horn_02) # Horn of Winter (T2)
-	Texture(ability_hunter_glacialtrap) # Glacial Advance (T3)
-	Texture(spell_frost_chillingblast) # Blinding Sleet (T4)
-	Texture(inv_misc_2h_farmscythe_a_01) # Frostscythe (T6)
-	Texture(inv_axe_114) # Obliteration (T7)
+	Texture(ability_deathknight_asphixiate) # Asphyxiate (T3)
+	Texture(spell_frost_chillingblast) # Blinding Sleet (T3)
+	Texture(inv_misc_2h_farmscythe_a_01) # Frostscythe (T4)
+	Texture(ability_hunter_glacialtrap) # Glacial Advance (T6)
+	Texture(achievement_boss_sindragosa) # Frostwyrm's Fury (T6)
 	Texture(spell_deathknight_breathofsindragosa) # Breath of Sindragosa(T7)
-	Texture(ability_deathknight_hungeringruneblade) # Hungering Rune Weapon (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -48,6 +44,28 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ]]
 
 	OvaleScripts:RegisterScript("DEATHKNIGHT", "frost", name, desc, code, "script")
