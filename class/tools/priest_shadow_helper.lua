@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Shadowhelp"
-	local desc = "[Xel][7.x] Spellhelper: Shadow"
+	local desc = "[Xel][8.x] Spellhelper: Shadow"
 	local code = [[
 AddIcon
 {
@@ -13,24 +13,26 @@ AddIcon
 	Texture(spell_holy_stoicism) # Vampiric Touch
 	Texture(spell_shadow_unholyfrenzy) # Mind Blast
 	Texture(spell_shadow_siphonmana) # Mind Flay
-	Texture(spell_shadow_demonicfortitude) # Shadow Word: Death
 	Texture(228260) # Void Eruption
 	Texture(ability_ironmaidens_convulsiveshadows) # Void Bolt (Replaces Void Eruption)
+	Texture(spell_shadow_mindshear) # Mind Sear
 	Texture(ability_priest_silence) # Silence
 
 	# Buffs
+	Texture(spell_shadow_shadowform) # Shadowform
+	Texture(spell_holy_wordfortitude) # Power Word: Fortitude
 	Texture(spell_shadow_dispersion) # Dispersion
 	Texture(spell_shadow_shadowfiend) # Shadowfiend
-	
-	# Artifact
-	Texture(inv_knife_1h_artifactcthun_d_01) # Void Torrent
 
 	# Talents
-	Texture(spell_mage_presenceofmind) # Shadow Word: Void (T1)
-	Texture(spell_shadow_mindbomb) # Mind Bomb (T3)
-	Texture(spell_holy_powerinfusion) # Power Infusion (T6)
+	Texture(spell_mage_presenceofmind) # Shadow Word: Void (T1) (Replaces Mind Blast)
+	Texture(spell_shadow_mindbomb) # Mind Bomb (T4) (Replaces Psychic Scream)
+	Texture(spell_shadow_psychichorrors) # Psychic Horror (T4)
+	Texture(spell_shadow_demonicfortitude) # Shadow Word: Death (T5)
+	Texture(spell_shadow_shadowfury) # Shadow Crash (T5)
 	Texture(spell_shadow_soulleech_3) # Mindbender (T6) (Replaces Shadowfiend)
-	Texture(spell_shadow_shadowfury) # Shadow Crash (T7)
+	Texture(spell_priest_voidsear) # Void Torrent (T6)
+	Texture(achievement_boss_triumvirate_darknaaru) # Dark Ascension (T7)
 	Texture(achievement_boss_generalvezax_01) # Surrender to Madness (T7)
 
 	# Racials
