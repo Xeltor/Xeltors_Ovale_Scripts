@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "hooves_blood"
-	local desc = "[Hooves][7.3] Death Knight: Blood"
+	local desc = "[Hooves][8.0] Death Knight: Blood"
 	local code = [[
 # Based on SimulationCraft profile "Death_Knight_Blood_T17M".
 #	class=deathknight
@@ -24,7 +24,8 @@ Define(path_of_frost_buff 3714)
 Define(consumption 205223)
 	SpellInfo(consumption cd=45)
 
-# Blood
+
+
 AddIcon specialization=1 help=main
 {
 	# Path o' Frost
@@ -44,51 +45,19 @@ AddIcon specialization=1 help=main
     {
 		if BuffStacks(dark_succor_buff) Spell(death_strike)
 		
-		if Enemies(tagged=1) <= 1 BloodDefaultMainActions()
-		BloodDefaultAoEActions()
+		BloodDefaultMainActions()
+		
 	}
 }
-
-
-AddFunction BloodDefaultShortCDActions
+AddFunction BloodInterruptActions
 {
-	if CheckBoxOn(opt_melee_range) and not target.InRange(death_strike) Texture(misc_arrowlup help=L(not_in_melee_range))
-	if not BuffPresent(rune_tap_buff) Spell(rune_tap)
-	if Rune() <= 2 Spell(blood_tap)
+ if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.Casting()
+ {
+  if target.InRange(mind_freeze) and target.IsInterruptible() Spell(mind_freeze)
+  if target.InRange(asphyxiate) and not target.Classification(worldboss) Spell(asphyxiate)
+    if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
+ }
 }
-
-AddFunction BloodDefaultMainActions
-{
-	BloodHealMe()
-	if InCombat() and BuffExpires(bone_shield_buff 3) Spell(marrowrend)
-	if target.DebuffRefreshable(blood_plague_debuff) Spell(blood_boil)
-	if not BuffPresent(death_and_decay_buff) and BuffPresent(crimson_scourge_buff) and Talent(rapid_decomposition_talent) Spell(death_and_decay)
-	if RunicPower() >= 100 and target.TimeToDie() >= 10 Spell(bonestorm)
-	if RunicPowerDeficit() <= 20 Spell(death_strike)
-	if BuffStacks(bone_shield_buff) <= 2+4*Talent(ossuary_talent) Spell(marrowrend)
-	if not BuffPresent(death_and_decay_buff) and Rune() >= 3 and Talent(rapid_decomposition_talent) Spell(death_and_decay)
-	if not target.DebuffPresent(mark_of_blood_debuff) Spell(mark_of_blood)
-	if Rune() >= 3 or RunicPower() < 45 Spell(heart_strike)
-	Spell(consumption)
-	Spell(blood_boil)
-}
-
-AddFunction BloodDefaultAoEActions
-{
-	BloodHealMe()
-	if RunicPower() >= 100 Spell(bonestorm)
-	if InCombat() and BuffExpires(bone_shield_buff 3) Spell(marrowrend)
-	if DebuffCountOnAny(blood_plague_debuff) < Enemies(tagged=1) Spell(blood_boil)
-	if not BuffPresent(death_and_decay_buff) and BuffPresent(crimson_scourge_buff) Spell(death_and_decay)
-	if RunicPowerDeficit() <= 20 Spell(death_strike)
-	if BuffStacks(bone_shield_buff) <= 2+4*Talent(ossuary_talent) Spell(marrowrend)
-	if not BuffPresent(death_and_decay_buff) and Enemies(tagged=1) >= 3 Spell(death_and_decay)
-	if not target.DebuffPresent(mark_of_blood_debuff) Spell(mark_of_blood)
-	if Rune() >= 3 or RunicPower() < 45 Spell(heart_strike)
-	Spell(consumption)
-	Spell(blood_boil)
-}
-
 AddFunction BloodHealMe
 {
 	if HealthPercent() <= 70 Spell(death_strike)
@@ -97,34 +66,188 @@ AddFunction BloodHealMe
 	if HealthPercent() <= 70 Spell(consumption)
 }
 
+
+AddFunction BloodDefaultMainActions
+{
+ #potion,if=buff.dancing_rune_weapon.up
+ if BuffPresent(dancing_rune_weapon_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war usable=1)
+ #call_action_list,name=standard
+ BloodHealMe()
+ BloodStandardMainActions()
+}
+
+AddFunction BloodDefaultMainPostConditions
+{
+ BloodStandardMainPostConditions()
+}
+
+AddFunction BloodDefaultShortCdActions
+{
+ #auto_attack
+ BloodGetInMeleeRange()
+
+ unless BuffPresent(dancing_rune_weapon_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) and Item(old_war usable=1)
+ {
+  #tombstone,if=buff.bone_shield.stack>=7
+  if BuffStacks(bone_shield_buff) >= 7 Spell(tombstone)
+  #call_action_list,name=standard
+  BloodStandardShortCdActions()
+ }
+}
+
+AddFunction BloodDefaultShortCdPostConditions
+{
+ BuffPresent(dancing_rune_weapon_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) and Item(old_war usable=1) or BloodStandardShortCdPostConditions()
+}
+
 AddFunction BloodDefaultCdActions
 {
-	BloodInterruptActions()
-	if IncomingDamage(1.5 magic=1) > 0 spell(antimagic_shell)
-	#if (HasEquippedItem(shifting_cosmic_sliver)) Spell(icebound_fortitude)
-	#Item(Trinket0Slot usable=1 text=13)
-	#Item(Trinket1Slot usable=1 text=14)
-	#Spell(vampiric_blood)
-	#Spell(icebound_fortitude)
-	if target.InRange(blood_mirror) Spell(blood_mirror)
-	Spell(dancing_rune_weapon)
-	if BuffStacks(bone_shield_buff) >= 5 Spell(tombstone)
-	if CheckBoxOn(opt_use_consumables) Item(unbending_potion usable=1)
-	UseRacialSurvivalActions()
+ #mind_freeze
+ BloodInterruptActions()
+ #blood_fury,if=cooldown.dancing_rune_weapon.ready&(!cooldown.blooddrinker.ready|!talent.blooddrinker.enabled)
+ if SpellCooldown(dancing_rune_weapon) == 0 and { not SpellCooldown(blooddrinker) == 0 or not Talent(blooddrinker_talent) } Spell(blood_fury_ap)
+ #berserking
+ Spell(berserking)
+ #use_items
+ BloodUseItemActions()
+
+ unless BuffPresent(dancing_rune_weapon_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) and Item(old_war usable=1)
+ {
+  #dancing_rune_weapon,if=!talent.blooddrinker.enabled|!cooldown.blooddrinker.ready
+  #if not Talent(blooddrinker_talent) or not SpellCooldown(blooddrinker) == 0 Spell(dancing_rune_weapon)
+
+  unless BuffStacks(bone_shield_buff) >= 7 and Spell(tombstone)
+  {
+   #call_action_list,name=standard
+   BloodStandardCdActions()
+  }
+ }
 }
 
-AddFunction BloodInterruptActions
+AddFunction BloodDefaultCdPostConditions
 {
-	if CheckBoxOn(opt_interrupt) and not target.IsFriend() and target.Casting()
-	{
-		if target.InRange(mind_freeze) and target.IsInterruptible() Spell(mind_freeze)
-		if target.InRange(asphyxiate) and not target.Classification(worldboss) Spell(asphyxiate)
-		if target.Distance(less 8) and target.IsInterruptible() Spell(arcane_torrent_runicpower)
-		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
-	}
+ BuffPresent(dancing_rune_weapon_buff) and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) and Item(old_war usable=1) or BuffStacks(bone_shield_buff) >= 7 and Spell(tombstone) or BloodStandardCdPostConditions()
 }
 
-AddCheckBox(opt_deathknight_blood_aoe L(AOE) default specialization=blood)
+### actions.precombat
+
+AddFunction BloodPrecombatMainActions
+{
+ #flask
+ #food
+ #augmentation
+ #snapshot_stats
+ #potion
+ if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(old_war usable=1)
+}
+
+AddFunction BloodPrecombatMainPostConditions
+{
+}
+
+AddFunction BloodPrecombatShortCdActions
+{
+}
+
+AddFunction BloodPrecombatShortCdPostConditions
+{
+ CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) and Item(old_war usable=1)
+}
+
+AddFunction BloodPrecombatCdActions
+{
+}
+
+AddFunction BloodPrecombatCdPostConditions
+{
+ CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) and Item(old_war usable=1)
+}
+
+### actions.standard
+
+AddFunction BloodStandardMainActions
+{
+ #death_strike,if=runic_power.deficit<=10
+ if RunicPowerDeficit() <= 10 Spell(death_strike)
+ #marrowrend,if=(buff.bone_shield.remains<=rune.time_to_3|buff.bone_shield.remains<=(gcd+cooldown.blooddrinker.ready*talent.blooddrinker.enabled*2)|buff.bone_shield.stack<3)&runic_power.deficit>=20
+ if { BuffRemaining(bone_shield_buff) <= TimeToRunes(3) or BuffRemaining(bone_shield_buff) <= GCD() + { SpellCooldown(blooddrinker) == 0 } * TalentPoints(blooddrinker_talent) * 2 or BuffStacks(bone_shield_buff) < 3 } and RunicPowerDeficit() >= 20 Spell(marrowrend)
+ #blood_boil,if=charges_fractional>=1.8&(buff.hemostasis.stack<=(5-spell_targets.blood_boil)|spell_targets.blood_boil>2)
+ if Charges(blood_boil count=0) >= 1.8 and { BuffStacks(hemostasis_buff) <= 5 - Enemies() or Enemies() > 2 } Spell(blood_boil)
+ #marrowrend,if=buff.bone_shield.stack<5&talent.ossuary.enabled&runic_power.deficit>=15
+ if BuffStacks(bone_shield_buff) < 5 and Talent(ossuary_talent) and RunicPowerDeficit() >= 15 Spell(marrowrend)
+ #death_strike,if=runic_power.deficit<=(15+buff.dancing_rune_weapon.up*5+spell_targets.heart_strike*talent.heartbreaker.enabled*2)|target.time_to_die<10
+ if RunicPowerDeficit() <= 15 + BuffPresent(dancing_rune_weapon_buff) * 5 + Enemies() * TalentPoints(heartbreaker_talent) * 2 or target.TimeToDie() < 10 Spell(death_strike)
+ #death_and_decay,if=spell_targets.death_and_decay>=3
+ if Enemies() >= 3 Spell(death_and_decay)
+ #heart_strike,if=buff.dancing_rune_weapon.up|rune.time_to_4<gcd
+ if BuffPresent(dancing_rune_weapon_buff) or TimeToRunes(4) < GCD() Spell(heart_strike)
+ #blood_boil,if=buff.dancing_rune_weapon.up
+ if BuffPresent(dancing_rune_weapon_buff) Spell(blood_boil)
+ #death_and_decay,if=buff.crimson_scourge.up|talent.rapid_decomposition.enabled|spell_targets.death_and_decay>=2
+ if BuffPresent(crimson_scourge_buff) or Talent(rapid_decomposition_talent) or Enemies() >= 2 Spell(death_and_decay)
+ #blood_boil
+ Spell(blood_boil)
+ #heart_strike,if=rune.time_to_3<gcd|buff.bone_shield.stack>6
+ if TimeToRunes(3) < GCD() or BuffStacks(bone_shield_buff) > 6 Spell(heart_strike)
+}
+
+AddFunction BloodStandardMainPostConditions
+{
+}
+
+AddFunction BloodStandardShortCdActions
+{
+ unless RunicPowerDeficit() <= 10 and Spell(death_strike)
+ {
+  #blooddrinker,if=!buff.dancing_rune_weapon.up
+  if not BuffPresent(dancing_rune_weapon_buff) Spell(blooddrinker)
+
+  unless { BuffRemaining(bone_shield_buff) <= TimeToRunes(3) or BuffRemaining(bone_shield_buff) <= GCD() + { SpellCooldown(blooddrinker) == 0 } * TalentPoints(blooddrinker_talent) * 2 or BuffStacks(bone_shield_buff) < 3 } and RunicPowerDeficit() >= 20 and Spell(marrowrend) or Charges(blood_boil count=0) >= 1.8 and { BuffStacks(hemostasis_buff) <= 5 - Enemies() or Enemies() > 2 } and Spell(blood_boil) or BuffStacks(bone_shield_buff) < 5 and Talent(ossuary_talent) and RunicPowerDeficit() >= 15 and Spell(marrowrend)
+  {
+   #bonestorm,if=runic_power>=100&!buff.dancing_rune_weapon.up
+   if RunicPower() >= 100 and not BuffPresent(dancing_rune_weapon_buff) Spell(bonestorm)
+
+   unless { RunicPowerDeficit() <= 15 + BuffPresent(dancing_rune_weapon_buff) * 5 + Enemies() * TalentPoints(heartbreaker_talent) * 2 or target.TimeToDie() < 10 } and Spell(death_strike) or Enemies() >= 3 and Spell(death_and_decay)
+   {
+    #rune_strike,if=(charges_fractional>=1.8|buff.dancing_rune_weapon.up)&rune.time_to_3>=gcd
+    if { Charges(rune_strike count=0) >= 1.8 or BuffPresent(dancing_rune_weapon_buff) } and TimeToRunes(3) >= GCD() Spell(rune_strike)
+
+    unless { BuffPresent(dancing_rune_weapon_buff) or TimeToRunes(4) < GCD() } and Spell(heart_strike) or BuffPresent(dancing_rune_weapon_buff) and Spell(blood_boil) or { BuffPresent(crimson_scourge_buff) or Talent(rapid_decomposition_talent) or Enemies() >= 2 } and Spell(death_and_decay)
+    {
+     #consumption
+     Spell(consumption)
+
+     unless Spell(blood_boil) or { TimeToRunes(3) < GCD() or BuffStacks(bone_shield_buff) > 6 } and Spell(heart_strike)
+     {
+      #rune_strike
+      Spell(rune_strike)
+     }
+    }
+   }
+  }
+ }
+}
+
+AddFunction BloodStandardShortCdPostConditions
+{
+ RunicPowerDeficit() <= 10 and Spell(death_strike) or { BuffRemaining(bone_shield_buff) <= TimeToRunes(3) or BuffRemaining(bone_shield_buff) <= GCD() + { SpellCooldown(blooddrinker) == 0 } * TalentPoints(blooddrinker_talent) * 2 or BuffStacks(bone_shield_buff) < 3 } and RunicPowerDeficit() >= 20 and Spell(marrowrend) or Charges(blood_boil count=0) >= 1.8 and { BuffStacks(hemostasis_buff) <= 5 - Enemies() or Enemies() > 2 } and Spell(blood_boil) or BuffStacks(bone_shield_buff) < 5 and Talent(ossuary_talent) and RunicPowerDeficit() >= 15 and Spell(marrowrend) or { RunicPowerDeficit() <= 15 + BuffPresent(dancing_rune_weapon_buff) * 5 + Enemies() * TalentPoints(heartbreaker_talent) * 2 or target.TimeToDie() < 10 } and Spell(death_strike) or Enemies() >= 3 and Spell(death_and_decay) or { BuffPresent(dancing_rune_weapon_buff) or TimeToRunes(4) < GCD() } and Spell(heart_strike) or BuffPresent(dancing_rune_weapon_buff) and Spell(blood_boil) or { BuffPresent(crimson_scourge_buff) or Talent(rapid_decomposition_talent) or Enemies() >= 2 } and Spell(death_and_decay) or Spell(blood_boil) or { TimeToRunes(3) < GCD() or BuffStacks(bone_shield_buff) > 6 } and Spell(heart_strike)
+}
+
+AddFunction BloodStandardCdActions
+{
+ unless RunicPowerDeficit() <= 10 and Spell(death_strike) or not BuffPresent(dancing_rune_weapon_buff) and Spell(blooddrinker) or { BuffRemaining(bone_shield_buff) <= TimeToRunes(3) or BuffRemaining(bone_shield_buff) <= GCD() + { SpellCooldown(blooddrinker) == 0 } * TalentPoints(blooddrinker_talent) * 2 or BuffStacks(bone_shield_buff) < 3 } and RunicPowerDeficit() >= 20 and Spell(marrowrend) or Charges(blood_boil count=0) >= 1.8 and { BuffStacks(hemostasis_buff) <= 5 - Enemies() or Enemies() > 2 } and Spell(blood_boil) or BuffStacks(bone_shield_buff) < 5 and Talent(ossuary_talent) and RunicPowerDeficit() >= 15 and Spell(marrowrend) or RunicPower() >= 100 and not BuffPresent(dancing_rune_weapon_buff) and Spell(bonestorm) or { RunicPowerDeficit() <= 15 + BuffPresent(dancing_rune_weapon_buff) * 5 + Enemies() * TalentPoints(heartbreaker_talent) * 2 or target.TimeToDie() < 10 } and Spell(death_strike) or Enemies() >= 3 and Spell(death_and_decay) or { Charges(rune_strike count=0) >= 1.8 or BuffPresent(dancing_rune_weapon_buff) } and TimeToRunes(3) >= GCD() and Spell(rune_strike) or { BuffPresent(dancing_rune_weapon_buff) or TimeToRunes(4) < GCD() } and Spell(heart_strike) or BuffPresent(dancing_rune_weapon_buff) and Spell(blood_boil) or { BuffPresent(crimson_scourge_buff) or Talent(rapid_decomposition_talent) or Enemies() >= 2 } and Spell(death_and_decay) or Spell(consumption) or Spell(blood_boil) or { TimeToRunes(3) < GCD() or BuffStacks(bone_shield_buff) > 6 } and Spell(heart_strike) or Spell(rune_strike)
+ {
+  #arcane_torrent,if=runic_power.deficit>20
+  if RunicPowerDeficit() > 20 Spell(arcane_torrent_runicpower)
+ }
+}
+
+AddFunction BloodStandardCdPostConditions
+{
+ RunicPowerDeficit() <= 10 and Spell(death_strike) or not BuffPresent(dancing_rune_weapon_buff) and Spell(blooddrinker) or { BuffRemaining(bone_shield_buff) <= TimeToRunes(3) or BuffRemaining(bone_shield_buff) <= GCD() + { SpellCooldown(blooddrinker) == 0 } * TalentPoints(blooddrinker_talent) * 2 or BuffStacks(bone_shield_buff) < 3 } and RunicPowerDeficit() >= 20 and Spell(marrowrend) or Charges(blood_boil count=0) >= 1.8 and { BuffStacks(hemostasis_buff) <= 5 - Enemies() or Enemies() > 2 } and Spell(blood_boil) or BuffStacks(bone_shield_buff) < 5 and Talent(ossuary_talent) and RunicPowerDeficit() >= 15 and Spell(marrowrend) or RunicPower() >= 100 and not BuffPresent(dancing_rune_weapon_buff) and Spell(bonestorm) or { RunicPowerDeficit() <= 15 + BuffPresent(dancing_rune_weapon_buff) * 5 + Enemies() * TalentPoints(heartbreaker_talent) * 2 or target.TimeToDie() < 10 } and Spell(death_strike) or Enemies() >= 3 and Spell(death_and_decay) or { Charges(rune_strike count=0) >= 1.8 or BuffPresent(dancing_rune_weapon_buff) } and TimeToRunes(3) >= GCD() and Spell(rune_strike) or { BuffPresent(dancing_rune_weapon_buff) or TimeToRunes(4) < GCD() } and Spell(heart_strike) or BuffPresent(dancing_rune_weapon_buff) and Spell(blood_boil) or { BuffPresent(crimson_scourge_buff) or Talent(rapid_decomposition_talent) or Enemies() >= 2 } and Spell(death_and_decay) or Spell(consumption) or Spell(blood_boil) or { TimeToRunes(3) < GCD() or BuffStacks(bone_shield_buff) > 6 } and Spell(heart_strike) or Spell(rune_strike)
+}
+
+
 
 ]]
 
