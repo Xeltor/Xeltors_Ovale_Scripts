@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "MWWhelp"
-	local desc = "[Xel][7.x] Spellhelper: Windwalker"
+	local desc = "[Xel][8.x] Spellhelper: Windwalker"
 	local code = [[
 AddIcon
 {
@@ -18,22 +18,19 @@ AddIcon
 	Texture(ability_monk_cracklingjadelightning) # Crackling Jade Lightning
 	Texture(ability_monk_spearhand) # Spear Hand Strike
 	Texture(ability_monk_paralysis) # Paralysis
+	Texture(ability_monk_legsweep) # Leg Sweep
 	
 	# Buffs
 	Texture(spell_nature_giftofthewild) # Storm, Earth, and Fire
-	
-	# Artifact
-	Texture(inv_hand_1h_artifactskywall_d_01) # Strike of the Windlord
 
 	# Talents
-	Texture(spell_arcane_arcanetorrent) # Chi Burst (T1)
 	Texture(ability_monk_chiwave) # Chi Wave (T1)
+	Texture(spell_arcane_arcanetorrent) # Chi Burst (T1)
 	Texture(ability_monk_quitornado) # Chi Torpedo (T2)(replaces roll)
 	Texture(ability_monk_tigerslust) # Tiger's Lust (T2)
+	Texture(inv_fistofthewhitetiger) # Fist of the White Tiger (T3)
 	Texture(ability_monk_energizingwine) # Energizing Elixir (T3)
 	Texture(spell_monk_ringofpeace) # Ring of Peace (T4)
-	Texture(ability_monk_legsweep) # Leg Sweep (T4)
-	Texture(ability_monk_jasmineforcetea) # Healing Elixir (T5)
 	Texture(spell_monk_diffusemagic) # Diffuse Magic (T5)
 	Texture(ability_monk_dampenharm) # Dampen Harm (T5)
 	Texture(ability_monk_rushingjadewind) # Rushing Jade Wind (T6)
