@@ -187,9 +187,9 @@ AddFunction ProtectionProtShortCdPostConditions
 AddFunction ProtectionProtCdActions
 {
 	#last_stand,if=incoming_damage_2500ms>health.max*0.40
-	if IncomingDamage(2.5) > MaxHealth() * 0.4 Spell(last_stand)
+	#if IncomingDamage(2.5) > MaxHealth() * 0.4 Spell(last_stand)
 	#shield_wall,if=incoming_damage_2500ms>health.max*0.40&!cooldown.last_stand.remains=0
-	if IncomingDamage(2.5) > MaxHealth() * 0.4 and not { not SpellCooldown(last_stand) > 0 } Spell(shield_wall)
+	#if IncomingDamage(2.5) > MaxHealth() * 0.4 and not { not SpellCooldown(last_stand) > 0 } Spell(shield_wall)
 	#potion,name=unbending_potion,if=(incoming_damage_2500ms>health.max*0.15&!buff.potion.up)|target.time_to_die<=25
 	# if { IncomingDamage(2.5) > MaxHealth() * 0.15 and not BuffPresent(potion_buff) or target.TimeToDie() <= 25 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(unbending_potion usable=1)
 	#battle_cry,if=cooldown.shield_slam.remains=0
