@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "WLKDEMOhelp"
-	local desc = "[Xel][7.x] Spellhelper: Demonology"
+	local desc = "[Xel][8.x] Spellhelper: Demonology"
 	local code = [[
 AddIcon
 {
@@ -11,32 +11,29 @@ AddIcon
 	# Spells
 	Texture(spell_shadow_shadowbolt) # Shadow Bolt
 	Texture(ability_warlock_handofguldan) # Hand of Gul'dan
-	Texture(spell_shadow_auraofdarkness) # Doom
-	Texture(spell_shadow_burningspirit) # Life Tap
-	Texture(ability_warrior_bladestorm) # Felstorm (command demon)
+	Texture(inv__demonbolt) # Demonbolt
+	Texture(inv_implosion) # Implosion
+	Texture(ability_warrior_titansgrip) # Axe Toss (command demon)
 	Texture(spell_shadow_mindrot) # Spell Lock (command demon)
-	Texture(spell_shadow_lifedrain02) # Drain Life (Used with Voidwalker / Voidlord)
 	
-	# Artifact
-	Texture(inv_offhand_1h_artifactskulloferedar_d_01) # Tha'kiel's Consumption
+	# Survival stuff
+	Texture(spell_shadow_lifedrain02) # Drain Life
+	Texture(spell_shadow_lifedrain) # Health Funnel
 
 	# Buffs
-	Texture(spell_warlock_demonicempowerment) # Demonic Empowerment
-	Texture(spell_warlock_demonwrath) # Demonwrath
+	Texture(inv_summondemonictyrant) # Summon Demonic Tyrant
 	Texture(spell_warlock_calldreadstalkers) # Call Dreadstalkers
-	Texture(warlock_summon_doomguard) # Summon Doomguard
-	Texture(spell_shadow_summoninfernal) # Summon Infernal
-	Texture(spell_shadow_lifedrain) # Health Funnel (Used with Voidwalker / Voidlord)
 
 	# Talents
-	Texture(ability_warlock_shadowflame) # Shadowflame (T1)
-	Texture(spell_shadow_shadowandflame) # Implosion (T2)
-	Texture(ability_warlock_mortalcoil) # Mortal Coil (T3)
-	Texture(ability_warlock_shadowfurytga) # Shadowfury (T3)
-	Texture(spell_warlock_demonsoul) # Soul Harvest (T4)
+	Texture(ability_warlock_demonicempowerment) # Demonic Strength (T1)
+	Texture(ability_hunter_pet_bat) # Bilescourge Bombers (T1)
+	Texture(ability_warlock_backdraft) # Power Siphon (T2)
+	Texture(spell_shadow_shadowbolt) # Doom (T2)
+	Texture(inv_polearm_2h_fellord_04) # Soul Strike (T4)
+	Texture(inv_argusfelstalkermount) # Summon Vilefiend (T4)
+	Texture(ability_warlock_mortalcoil) # Mortal Coil (T5)
 	Texture(spell_shadow_summonfelguard) # Grimoire: Felguard (T6)
-	Texture(achievement_boss_durumu) # Summon Darkglare (T7)
-	Texture(spell_warlock_demonbolt) # Demonbolt (T7) (Replaces Shadow Bolt)
+	Texture(inv_netherportal) # Nether Portal (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -52,6 +49,33 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 
