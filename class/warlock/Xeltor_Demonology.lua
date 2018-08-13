@@ -107,7 +107,7 @@ AddFunction DemonologyDefaultShortCdActions
  unless not target.DebuffPresent(doom_debuff) and target.TimeToDie() > 30 and Enemies(tagged=1) < 2 and Spell(doom)
  {
   #demonic_strength,if=(buff.wild_imps.stack<6|buff.demonic_power.up)|spell_targets.implosion<2
-  if { Demons(wild_imp) < 6 or DebuffPresent(demonic_power) or Enemies(tagged=1) < 2 } and not Pet.BuffPresent(pet_auto_spin) Spell(demonic_strength)
+  if { Demons(wild_imp) < 6 or DebuffPresent(demonic_power) or Enemies(tagged=1) < 2 } and not Pet.BuffPresent(pet_auto_spin) and pet.Present() and pet.CreatureFamily(felguard) Spell(demonic_strength)
   #call_action_list,name=nether_portal,if=talent.nether_portal.enabled&spell_targets.implosion<=2
   if Talent(nether_portal_talent) and Enemies(tagged=1) <= 2 DemonologyNetherPortalShortCdActions()
 
