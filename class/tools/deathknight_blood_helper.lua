@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "DKBhelp"
-	local desc = "[Xel][7.3.5] Spellhelper: Blood"
+	local desc = "[Xel][8.x] Spellhelper: Blood"
 	local code = [[
 AddIcon
 {
@@ -18,21 +18,17 @@ AddIcon
 	Texture(ability_deathknight_asphixiate) # Asphyxiate
 
 	# Buffs
-	Texture(inv_sword_07) # Dancing Rune Weapon
 	Texture(spell_shadow_lifedrain) # Vampiric Blood
-	Texture(spell_deathknight_pathoffrost) # Path of Frost
-	
-	# Artifact
-	Texture(inv_axe_2h_artifactmaw_d_01) # Consumption
+	Texture(inv_sword_07) # Dancing Rune Weapon
 
 	# Talents
 	Texture(ability_animusdraw) # Blooddrinker (T1)
-	Texture(spell_deathknight_bloodtap) # Blood Tap (T3)
-	Texture(ability_hunter_rapidkilling) # Mark of Blood (T4)
-	Texture(ability_fiegndead) # Tombstone (T4)
-	Texture(spell_deathknight_runetap) # Rune Tap (T6)
+	Texture(spell_deathknight_darkconviction) # Rune Strike (T1)
+	Texture(inv_axe_2h_artifactmaw_d_02) # Consumption (T2)
+	Texture(ability_fiegndead) # Tombstone (T3)
+	Texture(spell_deathknight_runetap) # Rune Tap (T4)
+	Texture(ability_hunter_rapidkilling) # Mark of Blood (T6)
 	Texture(achievement_boss_lordmarrowgar) # Bonestorm (T7)
-	Texture(inv_misc_gem_bloodstone_01) # Blood Mirror(T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -47,6 +43,45 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

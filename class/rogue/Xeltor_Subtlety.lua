@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_shanky"
-	local desc = "[Xel][7.3.5] Blush: Shanky"
+	local desc = "[Xel][8.0] Blush: Shanky"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -20,8 +20,6 @@ AddIcon specialization=3 help=main
 		if target.InRange(marked_for_death) Spell(marked_for_death)
 		#symbols_of_death
 		if not Talent(death_from_above_talent) and not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
-		#nightblade
-		if target.InRange(nightblade) Spell(nightblade)
 	}
 	
 	if InCombat() InterruptActions()
@@ -47,18 +45,12 @@ AddFunction Boss
 	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
 }
 
-AddFunction position_front
-{
-	target.istargetingplayer()
-}
-
 AddFunction GetInMeleeRange
 {
 	if not target.InRange(kick)
 	{
-		if target.InRange(shadowstep) Spell(shadowstrike)
+		if target.InRange(shadowstep) and Stealthed() Spell(shadowstrike)
 		if target.InRange(shadowstep) Spell(shadowstep)
-		if target.InRange(shadowstep) and not Stealthed() SubtletyStealthCdsShortCdActions()
 		# Texture(misc_arrowlup help=L(not_in_melee_range))
 	}
 }
@@ -71,39 +63,26 @@ AddFunction InterruptActions
 		if not target.Classification(worldboss)
 		{
 			if target.InRange(cheap_shot) and Stealthed() Spell(cheap_shot)
-			if target.InRange(blind) and not Stealthed() Spell(blind)
 			if target.InRange(kidney_shot) and not Stealthed() Spell(kidney_shot)
-			if target.InRange(kidney_shot) and not Stealthed() Spell(arcane_torrent_energy)
 			if target.InRange(quaking_palm) and not Stealthed() Spell(quaking_palm)
 		}
 	}
 }
 
-AddFunction shd_fractional
+AddFunction shd_threshold
 {
- 1.725 + 0.725 * TalentPoints(enveloping_shadows_talent)
-}
-
-AddFunction ssw_refund
-{
- HasEquippedItem(shadow_satyrs_walk) * { 6 + { target.Distance() % 3 - 1 } }
+ SpellCharges(shadow_dance count=0) >= 1.75
 }
 
 AddFunction stealth_threshold
 {
- 65 + TalentPoints(vigor_talent) * 35 + TalentPoints(master_of_shadows_talent) * 10 + ssw_refund()
-}
-
-AddFunction dsh_dfa
-{
- Talent(death_from_above_talent) and Talent(dark_shadow_talent) and Enemies(tagged=1) < 4
+ 60 + TalentPoints(vigor_talent) * 35 + TalentPoints(master_of_shadows_talent) * 10
 }
 
 ### actions.default
 
 AddFunction SubtletyDefaultMainActions
 {
- #wait,sec=0.1,if=buff.shadow_dance.up&gcd.remains>0
  #call_action_list,name=cds
  SubtletyCdsMainActions()
 
@@ -116,40 +95,18 @@ AddFunction SubtletyDefaultMainActions
   {
    #nightblade,if=target.time_to_die>6&remains<gcd.max&combo_points>=4-(time<10)*2
    if target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 Spell(nightblade)
-   #call_action_list,name=stealth_als,if=talent.dark_shadow.enabled&combo_points.deficit>=2+buff.shadow_blades.up&(dot.nightblade.remains>4+talent.subterfuge.enabled|cooldown.shadow_dance.charges_fractional>=1.9&(!equipped.denial_of_the_halfgiants|time>10))
-   if Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } SubtletyStealthAlsMainActions()
+   #call_action_list,name=stealth_cds,if=energy.deficit<=variable.stealth_threshold&combo_points.deficit>=4
+   if EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 SubtletyStealthCdsMainActions()
 
-   unless Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } and SubtletyStealthAlsMainPostConditions()
+   unless EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 and SubtletyStealthCdsMainPostConditions()
    {
-    #call_action_list,name=stealth_als,if=!talent.dark_shadow.enabled&(combo_points.deficit>=2+buff.shadow_blades.up|cooldown.shadow_dance.charges_fractional>=1.9+talent.enveloping_shadows.enabled)
-    if not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } SubtletyStealthAlsMainActions()
+    #call_action_list,name=finish,if=combo_points>=4+talent.deeper_stratagem.enabled|target.time_to_die<=1&combo_points>=3
+    if ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 SubtletyFinishMainActions()
 
-    unless not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } and SubtletyStealthAlsMainPostConditions()
+    unless { ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishMainPostConditions()
     {
-     #call_action_list,name=finish,if=combo_points>=5+3*(buff.the_first_of_the_dead.up&talent.anticipation.enabled)+(talent.deeper_stratagem.enabled&!buff.shadow_blades.up&(mantle_duration=0|set_bonus.tier20_4pc)&(!buff.the_first_of_the_dead.up|variable.dsh_dfa))|(combo_points>=4&combo_points.deficit<=2&spell_targets.shuriken_storm>=3&spell_targets.shuriken_storm<=4)|(target.time_to_die<=1&combo_points>=3)
-     if ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 SubtletyFinishMainActions()
-
-     unless { ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishMainPostConditions()
-     {
-      #call_action_list,name=finish,if=buff.the_first_of_the_dead.remains>1&combo_points>=3&spell_targets.shuriken_storm<2&!buff.shadow_gestures.up
-      if BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) SubtletyFinishMainActions()
-
-      unless BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) and SubtletyFinishMainPostConditions()
-      {
-       #call_action_list,name=finish,if=variable.dsh_dfa&equipped.the_first_of_the_dead&dot.nightblade.remains<=(cooldown.symbols_of_death.remains+10)&cooldown.symbols_of_death.remains<=2&combo_points>=2
-       if dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 SubtletyFinishMainActions()
-
-       unless dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 and SubtletyFinishMainPostConditions()
-       {
-        #wait,sec=time_to_sht.5,if=combo_points=5&time_to_sht.5<=1&energy.deficit>=30&!buff.shadow_blades.up
-        unless ComboPoints() == 5 and 100 <= 1 and EnergyDeficit() >= 30 and not BuffPresent(shadow_blades_buff) and 100 > 0
-        {
-         #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold
-         if EnergyDeficit() <= stealth_threshold() SubtletyBuildMainActions()
-        }
-       }
-      }
-     }
+     #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold-40*!(talent.alacrity.enabled|talent.shadow_focus.enabled|talent.master_of_shadows.enabled)
+     if EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } SubtletyBuildMainActions()
     }
    }
   }
@@ -158,15 +115,11 @@ AddFunction SubtletyDefaultMainActions
 
 AddFunction SubtletyDefaultMainPostConditions
 {
- SubtletyCdsMainPostConditions() or Stealthed() and SubtletyStealthedMainPostConditions() or Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } and SubtletyStealthAlsMainPostConditions() or not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } and SubtletyStealthAlsMainPostConditions() or { ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishMainPostConditions() or BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) and SubtletyFinishMainPostConditions() or dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 and SubtletyFinishMainPostConditions() or not { ComboPoints() == 5 and 100 <= 1 and EnergyDeficit() >= 30 and not BuffPresent(shadow_blades_buff) and 100 > 0 } and EnergyDeficit() <= stealth_threshold() and SubtletyBuildMainPostConditions()
+ SubtletyCdsMainPostConditions() or Stealthed() and SubtletyStealthedMainPostConditions() or EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 and SubtletyStealthCdsMainPostConditions() or { ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishMainPostConditions() or EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } and SubtletyBuildMainPostConditions()
 }
 
 AddFunction SubtletyDefaultShortCdActions
 {
- #variable,name=dsh_dfa,value=talent.death_from_above.enabled&talent.dark_shadow.enabled&spell_targets.death_from_above<4
- #shadow_dance,if=talent.dark_shadow.enabled&(!stealthed.all|buff.subterfuge.up)&buff.death_from_above.up&buff.death_from_above.remains<=0.15
- if Talent(dark_shadow_talent) and not BuffPresent(shadow_dance_buff) and { not Stealthed() or BuffPresent(subterfuge_buff) } and BuffPresent(death_from_above_buff) and BuffRemaining(death_from_above_buff) <= 0.15 Spell(shadow_dance)
- #wait,sec=0.1,if=buff.shadow_dance.up&gcd.remains>0
  #call_action_list,name=cds
  SubtletyCdsShortCdActions()
 
@@ -177,40 +130,18 @@ AddFunction SubtletyDefaultShortCdActions
 
   unless Stealthed() and SubtletyStealthedShortCdPostConditions() or target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 and Spell(nightblade)
   {
-   #call_action_list,name=stealth_als,if=talent.dark_shadow.enabled&combo_points.deficit>=2+buff.shadow_blades.up&(dot.nightblade.remains>4+talent.subterfuge.enabled|cooldown.shadow_dance.charges_fractional>=1.9&(!equipped.denial_of_the_halfgiants|time>10))
-   if Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } SubtletyStealthAlsShortCdActions()
+   #call_action_list,name=stealth_cds,if=energy.deficit<=variable.stealth_threshold&combo_points.deficit>=4
+   if EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 SubtletyStealthCdsShortCdActions()
 
-   unless Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } and SubtletyStealthAlsShortCdPostConditions()
+   unless EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 and SubtletyStealthCdsShortCdPostConditions()
    {
-    #call_action_list,name=stealth_als,if=!talent.dark_shadow.enabled&(combo_points.deficit>=2+buff.shadow_blades.up|cooldown.shadow_dance.charges_fractional>=1.9+talent.enveloping_shadows.enabled)
-    if not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } SubtletyStealthAlsShortCdActions()
+    #call_action_list,name=finish,if=combo_points>=4+talent.deeper_stratagem.enabled|target.time_to_die<=1&combo_points>=3
+    if ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 SubtletyFinishShortCdActions()
 
-    unless not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } and SubtletyStealthAlsShortCdPostConditions()
+    unless { ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishShortCdPostConditions()
     {
-     #call_action_list,name=finish,if=combo_points>=5+3*(buff.the_first_of_the_dead.up&talent.anticipation.enabled)+(talent.deeper_stratagem.enabled&!buff.shadow_blades.up&(mantle_duration=0|set_bonus.tier20_4pc)&(!buff.the_first_of_the_dead.up|variable.dsh_dfa))|(combo_points>=4&combo_points.deficit<=2&spell_targets.shuriken_storm>=3&spell_targets.shuriken_storm<=4)|(target.time_to_die<=1&combo_points>=3)
-     if ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 SubtletyFinishShortCdActions()
-
-     unless { ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishShortCdPostConditions()
-     {
-      #call_action_list,name=finish,if=buff.the_first_of_the_dead.remains>1&combo_points>=3&spell_targets.shuriken_storm<2&!buff.shadow_gestures.up
-      if BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) SubtletyFinishShortCdActions()
-
-      unless BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) and SubtletyFinishShortCdPostConditions()
-      {
-       #call_action_list,name=finish,if=variable.dsh_dfa&equipped.the_first_of_the_dead&dot.nightblade.remains<=(cooldown.symbols_of_death.remains+10)&cooldown.symbols_of_death.remains<=2&combo_points>=2
-       if dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 SubtletyFinishShortCdActions()
-
-       unless dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 and SubtletyFinishShortCdPostConditions()
-       {
-        #wait,sec=time_to_sht.5,if=combo_points=5&time_to_sht.5<=1&energy.deficit>=30&!buff.shadow_blades.up
-        unless ComboPoints() == 5 and 100 <= 1 and EnergyDeficit() >= 30 and not BuffPresent(shadow_blades_buff) and 100 > 0
-        {
-         #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold
-         if EnergyDeficit() <= stealth_threshold() SubtletyBuildShortCdActions()
-        }
-       }
-      }
-     }
+     #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold-40*!(talent.alacrity.enabled|talent.shadow_focus.enabled|talent.master_of_shadows.enabled)
+     if EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } SubtletyBuildShortCdActions()
     }
    }
   }
@@ -219,12 +150,11 @@ AddFunction SubtletyDefaultShortCdActions
 
 AddFunction SubtletyDefaultShortCdPostConditions
 {
- SubtletyCdsShortCdPostConditions() or Stealthed() and SubtletyStealthedShortCdPostConditions() or target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 and Spell(nightblade) or Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } and SubtletyStealthAlsShortCdPostConditions() or not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } and SubtletyStealthAlsShortCdPostConditions() or { ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishShortCdPostConditions() or BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) and SubtletyFinishShortCdPostConditions() or dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 and SubtletyFinishShortCdPostConditions() or not { ComboPoints() == 5 and 100 <= 1 and EnergyDeficit() >= 30 and not BuffPresent(shadow_blades_buff) and 100 > 0 } and EnergyDeficit() <= stealth_threshold() and SubtletyBuildShortCdPostConditions()
+ SubtletyCdsShortCdPostConditions() or Stealthed() and SubtletyStealthedShortCdPostConditions() or target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 and Spell(nightblade) or EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 and SubtletyStealthCdsShortCdPostConditions() or { ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishShortCdPostConditions() or EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } and SubtletyBuildShortCdPostConditions()
 }
 
 AddFunction SubtletyDefaultCdActions
 {
- #wait,sec=0.1,if=buff.shadow_dance.up&gcd.remains>0
  #call_action_list,name=cds
  SubtletyCdsCdActions()
 
@@ -235,45 +165,27 @@ AddFunction SubtletyDefaultCdActions
 
   unless Stealthed() and SubtletyStealthedCdPostConditions() or target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 and Spell(nightblade)
   {
-   #call_action_list,name=stealth_als,if=talent.dark_shadow.enabled&combo_points.deficit>=2+buff.shadow_blades.up&(dot.nightblade.remains>4+talent.subterfuge.enabled|cooldown.shadow_dance.charges_fractional>=1.9&(!equipped.denial_of_the_halfgiants|time>10))
-   if Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } SubtletyStealthAlsCdActions()
+   #call_action_list,name=stealth_cds,if=energy.deficit<=variable.stealth_threshold&combo_points.deficit>=4
+   if EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 SubtletyStealthCdsCdActions()
 
-   unless Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } and SubtletyStealthAlsCdPostConditions()
+   unless EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 and SubtletyStealthCdsCdPostConditions()
    {
-    #call_action_list,name=stealth_als,if=!talent.dark_shadow.enabled&(combo_points.deficit>=2+buff.shadow_blades.up|cooldown.shadow_dance.charges_fractional>=1.9+talent.enveloping_shadows.enabled)
-    if not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } SubtletyStealthAlsCdActions()
+    #call_action_list,name=finish,if=combo_points>=4+talent.deeper_stratagem.enabled|target.time_to_die<=1&combo_points>=3
+    if ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 SubtletyFinishCdActions()
 
-    unless not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } and SubtletyStealthAlsCdPostConditions()
+    unless { ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishCdPostConditions()
     {
-     #call_action_list,name=finish,if=combo_points>=5+3*(buff.the_first_of_the_dead.up&talent.anticipation.enabled)+(talent.deeper_stratagem.enabled&!buff.shadow_blades.up&(mantle_duration=0|set_bonus.tier20_4pc)&(!buff.the_first_of_the_dead.up|variable.dsh_dfa))|(combo_points>=4&combo_points.deficit<=2&spell_targets.shuriken_storm>=3&spell_targets.shuriken_storm<=4)|(target.time_to_die<=1&combo_points>=3)
-     if ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 SubtletyFinishCdActions()
+     #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold-40*!(talent.alacrity.enabled|talent.shadow_focus.enabled|talent.master_of_shadows.enabled)
+     if EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } SubtletyBuildCdActions()
 
-     unless { ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishCdPostConditions()
+     unless EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } and SubtletyBuildCdPostConditions()
      {
-      #call_action_list,name=finish,if=buff.the_first_of_the_dead.remains>1&combo_points>=3&spell_targets.shuriken_storm<2&!buff.shadow_gestures.up
-      if BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) SubtletyFinishCdActions()
-
-      unless BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) and SubtletyFinishCdPostConditions()
-      {
-       #call_action_list,name=finish,if=variable.dsh_dfa&equipped.the_first_of_the_dead&dot.nightblade.remains<=(cooldown.symbols_of_death.remains+10)&cooldown.symbols_of_death.remains<=2&combo_points>=2
-       if dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 SubtletyFinishCdActions()
-
-       unless dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 and SubtletyFinishCdPostConditions()
-       {
-        #wait,sec=time_to_sht.5,if=combo_points=5&time_to_sht.5<=1&energy.deficit>=30&!buff.shadow_blades.up
-        unless ComboPoints() == 5 and 100 <= 1 and EnergyDeficit() >= 30 and not BuffPresent(shadow_blades_buff) and 100 > 0
-        {
-         #call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold
-         if EnergyDeficit() <= stealth_threshold() SubtletyBuildCdActions()
-
-         unless EnergyDeficit() <= stealth_threshold() and SubtletyBuildCdPostConditions()
-         {
-          #arcane_pulse
-          Spell(arcane_pulse)
-         }
-        }
-       }
-      }
+      #arcane_torrent,if=energy.deficit>=15+energy.regen
+      if EnergyDeficit() >= 15 + EnergyRegenRate() Spell(arcane_torrent_energy)
+      #arcane_pulse
+      Spell(arcane_pulse)
+      #lights_judgment
+      Spell(lights_judgment)
      }
     }
    }
@@ -283,15 +195,17 @@ AddFunction SubtletyDefaultCdActions
 
 AddFunction SubtletyDefaultCdPostConditions
 {
- SubtletyCdsCdPostConditions() or Stealthed() and SubtletyStealthedCdPostConditions() or target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 and Spell(nightblade) or Talent(dark_shadow_talent) and ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) and { target.DebuffRemaining(nightblade_debuff) > 4 + TalentPoints(subterfuge_talent) or SpellCharges(shadow_dance count=0) >= 1.9 and { not HasEquippedItem(denial_of_the_halfgiants) or TimeInCombat() > 10 } } and SubtletyStealthAlsCdPostConditions() or not Talent(dark_shadow_talent) and { ComboPointsDeficit() >= 2 + BuffPresent(shadow_blades_buff) or SpellCharges(shadow_dance count=0) >= 1.9 + TalentPoints(enveloping_shadows_talent) } and SubtletyStealthAlsCdPostConditions() or { ComboPoints() >= 5 + 3 * { BuffPresent(the_first_of_the_dead_buff) and Talent(anticipation_talent) } + { Talent(deeper_stratagem_talent) and not BuffPresent(shadow_blades_buff) and { BuffRemaining(master_assassins_initiative) == 0 or ArmorSetBonus(T20 4) } and { not BuffPresent(the_first_of_the_dead_buff) or dsh_dfa() } } or ComboPoints() >= 4 and ComboPointsDeficit() <= 2 and Enemies(tagged=1) >= 3 and Enemies(tagged=1) <= 4 or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishCdPostConditions() or BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 3 and Enemies(tagged=1) < 2 and not BuffPresent(shadow_gestures_buff) and SubtletyFinishCdPostConditions() or dsh_dfa() and HasEquippedItem(the_first_of_the_dead) and target.DebuffRemaining(nightblade_debuff) <= SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 2 and ComboPoints() >= 2 and SubtletyFinishCdPostConditions() or not { ComboPoints() == 5 and 100 <= 1 and EnergyDeficit() >= 30 and not BuffPresent(shadow_blades_buff) and 100 > 0 } and EnergyDeficit() <= stealth_threshold() and SubtletyBuildCdPostConditions()
+ SubtletyCdsCdPostConditions() or Stealthed() and SubtletyStealthedCdPostConditions() or target.TimeToDie() > 6 and target.DebuffRemaining(nightblade_debuff) < GCD() and ComboPoints() >= 4 - { TimeInCombat() < 10 } * 2 and Spell(nightblade) or EnergyDeficit() <= stealth_threshold() and ComboPointsDeficit() >= 4 and SubtletyStealthCdsCdPostConditions() or { ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) or target.TimeToDie() <= 1 and ComboPoints() >= 3 } and SubtletyFinishCdPostConditions() or EnergyDeficit() <= stealth_threshold() - 40 * { not { Talent(alacrity_talent) or Talent(shadow_focus_talent) or Talent(master_of_shadows_talent) } } and SubtletyBuildCdPostConditions()
 }
 
 ### actions.build
 
 AddFunction SubtletyBuildMainActions
 {
- #shuriken_storm,if=spell_targets.shuriken_storm>=2+(buff.the_first_of_the_dead.up|buff.symbols_of_death.up|buff.master_of_subtlety.up)
- if Enemies(tagged=1) >= 2 + { BuffPresent(the_first_of_the_dead_buff) or BuffPresent(symbols_of_death_buff) or BuffPresent(master_of_subtlety_buff) } Spell(shuriken_storm)
+ #shuriken_toss,if=buff.sharpened_blades.stack>=29&spell_targets.shuriken_storm<=1+3*azerite.sharpened_blades.rank=2+4*azerite.sharpened_blades.rank=3
+ if BuffStacks(sharpened_blades_buff) >= 29 and Enemies(tagged=1) <= 1 + 3 * AzeriteTraitRank(sharpened_blades_trait) == 2 + 4 * AzeriteTraitRank(sharpened_blades_trait) == 3 Spell(shuriken_toss)
+ #shuriken_storm,if=spell_targets.shuriken_storm>=2|buff.the_dreadlords_deceit.stack>=29
+ if Enemies(tagged=1) >= 2 or BuffStacks(the_dreadlords_deceit_subtlety_buff) >= 29 Spell(shuriken_storm)
  #gloomblade
  Spell(gloomblade)
  #backstab
@@ -308,7 +222,7 @@ AddFunction SubtletyBuildShortCdActions
 
 AddFunction SubtletyBuildShortCdPostConditions
 {
- Enemies(tagged=1) >= 2 + { BuffPresent(the_first_of_the_dead_buff) or BuffPresent(symbols_of_death_buff) or BuffPresent(master_of_subtlety_buff) } and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
+ BuffStacks(sharpened_blades_buff) >= 29 and Enemies(tagged=1) <= 1 + 3 * AzeriteTraitRank(sharpened_blades_trait) == 2 + 4 * AzeriteTraitRank(sharpened_blades_trait) == 3 and Spell(shuriken_toss) or { Enemies(tagged=1) >= 2 or BuffStacks(the_dreadlords_deceit_subtlety_buff) >= 29 } and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
 }
 
 AddFunction SubtletyBuildCdActions
@@ -317,15 +231,13 @@ AddFunction SubtletyBuildCdActions
 
 AddFunction SubtletyBuildCdPostConditions
 {
- Enemies(tagged=1) >= 2 + { BuffPresent(the_first_of_the_dead_buff) or BuffPresent(symbols_of_death_buff) or BuffPresent(master_of_subtlety_buff) } and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
+ BuffStacks(sharpened_blades_buff) >= 29 and Enemies(tagged=1) <= 1 + 3 * AzeriteTraitRank(sharpened_blades_trait) == 2 + 4 * AzeriteTraitRank(sharpened_blades_trait) == 3 and Spell(shuriken_toss) or { Enemies(tagged=1) >= 2 or BuffStacks(the_dreadlords_deceit_subtlety_buff) >= 29 } and Spell(shuriken_storm) or Spell(gloomblade) or Spell(backstab)
 }
 
 ### actions.cds
 
 AddFunction SubtletyCdsMainActions
 {
- #goremaws_bite,if=!stealthed.all&cooldown.shadow_dance.charges_fractional<=variable.shd_fractional&((combo_points.deficit>=4-(time<10)*2&energy.deficit>50+talent.vigor.enabled*25-(time>=10)*15)|(combo_points.deficit>=1&target.time_to_die<8))
- if not Stealthed() and SpellCharges(shadow_dance count=0) <= shd_fractional() and { ComboPointsDeficit() >= 4 - { TimeInCombat() < 10 } * 2 and EnergyDeficit() > 50 + TalentPoints(vigor_talent) * 25 - { TimeInCombat() >= 10 } * 15 or ComboPointsDeficit() >= 1 and target.TimeToDie() < 8 } Spell(goremaws_bite)
 }
 
 AddFunction SubtletyCdsMainPostConditions
@@ -334,68 +246,57 @@ AddFunction SubtletyCdsMainPostConditions
 
 AddFunction SubtletyCdsShortCdActions
 {
- #symbols_of_death,if=!talent.death_from_above.enabled
- if not Talent(death_from_above_talent) Spell(symbols_of_death)
- #symbols_of_death,if=(talent.death_from_above.enabled&cooldown.death_from_above.remains<=1&(dot.nightblade.remains>=cooldown.death_from_above.remains+3|target.time_to_die-dot.nightblade.remains<=6)&(time>=3|set_bonus.tier20_4pc|equipped.the_first_of_the_dead))|target.time_to_die-remains<=10
- if Talent(death_from_above_talent) and SpellCooldown(death_from_above) <= 1 and { target.DebuffRemaining(nightblade_debuff) >= SpellCooldown(death_from_above) + 3 or target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) <= 6 } and { TimeInCombat() >= 3 or ArmorSetBonus(T20 4) or HasEquippedItem(the_first_of_the_dead) } or target.TimeToDie() - BuffRemaining(symbols_of_death_buff) <= 10 Spell(symbols_of_death)
+ #symbols_of_death,if=dot.nightblade.ticking
+ if target.DebuffPresent(nightblade_debuff) Spell(symbols_of_death)
  #marked_for_death,target_if=min:target.time_to_die,if=target.time_to_die<combo_points.deficit
  if target.TimeToDie() < ComboPointsDeficit() Spell(marked_for_death)
- #marked_for_death,if=raid_event.adds.in>40&!stealthed.all&combo_points.deficit>=cp_max_spend
- if 600 > 40 and not Stealthed() and ComboPointsDeficit() >= MaxComboPoints() Spell(marked_for_death)
-
- unless not Stealthed() and SpellCharges(shadow_dance count=0) <= shd_fractional() and { ComboPointsDeficit() >= 4 - { TimeInCombat() < 10 } * 2 and EnergyDeficit() > 50 + TalentPoints(vigor_talent) * 25 - { TimeInCombat() >= 10 } * 15 or ComboPointsDeficit() >= 1 and target.TimeToDie() < 8 } and Spell(goremaws_bite)
- {
-  #pool_resource,for_next=1,extra_amount=55-talent.shadow_focus.enabled*10
-  #vanish,if=energy>=55-talent.shadow_focus.enabled*10&variable.dsh_dfa&(!equipped.mantle_of_the_master_assassin|buff.symbols_of_death.up)&cooldown.shadow_dance.charges_fractional<=variable.shd_fractional&!buff.shadow_dance.up&!buff.stealth.up&mantle_duration=0&(dot.nightblade.remains>=cooldown.death_from_above.remains+6&!(buff.the_first_of_the_dead.remains>1&combo_points>=5)|target.time_to_die-dot.nightblade.remains<=6)&cooldown.death_from_above.remains<=1|target.time_to_die<=7
-  if Energy() >= 55 - TalentPoints(shadow_focus_talent) * 10 and dsh_dfa() and { not HasEquippedItem(mantle_of_the_master_assassin) or BuffPresent(symbols_of_death_buff) } and SpellCharges(shadow_dance count=0) <= shd_fractional() and not BuffPresent(shadow_dance_buff) and not BuffPresent(stealthed_buff any=1) and BuffRemaining(master_assassins_initiative) == 0 and { target.DebuffRemaining(nightblade_debuff) >= SpellCooldown(death_from_above) + 6 and not { BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 5 } or target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) <= 6 } and SpellCooldown(death_from_above) <= 1 or target.TimeToDie() <= 7 Spell(vanish)
-  unless { Energy() >= 55 - TalentPoints(shadow_focus_talent) * 10 and dsh_dfa() and { not HasEquippedItem(mantle_of_the_master_assassin) or BuffPresent(symbols_of_death_buff) } and SpellCharges(shadow_dance count=0) <= shd_fractional() and not BuffPresent(shadow_dance_buff) and not BuffPresent(stealthed_buff any=1) and BuffRemaining(master_assassins_initiative) == 0 and { target.DebuffRemaining(nightblade_debuff) >= SpellCooldown(death_from_above) + 6 and not { BuffRemaining(the_first_of_the_dead_buff) > 1 and ComboPoints() >= 5 } or target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) <= 6 } and SpellCooldown(death_from_above) <= 1 or target.TimeToDie() <= 7 } and SpellUsable(vanish) and SpellCooldown(vanish) < TimeToEnergyFor(vanish)
-  {
-   #shadow_dance,if=!buff.shadow_dance.up&target.time_to_die<=4+talent.subterfuge.enabled
-   if not BuffPresent(shadow_dance_buff) and target.TimeToDie() <= 4 + TalentPoints(subterfuge_talent) Spell(shadow_dance)
-  }
- }
+ #marked_for_death,if=raid_event.adds.in>30&!stealthed.all&combo_points.deficit>=cp_max_spend
+ if 600 > 30 and not Stealthed() and ComboPointsDeficit() >= MaxComboPoints() Spell(marked_for_death)
+ #shuriken_tornado,if=spell_targets>=3&dot.nightblade.ticking&buff.symbols_of_death.up&buff.shadow_dance.up
+ if Enemies(tagged=1) >= 3 and target.DebuffPresent(nightblade_debuff) and BuffPresent(symbols_of_death_buff) and BuffPresent(shadow_dance_buff) Spell(shuriken_tornado)
+ #shadow_dance,if=!buff.shadow_dance.up&target.time_to_die<=5+talent.subterfuge.enabled
+ if not BuffPresent(shadow_dance_buff) and target.TimeToDie() <= 5 + TalentPoints(subterfuge_talent) Spell(shadow_dance)
 }
 
 AddFunction SubtletyCdsShortCdPostConditions
 {
- not Stealthed() and SpellCharges(shadow_dance count=0) <= shd_fractional() and { ComboPointsDeficit() >= 4 - { TimeInCombat() < 10 } * 2 and EnergyDeficit() > 50 + TalentPoints(vigor_talent) * 25 - { TimeInCombat() >= 10 } * 15 or ComboPointsDeficit() >= 1 and target.TimeToDie() < 8 } and Spell(goremaws_bite)
 }
 
 AddFunction SubtletyCdsCdActions
 {
  #potion,if=buff.bloodlust.react|target.time_to_die<=60|(buff.vanish.up&(buff.shadow_blades.up|cooldown.shadow_blades.remains<=30))
- # if { BuffPresent(burst_haste_buff any=1) or target.TimeToDie() <= 60 or BuffPresent(vanish_buff) and { BuffPresent(shadow_blades_buff) or SpellCooldown(shadow_blades) <= 30 } } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ # if { BuffPresent(burst_haste_buff any=1) or target.TimeToDie() <= 60 or BuffPresent(vanish_buff) and { BuffPresent(shadow_blades_buff) or SpellCooldown(shadow_blades) <= 30 } } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_agility usable=1)
  #blood_fury,if=stealthed.rogue
  if Stealthed() Spell(blood_fury_ap)
  #berserking,if=stealthed.rogue
  if Stealthed() Spell(berserking)
- #arcane_torrent,if=energy.deficit>70
- if EnergyDeficit() > 70 Spell(arcane_torrent_energy)
+ #fireblood,if=stealthed.rogue
+ if Stealthed() Spell(fireblood)
+ #ancestral_call,if=stealthed.rogue
+ if Stealthed() Spell(ancestral_call)
 
- unless not Talent(death_from_above_talent) and Spell(symbols_of_death) or { Talent(death_from_above_talent) and SpellCooldown(death_from_above) <= 1 and { target.DebuffRemaining(nightblade_debuff) >= SpellCooldown(death_from_above) + 3 or target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) <= 6 } and { TimeInCombat() >= 3 or ArmorSetBonus(T20 4) or HasEquippedItem(the_first_of_the_dead) } or target.TimeToDie() - BuffRemaining(symbols_of_death_buff) <= 10 } and Spell(symbols_of_death)
+ unless target.DebuffPresent(nightblade_debuff) and Spell(symbols_of_death)
  {
-  #shadow_blades,if=(time>10&combo_points.deficit>=2+stealthed.all-equipped.mantle_of_the_master_assassin)|(time<10&(!talent.marked_for_death.enabled|combo_points.deficit>=3|dot.nightblade.ticking))
-  if TimeInCombat() > 10 and ComboPointsDeficit() >= 2 + Stealthed() - HasEquippedItem(mantle_of_the_master_assassin) or TimeInCombat() < 10 and { not Talent(marked_for_death_talent) or ComboPointsDeficit() >= 3 or target.DebuffPresent(nightblade_debuff) } Spell(shadow_blades)
+  #shadow_blades,if=combo_points.deficit>=2+stealthed.all
+  if ComboPointsDeficit() >= 2 + Stealthed() Spell(shadow_blades)
  }
 }
 
 AddFunction SubtletyCdsCdPostConditions
 {
- not Talent(death_from_above_talent) and Spell(symbols_of_death) or { Talent(death_from_above_talent) and SpellCooldown(death_from_above) <= 1 and { target.DebuffRemaining(nightblade_debuff) >= SpellCooldown(death_from_above) + 3 or target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) <= 6 } and { TimeInCombat() >= 3 or ArmorSetBonus(T20 4) or HasEquippedItem(the_first_of_the_dead) } or target.TimeToDie() - BuffRemaining(symbols_of_death_buff) <= 10 } and Spell(symbols_of_death) or not Stealthed() and SpellCharges(shadow_dance count=0) <= shd_fractional() and { ComboPointsDeficit() >= 4 - { TimeInCombat() < 10 } * 2 and EnergyDeficit() > 50 + TalentPoints(vigor_talent) * 25 - { TimeInCombat() >= 10 } * 15 or ComboPointsDeficit() >= 1 and target.TimeToDie() < 8 } and Spell(goremaws_bite)
+ target.DebuffPresent(nightblade_debuff) and Spell(symbols_of_death) or Enemies(tagged=1) >= 3 and target.DebuffPresent(nightblade_debuff) and BuffPresent(symbols_of_death_buff) and BuffPresent(shadow_dance_buff) and Spell(shuriken_tornado)
 }
 
 ### actions.finish
 
 AddFunction SubtletyFinishMainActions
 {
- #nightblade,if=(!talent.dark_shadow.enabled|!buff.shadow_dance.up)&target.time_to_die-remains>6&(mantle_duration=0|remains<=mantle_duration)&((refreshable&(!finality|buff.finality_nightblade.up|variable.dsh_dfa))|remains<tick_time*2)&(spell_targets.shuriken_storm<4&!variable.dsh_dfa|!buff.symbols_of_death.up)
- if { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } Spell(nightblade)
- #nightblade,cycle_targets=1,if=(!talent.dark_shadow.enabled|!buff.shadow_dance.up)&target.time_to_die-remains>12&mantle_duration=0&((refreshable&(!finality|buff.finality_nightblade.up|variable.dsh_dfa))|remains<tick_time*2)&(spell_targets.shuriken_storm<4&!variable.dsh_dfa|!buff.symbols_of_death.up)
- if { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } Spell(nightblade)
- #nightblade,if=remains<cooldown.symbols_of_death.remains+10&cooldown.symbols_of_death.remains<=5+(combo_points=6)&target.time_to_die-remains>cooldown.symbols_of_death.remains+5
- if target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 Spell(nightblade)
- #death_from_above,if=!talent.dark_shadow.enabled|(!buff.shadow_dance.up|spell_targets>=4)&(buff.symbols_of_death.up|cooldown.symbols_of_death.remains>=10+set_bonus.tier20_4pc*5)&buff.the_first_of_the_dead.remains<1&(buff.finality_eviscerate.up|spell_targets.shuriken_storm<4)
- if not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } Spell(death_from_above)
+ #nightblade,if=(!talent.dark_shadow.enabled|!buff.shadow_dance.up)&target.time_to_die-remains>6&remains<tick_time*2&(spell_targets.shuriken_storm<4|!buff.symbols_of_death.up)
+ if { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 and { Enemies(tagged=1) < 4 or not BuffPresent(symbols_of_death_buff) } Spell(nightblade)
+ #nightblade,cycle_targets=1,if=spell_targets.shuriken_storm>=2&(spell_targets.shuriken_storm<=5|talent.secret_technique.enabled)&!buff.shadow_dance.up&target.time_to_die>=(5+(2*combo_points))&refreshable
+ if Enemies(tagged=1) >= 2 and { Enemies(tagged=1) <= 5 or Talent(secret_technique_talent) } and not BuffPresent(shadow_dance_buff) and target.TimeToDie() >= 5 + 2 * ComboPoints() and target.Refreshable(nightblade_debuff) Spell(nightblade)
+ #nightblade,if=remains<cooldown.symbols_of_death.remains+10&cooldown.symbols_of_death.remains<=5&target.time_to_die-remains>cooldown.symbols_of_death.remains+5
+ if target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 Spell(nightblade)
  #eviscerate
  Spell(eviscerate)
 }
@@ -406,11 +307,18 @@ AddFunction SubtletyFinishMainPostConditions
 
 AddFunction SubtletyFinishShortCdActions
 {
+ unless { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 and { Enemies(tagged=1) < 4 or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or Enemies(tagged=1) >= 2 and { Enemies(tagged=1) <= 5 or Talent(secret_technique_talent) } and not BuffPresent(shadow_dance_buff) and target.TimeToDie() >= 5 + 2 * ComboPoints() and target.Refreshable(nightblade_debuff) and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade)
+ {
+  #secret_technique,if=buff.symbols_of_death.up&(!talent.dark_shadow.enabled|spell_targets.shuriken_storm<2|buff.shadow_dance.up)
+  if BuffPresent(symbols_of_death_buff) and { not Talent(dark_shadow_talent) or Enemies(tagged=1) < 2 or BuffPresent(shadow_dance_buff) } Spell(secret_technique)
+  #secret_technique,if=spell_targets.shuriken_storm>=2+talent.dark_shadow.enabled+talent.nightstalker.enabled
+  if Enemies(tagged=1) >= 2 + TalentPoints(dark_shadow_talent) + TalentPoints(nightstalker_talent) Spell(secret_technique)
+ }
 }
 
 AddFunction SubtletyFinishShortCdPostConditions
 {
- { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or { not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } } and Spell(death_from_above) or Spell(eviscerate)
+ { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 and { Enemies(tagged=1) < 4 or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or Enemies(tagged=1) >= 2 and { Enemies(tagged=1) <= 5 or Talent(secret_technique_talent) } and not BuffPresent(shadow_dance_buff) and target.TimeToDie() >= 5 + 2 * ComboPoints() and target.Refreshable(nightblade_debuff) and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or Spell(eviscerate)
 }
 
 AddFunction SubtletyFinishCdActions
@@ -419,7 +327,7 @@ AddFunction SubtletyFinishCdActions
 
 AddFunction SubtletyFinishCdPostConditions
 {
- { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and { BuffRemaining(master_assassins_initiative) == 0 or target.DebuffRemaining(nightblade_debuff) <= BuffRemaining(master_assassins_initiative) } and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 12 and BuffRemaining(master_assassins_initiative) == 0 and { target.Refreshable(nightblade_debuff) and { not HasArtifactTrait(finality) or BuffPresent(finality_nightblade_buff) or dsh_dfa() } or target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 } and { Enemies(tagged=1) < 4 and not dsh_dfa() or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 + { ComboPoints() == 6 } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or { not Talent(dark_shadow_talent) or { not BuffPresent(shadow_dance_buff) or Enemies(tagged=1) >= 4 } and { BuffPresent(symbols_of_death_buff) or SpellCooldown(symbols_of_death) >= 10 + ArmorSetBonus(T20 4) * 5 } and BuffRemaining(the_first_of_the_dead_buff) < 1 and { BuffPresent(finality_eviscerate_buff) or Enemies(tagged=1) < 4 } } and Spell(death_from_above) or Spell(eviscerate)
+ { not Talent(dark_shadow_talent) or not BuffPresent(shadow_dance_buff) } and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > 6 and target.DebuffRemaining(nightblade_debuff) < target.TickTime(nightblade_debuff) * 2 and { Enemies(tagged=1) < 4 or not BuffPresent(symbols_of_death_buff) } and Spell(nightblade) or Enemies(tagged=1) >= 2 and { Enemies(tagged=1) <= 5 or Talent(secret_technique_talent) } and not BuffPresent(shadow_dance_buff) and target.TimeToDie() >= 5 + 2 * ComboPoints() and target.Refreshable(nightblade_debuff) and Spell(nightblade) or target.DebuffRemaining(nightblade_debuff) < SpellCooldown(symbols_of_death) + 10 and SpellCooldown(symbols_of_death) <= 5 and target.TimeToDie() - target.DebuffRemaining(nightblade_debuff) > SpellCooldown(symbols_of_death) + 5 and Spell(nightblade) or BuffPresent(symbols_of_death_buff) and { not Talent(dark_shadow_talent) or Enemies(tagged=1) < 2 or BuffPresent(shadow_dance_buff) } and Spell(secret_technique) or Enemies(tagged=1) >= 2 + TalentPoints(dark_shadow_talent) + TalentPoints(nightstalker_talent) and Spell(secret_technique) or Spell(eviscerate)
 }
 
 ### actions.precombat
@@ -430,9 +338,7 @@ AddFunction SubtletyPrecombatMainActions
  #augmentation
  #food
  #snapshot_stats
- #variable,name=ssw_refund,value=equipped.shadow_satyrs_walk*(6+ssw_refund_offset)
- #variable,name=stealth_threshold,value=(65+talent.vigor.enabled*35+talent.master_of_shadows.enabled*10+variable.ssw_refund)
- #variable,name=shd_fractional,value=1.725+0.725*talent.enveloping_shadows.enabled
+ #variable,name=stealth_threshold,value=60+talent.vigor.enabled*35+talent.master_of_shadows.enabled*10
  #stealth
  Spell(stealth)
 }
@@ -445,8 +351,8 @@ AddFunction SubtletyPrecombatShortCdActions
 {
  unless Spell(stealth)
  {
-  #marked_for_death,precombat=1
-  if not InCombat() Spell(marked_for_death)
+  #marked_for_death,precombat_seconds=15
+  Spell(marked_for_death)
  }
 }
 
@@ -459,121 +365,16 @@ AddFunction SubtletyPrecombatCdActions
 {
  unless Spell(stealth)
  {
+  #shadow_blades,precombat_seconds=1
+  Spell(shadow_blades)
   #potion
-  # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+  # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_agility usable=1)
  }
 }
 
 AddFunction SubtletyPrecombatCdPostConditions
 {
  Spell(stealth)
-}
-
-### actions.stealth_als
-
-AddFunction SubtletyStealthAlsMainActions
-{
- #call_action_list,name=stealth_cds,if=energy.deficit<=variable.stealth_threshold-25*(!cooldown.goremaws_bite.up&!buff.feeding_frenzy.up)&(!equipped.shadow_satyrs_walk|cooldown.shadow_dance.charges_fractional>=variable.shd_fractional|energy.deficit>=10)
- if EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } SubtletyStealthCdsMainActions()
-
- unless EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } and SubtletyStealthCdsMainPostConditions()
- {
-  #call_action_list,name=stealth_cds,if=mantle_duration>2.3
-  if BuffRemaining(master_assassins_initiative) > 2.3 SubtletyStealthCdsMainActions()
-
-  unless BuffRemaining(master_assassins_initiative) > 2.3 and SubtletyStealthCdsMainPostConditions()
-  {
-   #call_action_list,name=stealth_cds,if=spell_targets.shuriken_storm>=4
-   if Enemies(tagged=1) >= 4 SubtletyStealthCdsMainActions()
-
-   unless Enemies(tagged=1) >= 4 and SubtletyStealthCdsMainPostConditions()
-   {
-    #call_action_list,name=stealth_cds,if=(cooldown.shadowmeld.up&!cooldown.vanish.up&cooldown.shadow_dance.charges<=1)
-    if not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 SubtletyStealthCdsMainActions()
-
-    unless not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 and SubtletyStealthCdsMainPostConditions()
-    {
-     #call_action_list,name=stealth_cds,if=target.time_to_die<12*cooldown.shadow_dance.charges_fractional*(1+equipped.shadow_satyrs_walk*0.5)
-     if target.TimeToDie() < 12 * SpellCharges(shadow_dance count=0) * { 1 + HasEquippedItem(shadow_satyrs_walk) * 0.5 } SubtletyStealthCdsMainActions()
-    }
-   }
-  }
- }
-}
-
-AddFunction SubtletyStealthAlsMainPostConditions
-{
- EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } and SubtletyStealthCdsMainPostConditions() or BuffRemaining(master_assassins_initiative) > 2.3 and SubtletyStealthCdsMainPostConditions() or Enemies(tagged=1) >= 4 and SubtletyStealthCdsMainPostConditions() or not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 and SubtletyStealthCdsMainPostConditions() or target.TimeToDie() < 12 * SpellCharges(shadow_dance count=0) * { 1 + HasEquippedItem(shadow_satyrs_walk) * 0.5 } and SubtletyStealthCdsMainPostConditions()
-}
-
-AddFunction SubtletyStealthAlsShortCdActions
-{
- #call_action_list,name=stealth_cds,if=energy.deficit<=variable.stealth_threshold-25*(!cooldown.goremaws_bite.up&!buff.feeding_frenzy.up)&(!equipped.shadow_satyrs_walk|cooldown.shadow_dance.charges_fractional>=variable.shd_fractional|energy.deficit>=10)
- if EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } SubtletyStealthCdsShortCdActions()
-
- unless EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } and SubtletyStealthCdsShortCdPostConditions()
- {
-  #call_action_list,name=stealth_cds,if=mantle_duration>2.3
-  if BuffRemaining(master_assassins_initiative) > 2.3 SubtletyStealthCdsShortCdActions()
-
-  unless BuffRemaining(master_assassins_initiative) > 2.3 and SubtletyStealthCdsShortCdPostConditions()
-  {
-   #call_action_list,name=stealth_cds,if=spell_targets.shuriken_storm>=4
-   if Enemies(tagged=1) >= 4 SubtletyStealthCdsShortCdActions()
-
-   unless Enemies(tagged=1) >= 4 and SubtletyStealthCdsShortCdPostConditions()
-   {
-    #call_action_list,name=stealth_cds,if=(cooldown.shadowmeld.up&!cooldown.vanish.up&cooldown.shadow_dance.charges<=1)
-    if not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 SubtletyStealthCdsShortCdActions()
-
-    unless not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 and SubtletyStealthCdsShortCdPostConditions()
-    {
-     #call_action_list,name=stealth_cds,if=target.time_to_die<12*cooldown.shadow_dance.charges_fractional*(1+equipped.shadow_satyrs_walk*0.5)
-     if target.TimeToDie() < 12 * SpellCharges(shadow_dance count=0) * { 1 + HasEquippedItem(shadow_satyrs_walk) * 0.5 } SubtletyStealthCdsShortCdActions()
-    }
-   }
-  }
- }
-}
-
-AddFunction SubtletyStealthAlsShortCdPostConditions
-{
- EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } and SubtletyStealthCdsShortCdPostConditions() or BuffRemaining(master_assassins_initiative) > 2.3 and SubtletyStealthCdsShortCdPostConditions() or Enemies(tagged=1) >= 4 and SubtletyStealthCdsShortCdPostConditions() or not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 and SubtletyStealthCdsShortCdPostConditions() or target.TimeToDie() < 12 * SpellCharges(shadow_dance count=0) * { 1 + HasEquippedItem(shadow_satyrs_walk) * 0.5 } and SubtletyStealthCdsShortCdPostConditions()
-}
-
-AddFunction SubtletyStealthAlsCdActions
-{
- #call_action_list,name=stealth_cds,if=energy.deficit<=variable.stealth_threshold-25*(!cooldown.goremaws_bite.up&!buff.feeding_frenzy.up)&(!equipped.shadow_satyrs_walk|cooldown.shadow_dance.charges_fractional>=variable.shd_fractional|energy.deficit>=10)
- if EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } SubtletyStealthCdsCdActions()
-
- unless EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } and SubtletyStealthCdsCdPostConditions()
- {
-  #call_action_list,name=stealth_cds,if=mantle_duration>2.3
-  if BuffRemaining(master_assassins_initiative) > 2.3 SubtletyStealthCdsCdActions()
-
-  unless BuffRemaining(master_assassins_initiative) > 2.3 and SubtletyStealthCdsCdPostConditions()
-  {
-   #call_action_list,name=stealth_cds,if=spell_targets.shuriken_storm>=4
-   if Enemies(tagged=1) >= 4 SubtletyStealthCdsCdActions()
-
-   unless Enemies(tagged=1) >= 4 and SubtletyStealthCdsCdPostConditions()
-   {
-    #call_action_list,name=stealth_cds,if=(cooldown.shadowmeld.up&!cooldown.vanish.up&cooldown.shadow_dance.charges<=1)
-    if not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 SubtletyStealthCdsCdActions()
-
-    unless not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 and SubtletyStealthCdsCdPostConditions()
-    {
-     #call_action_list,name=stealth_cds,if=target.time_to_die<12*cooldown.shadow_dance.charges_fractional*(1+equipped.shadow_satyrs_walk*0.5)
-     if target.TimeToDie() < 12 * SpellCharges(shadow_dance count=0) * { 1 + HasEquippedItem(shadow_satyrs_walk) * 0.5 } SubtletyStealthCdsCdActions()
-    }
-   }
-  }
- }
-}
-
-AddFunction SubtletyStealthAlsCdPostConditions
-{
- EnergyDeficit() <= stealth_threshold() - 25 * { not { not SpellCooldown(goremaws_bite) > 0 } and not BuffPresent(feeding_frenzy_buff) } and { not HasEquippedItem(shadow_satyrs_walk) or SpellCharges(shadow_dance count=0) >= shd_fractional() or EnergyDeficit() >= 10 } and SubtletyStealthCdsCdPostConditions() or BuffRemaining(master_assassins_initiative) > 2.3 and SubtletyStealthCdsCdPostConditions() or Enemies(tagged=1) >= 4 and SubtletyStealthCdsCdPostConditions() or not SpellCooldown(shadowmeld) > 0 and not { not SpellCooldown(vanish) > 0 } and SpellCharges(shadow_dance) <= 1 and SubtletyStealthCdsCdPostConditions() or target.TimeToDie() < 12 * SpellCharges(shadow_dance count=0) * { 1 + HasEquippedItem(shadow_satyrs_walk) * 0.5 } and SubtletyStealthCdsCdPostConditions()
 }
 
 ### actions.stealth_cds
@@ -588,16 +389,17 @@ AddFunction SubtletyStealthCdsMainPostConditions
 
 AddFunction SubtletyStealthCdsShortCdActions
 {
- #vanish,if=!variable.dsh_dfa&mantle_duration=0&cooldown.shadow_dance.charges_fractional<variable.shd_fractional+(equipped.mantle_of_the_master_assassin&time<30)*0.3&(!equipped.mantle_of_the_master_assassin|buff.symbols_of_death.up)
- if not dsh_dfa() and BuffRemaining(master_assassins_initiative) == 0 and SpellCharges(shadow_dance count=0) < shd_fractional() + { HasEquippedItem(mantle_of_the_master_assassin) and TimeInCombat() < 30 } * 0.3 and { not HasEquippedItem(mantle_of_the_master_assassin) or BuffPresent(symbols_of_death_buff) } Spell(vanish)
- #shadow_dance,if=dot.nightblade.remains>=5&charges_fractional>=variable.shd_fractional|target.time_to_die<cooldown.symbols_of_death.remains
- if { target.DebuffRemaining(nightblade_debuff) >= 5 and Charges(shadow_dance count=0) >= shd_fractional() or target.TimeToDie() < SpellCooldown(symbols_of_death) } and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
+ #variable,name=shd_threshold,value=cooldown.shadow_dance.charges_fractional>=1.75
+ #vanish,if=!variable.shd_threshold&debuff.find_weakness.remains<1
+ if not shd_threshold() and target.DebuffRemaining(find_weakness_debuff) < 1 Spell(vanish)
  #pool_resource,for_next=1,extra_amount=40
- #shadowmeld,if=energy>=40&energy.deficit>=10+variable.ssw_refund
- unless True(pool_energy 40) and EnergyDeficit() >= 10 + ssw_refund() and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(40)
+ #shadowmeld,if=energy>=40&energy.deficit>=10&!variable.shd_threshold&debuff.find_weakness.remains<1
+ unless True(pool_energy 40) and EnergyDeficit() >= 10 and not shd_threshold() and target.DebuffRemaining(find_weakness_debuff) < 1 and SpellUsable(shadowmeld) and SpellCooldown(shadowmeld) < TimeToEnergy(40)
  {
-  #shadow_dance,if=!variable.dsh_dfa&combo_points.deficit>=2+talent.subterfuge.enabled*2&(buff.symbols_of_death.remains>=1.2|cooldown.symbols_of_death.remains>=12+(talent.dark_shadow.enabled&set_bonus.tier20_4pc)*3-(!talent.dark_shadow.enabled&set_bonus.tier20_4pc)*4|mantle_duration>0)&(spell_targets.shuriken_storm>=4|!buff.the_first_of_the_dead.up)
-  if not dsh_dfa() and ComboPointsDeficit() >= 2 + TalentPoints(subterfuge_talent) * 2 and { BuffRemaining(symbols_of_death_buff) >= 1.2 or SpellCooldown(symbols_of_death) >= 12 + { Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 3 - { not Talent(dark_shadow_talent) and ArmorSetBonus(T20 4) } * 4 or BuffRemaining(master_assassins_initiative) > 0 } and { Enemies(tagged=1) >= 4 or not BuffPresent(the_first_of_the_dead_buff) } and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
+  #shadow_dance,if=(!talent.dark_shadow.enabled|dot.nightblade.remains>=5+talent.subterfuge.enabled)&(variable.shd_threshold|buff.symbols_of_death.remains>=1.2|spell_targets>=4&cooldown.symbols_of_death.remains>10)
+  if { not Talent(dark_shadow_talent) or target.DebuffRemaining(nightblade_debuff) >= 5 + TalentPoints(subterfuge_talent) } and { shd_threshold() or BuffRemaining(symbols_of_death_buff) >= 1.2 or Enemies(tagged=1) >= 4 and SpellCooldown(symbols_of_death) > 10 } Spell(shadow_dance)
+  #shadow_dance,if=target.time_to_die<cooldown.symbols_of_death.remains
+  if target.TimeToDie() < SpellCooldown(symbols_of_death) Spell(shadow_dance)
  }
 }
 
@@ -608,8 +410,8 @@ AddFunction SubtletyStealthCdsShortCdPostConditions
 AddFunction SubtletyStealthCdsCdActions
 {
  #pool_resource,for_next=1,extra_amount=40
- #shadowmeld,if=energy>=40&energy.deficit>=10+variable.ssw_refund
- if Energy() >= 40 and EnergyDeficit() >= 10 + ssw_refund() Spell(shadowmeld)
+ #shadowmeld,if=energy>=40&energy.deficit>=10&!variable.shd_threshold&debuff.find_weakness.remains<1
+ if Energy() >= 40 and EnergyDeficit() >= 10 and not shd_threshold() and target.DebuffRemaining(find_weakness_debuff) < 1 Spell(shadowmeld)
 }
 
 AddFunction SubtletyStealthCdsCdPostConditions
@@ -621,68 +423,54 @@ AddFunction SubtletyStealthCdsCdPostConditions
 AddFunction SubtletyStealthedMainActions
 {
  #shadowstrike,if=buff.stealth.up
+ if BuffPresent(shot_in_the_dark_buff) and not InCombat() Spell(cheap_shot)
  if BuffPresent(stealthed_buff any=1) Spell(shadowstrike)
- #call_action_list,name=finish,if=combo_points>=5+(talent.deeper_stratagem.enabled&buff.vanish.up)&(spell_targets.shuriken_storm>=3+equipped.shadow_satyrs_walk|(mantle_duration<=1.3&mantle_duration>=0.3))
- if ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } SubtletyFinishMainActions()
+ if BuffPresent(shot_in_the_dark_buff) Spell(cheap_shot)
+ #call_action_list,name=finish,if=combo_points.deficit<=1-(talent.deeper_stratagem.enabled&buff.vanish.up)
+ if ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } SubtletyFinishMainActions()
 
- unless ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } and SubtletyFinishMainPostConditions()
+ unless ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishMainPostConditions()
  {
-  #shuriken_storm,if=buff.shadowmeld.down&((combo_points.deficit>=2+equipped.insignia_of_ravenholdt&spell_targets.shuriken_storm>=3+equipped.shadow_satyrs_walk)|(combo_points.deficit>=1&buff.the_dreadlords_deceit.stack>=29))
-  if BuffExpires(shadowmeld_buff) and { ComboPointsDeficit() >= 2 + HasEquippedItem(insignia_of_ravenholdt) and Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or ComboPointsDeficit() >= 1 and BuffStacks(the_dreadlords_deceit_buff) >= 29 } Spell(shuriken_storm)
-  #call_action_list,name=finish,if=combo_points>=5+(talent.deeper_stratagem.enabled&buff.vanish.up)&combo_points.deficit<3+buff.shadow_blades.up-equipped.mantle_of_the_master_assassin
-  if ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) SubtletyFinishMainActions()
-
-  unless ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) and SubtletyFinishMainPostConditions()
-  {
-   #shadowstrike
-   Spell(shadowstrike)
-  }
+  #shadowstrike,cycle_targets=1,if=talent.secret_technique.enabled&talent.find_weakness.enabled&debuff.find_weakness.remains<1&spell_targets.shuriken_storm=2&target.time_to_die-remains>6
+  if Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 Spell(shadowstrike)
+  #shuriken_storm,if=spell_targets.shuriken_storm>=3
+  if Enemies(tagged=1) >= 3 Spell(shuriken_storm)
+  #shadowstrike
+  Spell(shadowstrike)
  }
 }
 
 AddFunction SubtletyStealthedMainPostConditions
 {
- ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } and SubtletyFinishMainPostConditions() or ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) and SubtletyFinishMainPostConditions()
+ ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishMainPostConditions()
 }
 
 AddFunction SubtletyStealthedShortCdActions
 {
  unless BuffPresent(stealthed_buff any=1) and Spell(shadowstrike)
  {
-  #call_action_list,name=finish,if=combo_points>=5+(talent.deeper_stratagem.enabled&buff.vanish.up)&(spell_targets.shuriken_storm>=3+equipped.shadow_satyrs_walk|(mantle_duration<=1.3&mantle_duration>=0.3))
-  if ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } SubtletyFinishShortCdActions()
-
-  unless ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } and SubtletyFinishShortCdPostConditions() or BuffExpires(shadowmeld_buff) and { ComboPointsDeficit() >= 2 + HasEquippedItem(insignia_of_ravenholdt) and Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or ComboPointsDeficit() >= 1 and BuffStacks(the_dreadlords_deceit_buff) >= 29 } and Spell(shuriken_storm)
-  {
-   #call_action_list,name=finish,if=combo_points>=5+(talent.deeper_stratagem.enabled&buff.vanish.up)&combo_points.deficit<3+buff.shadow_blades.up-equipped.mantle_of_the_master_assassin
-   if ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) SubtletyFinishShortCdActions()
-  }
+  #call_action_list,name=finish,if=combo_points.deficit<=1-(talent.deeper_stratagem.enabled&buff.vanish.up)
+  if ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } SubtletyFinishShortCdActions()
  }
 }
 
 AddFunction SubtletyStealthedShortCdPostConditions
 {
- BuffPresent(stealthed_buff any=1) and Spell(shadowstrike) or ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } and SubtletyFinishShortCdPostConditions() or BuffExpires(shadowmeld_buff) and { ComboPointsDeficit() >= 2 + HasEquippedItem(insignia_of_ravenholdt) and Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or ComboPointsDeficit() >= 1 and BuffStacks(the_dreadlords_deceit_buff) >= 29 } and Spell(shuriken_storm) or ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) and SubtletyFinishShortCdPostConditions() or Spell(shadowstrike)
+ BuffPresent(stealthed_buff any=1) and Spell(shadowstrike) or ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishShortCdPostConditions() or Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 and Spell(shadowstrike) or Enemies(tagged=1) >= 3 and Spell(shuriken_storm) or Spell(shadowstrike)
 }
 
 AddFunction SubtletyStealthedCdActions
 {
  unless BuffPresent(stealthed_buff any=1) and Spell(shadowstrike)
  {
-  #call_action_list,name=finish,if=combo_points>=5+(talent.deeper_stratagem.enabled&buff.vanish.up)&(spell_targets.shuriken_storm>=3+equipped.shadow_satyrs_walk|(mantle_duration<=1.3&mantle_duration>=0.3))
-  if ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } SubtletyFinishCdActions()
-
-  unless ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } and SubtletyFinishCdPostConditions() or BuffExpires(shadowmeld_buff) and { ComboPointsDeficit() >= 2 + HasEquippedItem(insignia_of_ravenholdt) and Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or ComboPointsDeficit() >= 1 and BuffStacks(the_dreadlords_deceit_buff) >= 29 } and Spell(shuriken_storm)
-  {
-   #call_action_list,name=finish,if=combo_points>=5+(talent.deeper_stratagem.enabled&buff.vanish.up)&combo_points.deficit<3+buff.shadow_blades.up-equipped.mantle_of_the_master_assassin
-   if ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) SubtletyFinishCdActions()
-  }
+  #call_action_list,name=finish,if=combo_points.deficit<=1-(talent.deeper_stratagem.enabled&buff.vanish.up)
+  if ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } SubtletyFinishCdActions()
  }
 }
 
 AddFunction SubtletyStealthedCdPostConditions
 {
- BuffPresent(stealthed_buff any=1) and Spell(shadowstrike) or ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and { Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or BuffRemaining(master_assassins_initiative) <= 1.3 and BuffRemaining(master_assassins_initiative) >= 0.3 } and SubtletyFinishCdPostConditions() or BuffExpires(shadowmeld_buff) and { ComboPointsDeficit() >= 2 + HasEquippedItem(insignia_of_ravenholdt) and Enemies(tagged=1) >= 3 + HasEquippedItem(shadow_satyrs_walk) or ComboPointsDeficit() >= 1 and BuffStacks(the_dreadlords_deceit_buff) >= 29 } and Spell(shuriken_storm) or ComboPoints() >= 5 + { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and ComboPointsDeficit() < 3 + BuffPresent(shadow_blades_buff) - HasEquippedItem(mantle_of_the_master_assassin) and SubtletyFinishCdPostConditions() or Spell(shadowstrike)
+ BuffPresent(stealthed_buff any=1) and Spell(shadowstrike) or ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishCdPostConditions() or Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 and Spell(shadowstrike) or Enemies(tagged=1) >= 3 and Spell(shuriken_storm) or Spell(shadowstrike)
 }
 ]]
 
