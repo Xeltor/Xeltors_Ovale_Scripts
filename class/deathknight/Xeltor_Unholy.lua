@@ -216,7 +216,7 @@ AddFunction UnholyCooldownsMainActions
   #unholy_frenzy,if=active_enemies>=2&((cooldown.death_and_decay.remains<=gcd&!talent.defile.enabled)|(cooldown.defile.remains<=gcd&talent.defile.enabled))
   if Enemies(tagged=1) >= 2 and { SpellCooldown(death_and_decay) <= GCD() and not Talent(defile_talent) or SpellCooldown(defile) <= GCD() and Talent(defile_talent) } Spell(unholy_frenzy)
   #soul_reaper,target_if=(target.time_to_die<8|rune<=2)&!buff.unholy_frenzy.up
-  if { target.TimeToDie() < 8 or Rune() < 3 } and not BuffPresent(unholy_frenzy_buff) Spell(soul_reaper_unholy)
+  if { target.TimeToDie() < 8 or Rune() < 3 } and not BuffPresent(unholy_frenzy_buff) Spell(soul_reaper)
   #unholy_blight
   Spell(unholy_blight)
  }
@@ -235,7 +235,7 @@ AddFunction UnholyCooldownsShortCdActions
 
 AddFunction UnholyCooldownsShortCdPostConditions
 {
- HasEquippedItem(cold_heart) and BuffStacks(cold_heart_item_buff) > 10 and UnholyColdHeartShortCdPostConditions() or Spell(army_of_the_dead) or target.DebuffStacks(festering_wound_debuff) >= 4 and Spell(apocalypse) or { HasEquippedItem(137075) and SpellCooldown(summon_gargoyle) > 40 or not HasEquippedItem(137075) or not Talent(summon_gargoyle_talent) } and Spell(dark_transformation) or RunicPowerDeficit() < 14 and Spell(summon_gargoyle) or target.DebuffStacks(festering_wound_debuff) < 4 and Spell(unholy_frenzy) or Enemies(tagged=1) >= 2 and { SpellCooldown(death_and_decay) <= GCD() and not Talent(defile_talent) or SpellCooldown(defile) <= GCD() and Talent(defile_talent) } and Spell(unholy_frenzy) or { target.TimeToDie() < 8 or Rune() < 3 } and not BuffPresent(unholy_frenzy_buff) and Spell(soul_reaper_unholy) or Spell(unholy_blight)
+ HasEquippedItem(cold_heart) and BuffStacks(cold_heart_item_buff) > 10 and UnholyColdHeartShortCdPostConditions() or Spell(army_of_the_dead) or target.DebuffStacks(festering_wound_debuff) >= 4 and Spell(apocalypse) or { HasEquippedItem(137075) and SpellCooldown(summon_gargoyle) > 40 or not HasEquippedItem(137075) or not Talent(summon_gargoyle_talent) } and Spell(dark_transformation) or RunicPowerDeficit() < 14 and Spell(summon_gargoyle) or target.DebuffStacks(festering_wound_debuff) < 4 and Spell(unholy_frenzy) or Enemies(tagged=1) >= 2 and { SpellCooldown(death_and_decay) <= GCD() and not Talent(defile_talent) or SpellCooldown(defile) <= GCD() and Talent(defile_talent) } and Spell(unholy_frenzy) or { target.TimeToDie() < 8 or Rune() < 3 } and not BuffPresent(unholy_frenzy_buff) and Spell(soul_reaper) or Spell(unholy_blight)
 }
 
 AddFunction UnholyCooldownsCdActions
@@ -246,7 +246,7 @@ AddFunction UnholyCooldownsCdActions
 
 AddFunction UnholyCooldownsCdPostConditions
 {
- HasEquippedItem(cold_heart) and BuffStacks(cold_heart_item_buff) > 10 and UnholyColdHeartCdPostConditions() or Spell(army_of_the_dead) or target.DebuffStacks(festering_wound_debuff) >= 4 and Spell(apocalypse) or { HasEquippedItem(137075) and SpellCooldown(summon_gargoyle) > 40 or not HasEquippedItem(137075) or not Talent(summon_gargoyle_talent) } and Spell(dark_transformation) or RunicPowerDeficit() < 14 and Spell(summon_gargoyle) or target.DebuffStacks(festering_wound_debuff) < 4 and Spell(unholy_frenzy) or Enemies(tagged=1) >= 2 and { SpellCooldown(death_and_decay) <= GCD() and not Talent(defile_talent) or SpellCooldown(defile) <= GCD() and Talent(defile_talent) } and Spell(unholy_frenzy) or { target.TimeToDie() < 8 or Rune() < 3 } and not BuffPresent(unholy_frenzy_buff) and Spell(soul_reaper_unholy) or Spell(unholy_blight)
+ HasEquippedItem(cold_heart) and BuffStacks(cold_heart_item_buff) > 10 and UnholyColdHeartCdPostConditions() or Spell(army_of_the_dead) or target.DebuffStacks(festering_wound_debuff) >= 4 and Spell(apocalypse) or { HasEquippedItem(137075) and SpellCooldown(summon_gargoyle) > 40 or not HasEquippedItem(137075) or not Talent(summon_gargoyle_talent) } and Spell(dark_transformation) or RunicPowerDeficit() < 14 and Spell(summon_gargoyle) or target.DebuffStacks(festering_wound_debuff) < 4 and Spell(unholy_frenzy) or Enemies(tagged=1) >= 2 and { SpellCooldown(death_and_decay) <= GCD() and not Talent(defile_talent) or SpellCooldown(defile) <= GCD() and Talent(defile_talent) } and Spell(unholy_frenzy) or { target.TimeToDie() < 8 or Rune() < 3 } and not BuffPresent(unholy_frenzy_buff) and Spell(soul_reaper) or Spell(unholy_blight)
 }
 
 ### actions.generic

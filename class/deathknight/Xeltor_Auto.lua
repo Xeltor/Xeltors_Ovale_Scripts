@@ -95,7 +95,7 @@ AddFunction InterruptActions
 		if not target.Classification(worldboss)
 		{
 			if target.InRange(asphyxiate) Spell(asphyxiate)
-			if target.InRange(strangulate) Spell(strangulate)
+			# if target.InRange(strangulate) Spell(strangulate)
 			if target.Distance(less 12) Spell(blinding_sleet)
 			if target.Distance(less 8) Spell(arcane_torrent_runicpower)
 			if target.InRange(quaking_palm) Spell(quaking_palm)
