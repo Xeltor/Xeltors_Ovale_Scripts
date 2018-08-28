@@ -19,7 +19,7 @@ Include(xeltor_unholy_functions)
 # Blood
 AddIcon specialization=1 help=main
 {
-	if InCombat() InterruptActions()
+	if InCombat() and not target.IsFriend() InterruptActions()
 	
 	if target.InRange(heart_strike) and HasFullControl()
     {
@@ -38,7 +38,7 @@ AddCheckBox(opt_cooldowns "Use cooldowns" default specialization=blood)
 AddIcon specialization=2 help=main
 {
 	# Interrupt
-	if InCombat() InterruptActions()
+	if InCombat() and not target.IsFriend() InterruptActions()
 	
     if target.InRange(obliterate) and HasFullControl()
     {
@@ -59,7 +59,7 @@ AddIcon specialization=2 help=main
 AddIcon specialization=3 help=main
 {
 	# Interrupt
-	if InCombat() InterruptActions()
+	if InCombat() and not target.IsFriend() InterruptActions()
 	
 	# if 
 	if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 and InCombat() and target.InRange(outbreak) and target.HealthPercent() < 100 Spell(outbreak)
@@ -89,7 +89,7 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if { target.HasManagedInterrupts() and target.MustInterrupt() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
 		if target.InRange(mind_freeze) Spell(mind_freeze)
 		if not target.Classification(worldboss)
