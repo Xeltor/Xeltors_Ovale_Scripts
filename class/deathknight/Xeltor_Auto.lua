@@ -89,7 +89,7 @@ AddFunction Boss
 
 AddFunction InterruptActions
 {
-	if { target.HasManagedInterrupts() and target.MustInterrupt() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
 		if target.InRange(mind_freeze) Spell(mind_freeze)
 		if not target.Classification(worldboss)
@@ -97,7 +97,6 @@ AddFunction InterruptActions
 			if target.InRange(asphyxiate) Spell(asphyxiate)
 			# if target.InRange(strangulate) Spell(strangulate)
 			if target.Distance(less 12) Spell(blinding_sleet)
-			if target.Distance(less 8) Spell(arcane_torrent_runicpower)
 			if target.InRange(quaking_palm) Spell(quaking_palm)
 			if target.Distance(less 8) Spell(war_stomp)
 		}
