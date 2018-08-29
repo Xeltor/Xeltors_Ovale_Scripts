@@ -19,7 +19,7 @@ Include(xeltor_unholy_functions)
 # Blood
 AddIcon specialization=1 help=main
 {
-	if InCombat() and not target.IsFriend() InterruptActions()
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
 	
 	if target.InRange(heart_strike) and HasFullControl()
     {
@@ -29,6 +29,7 @@ AddIcon specialization=1 help=main
 
 		if CheckBoxOn(opt_cooldowns) BloodDefaultShortCdActions()
 
+		if not target.DebuffPresent(blood_plague_debuff) Spell(blood_boil)
 		BloodDefaultMainActions()
 	}
 }
@@ -38,7 +39,7 @@ AddCheckBox(opt_cooldowns "Use cooldowns" default specialization=blood)
 AddIcon specialization=2 help=main
 {
 	# Interrupt
-	if InCombat() and not target.IsFriend() InterruptActions()
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
 	
     if target.InRange(obliterate) and HasFullControl()
     {
@@ -59,7 +60,7 @@ AddIcon specialization=2 help=main
 AddIcon specialization=3 help=main
 {
 	# Interrupt
-	if InCombat() and not target.IsFriend() InterruptActions()
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
 	
 	# if 
 	if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 and InCombat() and target.InRange(outbreak) and target.HealthPercent() < 100 Spell(outbreak)

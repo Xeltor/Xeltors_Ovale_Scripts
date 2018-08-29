@@ -12,8 +12,8 @@ Include(ovale_trinkets_wod)
 Include(ovale_demonhunter_spells)
 
 # Class specific functions.
-Include(xeltor_havoc_functions)
-Include(xeltor_vengeance_functions)
+# Include(xeltor_havoc_functions)
+# Include(xeltor_vengeance_functions)
 
 # Havoc
 AddIcon specialization=1 help=main
@@ -23,13 +23,13 @@ AddIcon specialization=1 help=main
 	if target.InRange(chaos_strike) and HasFullControl()
 	{
 		# Cooldowns
-		if Boss() HavocCooldownCdActions()
+		# if Boss() HavocCooldownCdActions()
 		
 		# Short Cooldowns
-		HavocDefaultShortCdActions()
+		# HavocDefaultShortCdActions()
 		
 		# Default Actions
-		HavocDefaultMainActions()
+		# HavocDefaultMainActions()
 	}
 	
 	# if InCombat() and not target.InRange(chaos_strike) and Falling() and not BuffPresent(glide_buff) Spell(glide)
@@ -44,13 +44,13 @@ AddIcon specialization=2 help=main
     if target.InRange(shear) and HasFullControl()
     {
 		# Cooldown
-		if CheckBoxOn(opt_cooldowns) VengeanceDefaultCdActions()
+		# if CheckBoxOn(opt_cooldowns) VengeanceDefaultCdActions()
 		
 		# Short Cooldown
-		VengeanceDefaultShortCdActions()
+		# VengeanceDefaultShortCdActions()
 		
 		# Main rotation
-		VengeanceDefaultMainActions()
+		# VengeanceDefaultMainActions()
     }
 	
 	if InCombat() and not target.InRange(shear) and target.InRange(felblade) and Falling() Spell(felblade)
