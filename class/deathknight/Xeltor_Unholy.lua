@@ -2,9 +2,63 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_unholy_functions"
-	local desc = "[Xel][7.3.5] Death Knight: Unholy Functions"
+	local name = "xeltor_unholy"
+	local desc = "[Xel][8.0] Death Knight: Unholy"
 	local code = [[
+# Common functions.
+Include(ovale_common)
+Include(ovale_trinkets_mop)
+Include(ovale_trinkets_wod)
+Include(ovale_deathknight_spells)
+
+# Unholy
+AddIcon specialization=3 help=main
+{
+	# Interrupt
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
+	
+	# if 
+	if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 and InCombat() and target.InRange(outbreak) and target.HealthPercent() < 100 Spell(outbreak)
+	
+    if target.InRange(festering_strike) and HasFullControl()
+    {
+		if not pet.Present() Spell(raise_dead)
+		if BuffStacks(dark_succor_buff) Spell(death_strike)
+		
+		# Cooldown
+		if Boss() UnholyDefaultCdActions()
+
+		# Short cooldown
+		UnholyDefaultShortCdActions()
+		
+		# Rotation
+		if target.DebuffRemaining(virulent_plague_debuff) <= GCD() * 2 Spell(outbreak)
+		UnholyDefaultMainActions()
+	}
+}
+
+# Common functions.
+AddFunction Boss
+{
+	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
+}
+
+AddFunction InterruptActions
+{
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
+	{
+		if target.InRange(mind_freeze) Spell(mind_freeze)
+		if not target.Classification(worldboss)
+		{
+			if target.InRange(asphyxiate) Spell(asphyxiate)
+			# if target.InRange(strangulate) Spell(strangulate)
+			if target.Distance(less 12) Spell(blinding_sleet)
+			if target.InRange(quaking_palm) Spell(quaking_palm)
+			if target.Distance(less 8) Spell(war_stomp)
+		}
+	}
+}
+
 AddFunction pooling_for_gargoyle
 {
  SpellCooldown(summon_gargoyle) < 5 and { SpellCooldown(dark_transformation) < 5 or not HasEquippedItem(137075) } and Talent(summon_gargoyle_talent)
@@ -334,5 +388,5 @@ AddFunction UnholyPrecombatCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("DEATHKNIGHT", nill, name, desc, code, "include")
+	OvaleScripts:RegisterScript("DEATHKNIGHT", "unholy", name, desc, code, "script")
 end

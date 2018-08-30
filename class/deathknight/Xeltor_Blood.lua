@@ -2,9 +2,56 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_blood_functions"
-	local desc = "[Xel][8.0] Death Knight: Blood Functions"
+	local name = "xeltor_blood"
+	local desc = "[Xel][8.0] Death Knight: Blood"
 	local code = [[
+# Common functions.
+Include(ovale_common)
+Include(ovale_trinkets_mop)
+Include(ovale_trinkets_wod)
+Include(ovale_deathknight_spells)
+
+# Blood
+AddIcon specialization=1 help=main
+{
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
+	
+	if target.InRange(heart_strike) and HasFullControl()
+    {
+		if BuffStacks(dark_succor_buff) Spell(death_strike)
+
+		if CheckBoxOn(opt_cooldowns) BloodDefaultCdActions()
+
+		if CheckBoxOn(opt_cooldowns) BloodDefaultShortCdActions()
+
+		if not target.DebuffPresent(blood_plague_debuff) Spell(blood_boil)
+		BloodDefaultMainActions()
+	}
+}
+AddCheckBox(opt_cooldowns "Use cooldowns" default specialization=blood)
+
+# Common functions.
+AddFunction Boss
+{
+	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
+}
+
+AddFunction InterruptActions
+{
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
+	{
+		if target.InRange(mind_freeze) Spell(mind_freeze)
+		if not target.Classification(worldboss)
+		{
+			if target.InRange(asphyxiate) Spell(asphyxiate)
+			# if target.InRange(strangulate) Spell(strangulate)
+			if target.Distance(less 12) Spell(blinding_sleet)
+			if target.InRange(quaking_palm) Spell(quaking_palm)
+			if target.Distance(less 8) Spell(war_stomp)
+		}
+	}
+}
+
 ### actions.default
 
 AddFunction BloodDefaultMainActions
@@ -177,5 +224,5 @@ AddFunction BloodStandardCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("DEATHKNIGHT", nil, name, desc, code, "include")
+	OvaleScripts:RegisterScript("DEATHKNIGHT", "blood", name, desc, code, "script")
 end
