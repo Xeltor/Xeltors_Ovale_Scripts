@@ -27,6 +27,9 @@ AddIcon
 	Texture(ability_vanish) # Vanish
 	Texture(inv_knife_1h_grimbatolraid_d_03) # Shadow Blades
 	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
 	# Talents
 	Texture(ability_ironmaidens_convulsiveshadows) # Gloomblade (T1) (Replaces Backstab)
 	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T3)

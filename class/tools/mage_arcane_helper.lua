@@ -3,16 +3,15 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "MAGEARCANE"
-	local desc = "[Xel][BROKEN] Spellhelper: Arcane"
+	local desc = "[Xel][8.0] Spellhelper: Arcane"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
 	Texture(spell_arcane_blast) # Arcane Blast
-	Texture(ability_mage_arcanebarrage) # Arcane Barrage
 	Texture(spell_nature_starfall) # Arcane Missiles
-	Texture(spell_frost_glacier) # Cone of Cold
+	Texture(ability_mage_arcanebarrage) # Arcane Barrage
 	Texture(spell_nature_wispsplode) # Arcane Explosion
 	Texture(spell_frost_iceshock) # Counterspell
 
@@ -21,16 +20,23 @@ AddIcon
 	Texture(spell_nature_lightning) # Arcane Power
 	Texture(spell_nature_enchantarmor) # Presence of Mind
 	Texture(spell_nature_purge) # Evocation
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
+	# Utils
+	Texture(spell_arcane_arcane02) # Spellsteal
+	Texture(spell_nature_slow) # Slow
+	Texture(spell_frost_frostnova) # Frost Nova
+	Texture(spell_magearmor) # Prismatic Barrier
 
 	# Talents
-	Texture(spell_mage_iceflows) # Ice Floes (T1)
-	Texture(spell_ice_lament) # Ice Barrier (T2)
-	Texture(ability_mage_frostjaw) # Frostjaw (T3)
-	Texture(spell_frost_wizardmark) # Cold Snap (T4)
-	Texture(spell_mage_nethertempest) # Nether Tempest (T5)
-	Texture(spell_mage_supernova) # Supernova (T5)
-	Texture(spell_magic_lesserinvisibilty) # Mirror Image (T6)
-	Texture(spell_mage_focusingcrystal) # Prismatic Crystal (T7)
+	Texture(ability_socererking_arcanemines) # Arcane Familiar (T1)
+	Texture(spell_magic_lesserinvisibilty) # Mirror Image (T3)
+	Texture(spell_mage_runeofpower) # Rune of Power (T3)
+	Texture(ability_thunderking_overcharge) # Charged Up (T4)
+	Texture(spell_mage_supernova) # Supernova (T4)
+	Texture(spell_mage_nethertempest) # Nether Tempest (T6)
 	Texture(spell_mage_arcaneorb) # Arcane Orb (T7)
 
 	# Racials
@@ -47,11 +53,31 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 
