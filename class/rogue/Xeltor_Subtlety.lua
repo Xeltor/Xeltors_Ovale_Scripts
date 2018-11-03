@@ -22,7 +22,7 @@ AddIcon specialization=3 help=main
 		if not Talent(death_from_above_talent) and not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
 	}
 	
-	if InCombat() InterruptActions()
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
 	if HealthPercent() <= 25 and HealthPercent() > 0 or HealthPercent() < 100 and HealthPercent() > 0 and not InCombat() and not mounted() Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()
@@ -42,7 +42,7 @@ AddIcon specialization=3 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { target.Level() >= Level() and { target.Classification(elite) or target.Classification(rare) } }
 }
 
 AddFunction GetInMeleeRange
@@ -57,7 +57,7 @@ AddFunction GetInMeleeRange
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
 		if target.InRange(kick) and not Stealthed() Spell(kick)
 		if not target.Classification(worldboss)
@@ -76,8 +76,8 @@ AddFunction VanishAllowed
 
 AddFunction SubtletyUseItemActions
 {
- if ItemCooldown(Trinket0Slot) <= 0 Texture(inv_jewelry_talisman_12)
- if ItemCooldown(Trinket1Slot) <= 0 Texture(inv_jewelry_talisman_12)
+ if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+ if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
 }
 
 AddFunction shd_threshold

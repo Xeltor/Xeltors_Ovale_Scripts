@@ -17,6 +17,7 @@ AddIcon specialization=1 help=main
 	{
 		#arcane_intellect
 		if not BuffPresent(arcane_intellect_buff any=1) and not target.IsFriend() Spell(arcane_intellect)
+		if not target.BuffPresent(arcane_intellect_buff any=1) and target.IsFriend() Spell(arcane_intellect)
 		#summon_arcane_familiar
 		if not BuffPresent(arcane_familiar_buff) Spell(summon_arcane_familiar)
 	}
@@ -36,12 +37,12 @@ AddIcon specialization=1 help=main
 
 AddFunction Boss
 {
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
+	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { target.Level() >= Level() and { target.Classification(elite) or target.Classification(rare) } }
 }
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
 		if target.InRange(counterspell) and target.IsInterruptible() Spell(counterspell)
 		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
@@ -78,8 +79,8 @@ AddFunction average_burn_length
 
 AddFunction ArcaneUseItemActions
 {
- if ItemCooldown(Trinket0Slot) <= 0 Texture(inv_jewelry_talisman_12)
- if ItemCooldown(Trinket1Slot) <= 0 Texture(inv_jewelry_talisman_12)
+ if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+ if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
 }
 
 ### actions.default
@@ -185,13 +186,13 @@ AddFunction ArcaneBurnMainActions
  #nether_tempest,if=(refreshable|!ticking)&buff.arcane_charge.stack=buff.arcane_charge.max_stack&buff.rune_of_power.down&buff.arcane_power.down
  if { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) Spell(nether_tempest)
  #arcane_blast,if=buff.rule_of_threes.up&talent.overpowered.enabled&active_enemies<3
- if DebuffPresent(rule_of_threes) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } Spell(arcane_blast)
+ if BuffPresent(rule_of_threes_buff) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } Spell(arcane_blast)
  #arcane_barrage,if=active_enemies>=3&(buff.arcane_charge.stack=buff.arcane_charge.max_stack)
  if Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() Spell(arcane_barrage)
  #arcane_explosion,if=active_enemies>=3
  if Enemies(tagged=1) >= 3 and target.Distance(less 10) Spell(arcane_explosion)
  #arcane_missiles,if=buff.clearcasting.react&active_enemies<3&(talent.amplification.enabled|(!talent.overpowered.enabled&azerite.arcane_pummeling.rank>=2)|buff.arcane_power.down),chain=1
- if DebuffPresent(clearcasting) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } Spell(arcane_missiles)
+ if BuffPresent(clearcasting_buff) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } Spell(arcane_missiles)
  #arcane_blast,if=active_enemies<3
  if Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } Spell(arcane_blast)
  #arcane_barrage
@@ -212,7 +213,7 @@ AddFunction ArcaneBurnShortCdActions
  #charged_up,if=buff.arcane_charge.stack<=1
  if ArcaneCharges() <= 1 Spell(charged_up)
 
- unless { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or DebuffPresent(rule_of_threes) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
+ unless { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or BuffPresent(rule_of_threes_buff) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
  {
   #rune_of_power,if=!buff.arcane_power.up&(mana.pct>=50|cooldown.arcane_power.remains=0)&(buff.arcane_charge.stack=buff.arcane_charge.max_stack)
   if not BuffPresent(arcane_power_buff) and { ManaPercent() >= 50 or not SpellCooldown(arcane_power) > 0 } and ArcaneCharges() == MaxArcaneCharges() and { Speed() == 0 or CastTime(rune_of_power) <= 0 } Spell(rune_of_power)
@@ -225,7 +226,7 @@ AddFunction ArcaneBurnShortCdActions
 
 AddFunction ArcaneBurnShortCdPostConditions
 {
- { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or DebuffPresent(rule_of_threes) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() and Spell(arcane_barrage) or Enemies(tagged=1) >= 3 and target.Distance(less 10) and Spell(arcane_explosion) or DebuffPresent(clearcasting) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
+ { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or BuffPresent(rule_of_threes_buff) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() and Spell(arcane_barrage) or Enemies(tagged=1) >= 3 and target.Distance(less 10) and Spell(arcane_explosion) or BuffPresent(clearcasting_buff) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
 }
 
 AddFunction ArcaneBurnCdActions
@@ -241,7 +242,7 @@ AddFunction ArcaneBurnCdActions
   #mirror_image
   Spell(mirror_image)
 
-  unless { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or DebuffPresent(rule_of_threes) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
+  unless { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or BuffPresent(rule_of_threes_buff) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
   {
    #lights_judgment,if=buff.arcane_power.down
    if BuffExpires(arcane_power_buff) Spell(lights_judgment)
@@ -263,7 +264,7 @@ AddFunction ArcaneBurnCdActions
     #potion,if=buff.arcane_power.up&(buff.berserking.up|buff.blood_fury.up|!(race.troll|race.orc))
     # if BuffPresent(arcane_power_buff) and { BuffPresent(berserking_buff) or BuffPresent(blood_fury_sp_buff) or not { Race(Troll) or Race(Orc) } } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_intellect usable=1)
 
-    unless { ArcaneCharges() == 0 or Enemies(tagged=1) < 3 or Enemies(tagged=1) < 2 and Talent(resonance_talent) } and Spell(arcane_orb) or Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() and Spell(arcane_barrage) or Enemies(tagged=1) >= 3 and target.Distance(less 10) and Spell(arcane_explosion) or DebuffPresent(clearcasting) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
+    unless { ArcaneCharges() == 0 or Enemies(tagged=1) < 3 or Enemies(tagged=1) < 2 and Talent(resonance_talent) } and Spell(arcane_orb) or Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() and Spell(arcane_barrage) or Enemies(tagged=1) >= 3 and target.Distance(less 10) and Spell(arcane_explosion) or BuffPresent(clearcasting_buff) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
     {
      #variable,name=average_burn_length,op=set,value=(variable.average_burn_length*variable.total_burns-variable.average_burn_length+(burn_phase_duration))%variable.total_burns
      #evocation,interrupt_if=mana.pct>=85,interrupt_immediate=1
@@ -276,7 +277,7 @@ AddFunction ArcaneBurnCdActions
 
 AddFunction ArcaneBurnCdPostConditions
 {
- ArcaneCharges() <= 1 and Spell(charged_up) or { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or DebuffPresent(rule_of_threes) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or not BuffPresent(arcane_power_buff) and { ManaPercent() >= 50 or not SpellCooldown(arcane_power) > 0 } and ArcaneCharges() == MaxArcaneCharges() and { Speed() == 0 or CastTime(rune_of_power) <= 0 } and Spell(rune_of_power) or { ArcaneCharges() == 0 or Enemies(tagged=1) < 3 or Enemies(tagged=1) < 2 and Talent(resonance_talent) } and Spell(arcane_orb) or Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() and Spell(arcane_barrage) or Enemies(tagged=1) >= 3 and target.Distance(less 10) and Spell(arcane_explosion) or DebuffPresent(clearcasting) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
+ ArcaneCharges() <= 1 and Spell(charged_up) or { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or BuffPresent(rule_of_threes_buff) and Talent(overpowered_talent) and Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or not BuffPresent(arcane_power_buff) and { ManaPercent() >= 50 or not SpellCooldown(arcane_power) > 0 } and ArcaneCharges() == MaxArcaneCharges() and { Speed() == 0 or CastTime(rune_of_power) <= 0 } and Spell(rune_of_power) or { ArcaneCharges() == 0 or Enemies(tagged=1) < 3 or Enemies(tagged=1) < 2 and Talent(resonance_talent) } and Spell(arcane_orb) or Enemies(tagged=1) >= 3 and ArcaneCharges() == MaxArcaneCharges() and Spell(arcane_barrage) or Enemies(tagged=1) >= 3 and target.Distance(less 10) and Spell(arcane_explosion) or BuffPresent(clearcasting_buff) and Enemies(tagged=1) < 3 and { Talent(amplification_talent) or not Talent(overpowered_talent) and AzeriteTraitRank(arcane_pummeling_trait) >= 2 or BuffExpires(arcane_power_buff) } and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or Enemies(tagged=1) < 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
 }
 
 ### actions.conserve
@@ -286,9 +287,9 @@ AddFunction ArcaneConserveMainActions
  #nether_tempest,if=(refreshable|!ticking)&buff.arcane_charge.stack=buff.arcane_charge.max_stack&buff.rune_of_power.down&buff.arcane_power.down
  if { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) Spell(nether_tempest)
  #arcane_blast,if=buff.rule_of_threes.up&buff.arcane_charge.stack>3
- if DebuffPresent(rule_of_threes) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } Spell(arcane_blast)
+ if BuffPresent(rule_of_threes_buff) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } Spell(arcane_blast)
  #arcane_missiles,if=mana.pct<=95&buff.clearcasting.react,chain=1
- if ManaPercent() <= 95 and DebuffPresent(clearcasting) and { Speed() == 0 or Talent(slipstream_talent) } Spell(arcane_missiles)
+ if ManaPercent() <= 95 and BuffPresent(clearcasting_buff) and { Speed() == 0 or Talent(slipstream_talent) } Spell(arcane_missiles)
  #arcane_barrage,if=((buff.arcane_charge.stack=buff.arcane_charge.max_stack)&((mana.pct<=variable.conserve_mana)|(cooldown.arcane_power.remains>cooldown.rune_of_power.full_recharge_time&mana.pct<=variable.conserve_mana+25))|(talent.arcane_orb.enabled&cooldown.arcane_orb.remains<=gcd&cooldown.arcane_power.remains>10))|mana.pct<=(variable.conserve_mana-10)
  if ArcaneCharges() == MaxArcaneCharges() and { ManaPercent() <= conserve_mana() or SpellCooldown(arcane_power) > SpellCooldown(rune_of_power) and ManaPercent() <= conserve_mana() + 25 } or Talent(arcane_orb_talent) and SpellCooldown(arcane_orb) <= GCD() and SpellCooldown(arcane_power) > 10 or ManaPercent() <= conserve_mana() - 10 Spell(arcane_barrage)
  #supernova,if=mana.pct<=95
@@ -315,7 +316,7 @@ AddFunction ArcaneConserveShortCdActions
   #arcane_orb,if=buff.arcane_charge.stack<=2&(cooldown.arcane_power.remains>10|active_enemies<=2)
   if ArcaneCharges() <= 2 and { SpellCooldown(arcane_power) > 10 or Enemies(tagged=1) <= 2 } Spell(arcane_orb)
 
-  unless DebuffPresent(rule_of_threes) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
+  unless BuffPresent(rule_of_threes_buff) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast)
   {
    #rune_of_power,if=buff.arcane_charge.stack=buff.arcane_charge.max_stack&(full_recharge_time<=execute_time|full_recharge_time<=cooldown.arcane_power.remains|target.time_to_die<=cooldown.arcane_power.remains)
    if ArcaneCharges() == MaxArcaneCharges() and { SpellFullRecharge(rune_of_power) <= ExecuteTime(rune_of_power) or SpellFullRecharge(rune_of_power) <= SpellCooldown(arcane_power) or target.TimeToDie() <= SpellCooldown(arcane_power) } Spell(rune_of_power)
@@ -325,7 +326,7 @@ AddFunction ArcaneConserveShortCdActions
 
 AddFunction ArcaneConserveShortCdPostConditions
 {
- { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or DebuffPresent(rule_of_threes) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or ManaPercent() <= 95 and DebuffPresent(clearcasting) and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or { ArcaneCharges() == MaxArcaneCharges() and { ManaPercent() <= conserve_mana() or SpellCooldown(arcane_power) > SpellCooldown(rune_of_power) and ManaPercent() <= conserve_mana() + 25 } or Talent(arcane_orb_talent) and SpellCooldown(arcane_orb) <= GCD() and SpellCooldown(arcane_power) > 10 or ManaPercent() <= conserve_mana() - 10 } and Spell(arcane_barrage) or ManaPercent() <= 95 and Spell(supernova) or Enemies(tagged=1) >= 3 and { ManaPercent() >= conserve_mana() or ArcaneCharges() == 3 } and target.Distance(less 10) and Spell(arcane_explosion) or Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
+ { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or BuffPresent(rule_of_threes_buff) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or ManaPercent() <= 95 and BuffPresent(clearcasting_buff) and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or { ArcaneCharges() == MaxArcaneCharges() and { ManaPercent() <= conserve_mana() or SpellCooldown(arcane_power) > SpellCooldown(rune_of_power) and ManaPercent() <= conserve_mana() + 25 } or Talent(arcane_orb_talent) and SpellCooldown(arcane_orb) <= GCD() and SpellCooldown(arcane_power) > 10 or ManaPercent() <= conserve_mana() - 10 } and Spell(arcane_barrage) or ManaPercent() <= 95 and Spell(supernova) or Enemies(tagged=1) >= 3 and { ManaPercent() >= conserve_mana() or ArcaneCharges() == 3 } and target.Distance(less 10) and Spell(arcane_explosion) or Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
 }
 
 AddFunction ArcaneConserveCdActions
@@ -336,7 +337,7 @@ AddFunction ArcaneConserveCdActions
 
 AddFunction ArcaneConserveCdPostConditions
 {
- ArcaneCharges() == 0 and Spell(charged_up) or { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or ArcaneCharges() <= 2 and { SpellCooldown(arcane_power) > 10 or Enemies(tagged=1) <= 2 } and Spell(arcane_orb) or DebuffPresent(rule_of_threes) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or ArcaneCharges() == MaxArcaneCharges() and { SpellFullRecharge(rune_of_power) <= ExecuteTime(rune_of_power) or SpellFullRecharge(rune_of_power) <= SpellCooldown(arcane_power) or target.TimeToDie() <= SpellCooldown(arcane_power) } and Spell(rune_of_power) or ManaPercent() <= 95 and DebuffPresent(clearcasting) and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or { ArcaneCharges() == MaxArcaneCharges() and { ManaPercent() <= conserve_mana() or SpellCooldown(arcane_power) > SpellCooldown(rune_of_power) and ManaPercent() <= conserve_mana() + 25 } or Talent(arcane_orb_talent) and SpellCooldown(arcane_orb) <= GCD() and SpellCooldown(arcane_power) > 10 or ManaPercent() <= conserve_mana() - 10 } and Spell(arcane_barrage) or ManaPercent() <= 95 and Spell(supernova) or Enemies(tagged=1) >= 3 and { ManaPercent() >= conserve_mana() or ArcaneCharges() == 3 } and target.Distance(less 10) and Spell(arcane_explosion) or Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
+ ArcaneCharges() == 0 and Spell(charged_up) or { target.Refreshable(nether_tempest_debuff) or not target.DebuffPresent(nether_tempest_debuff) } and ArcaneCharges() == MaxArcaneCharges() and BuffExpires(rune_of_power_buff) and BuffExpires(arcane_power_buff) and Spell(nether_tempest) or ArcaneCharges() <= 2 and { SpellCooldown(arcane_power) > 10 or Enemies(tagged=1) <= 2 } and Spell(arcane_orb) or BuffPresent(rule_of_threes_buff) and ArcaneCharges() > 3 and Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or ArcaneCharges() == MaxArcaneCharges() and { SpellFullRecharge(rune_of_power) <= ExecuteTime(rune_of_power) or SpellFullRecharge(rune_of_power) <= SpellCooldown(arcane_power) or target.TimeToDie() <= SpellCooldown(arcane_power) } and Spell(rune_of_power) or ManaPercent() <= 95 and BuffPresent(clearcasting_buff) and { Speed() == 0 or Talent(slipstream_talent) } and Spell(arcane_missiles) or { ArcaneCharges() == MaxArcaneCharges() and { ManaPercent() <= conserve_mana() or SpellCooldown(arcane_power) > SpellCooldown(rune_of_power) and ManaPercent() <= conserve_mana() + 25 } or Talent(arcane_orb_talent) and SpellCooldown(arcane_orb) <= GCD() and SpellCooldown(arcane_power) > 10 or ManaPercent() <= conserve_mana() - 10 } and Spell(arcane_barrage) or ManaPercent() <= 95 and Spell(supernova) or Enemies(tagged=1) >= 3 and { ManaPercent() >= conserve_mana() or ArcaneCharges() == 3 } and target.Distance(less 10) and Spell(arcane_explosion) or Mana() > ManaCost(arcane_blast) and { Speed() == 0 or CastTime(arcane_blast) <= 0 } and Spell(arcane_blast) or Spell(arcane_barrage)
 }
 
 ### actions.movement
