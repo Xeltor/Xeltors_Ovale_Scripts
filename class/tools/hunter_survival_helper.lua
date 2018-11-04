@@ -3,23 +3,23 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Xelhelpsurv"
-	local desc = "[Xel][7.0.3] Spellhelper: Survival"
+	local desc = "[Xel][8.0] Spellhelper: Survival"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
 	Texture(ability_hunter_raptorstrike) # Raptor Strike
-	Texture(ability_hunter_mongoosebite) # Mongoose Bite
-	Texture(ability_hunter_invigeration) # Flanking Strike
-	Texture(ability_hunter_laceration) # Lacerate
 	Texture(ability_hunter_carve) # Carve
-	Texture(spell_fire_selfdestruct) # Explosive Trap
+	Texture(ability_hunter_killcommand) # Kill Command
+	Texture(spell_hunter_exoticmunitions_poisoned) # Serpent Sting
+	Texture(inv_wildfirebomb) # Wildfire Bomb
 	Texture(ability_hunter_harpoon) # Harpoon
 	Texture(ability_hunter_negate) # Muzzle
 
 	# Buffs
 	Texture(spell_hunter_aspectoftheironhawk) # Aspect of the Eagle
+	Texture(inv_coordinatedassault) # Coordinated Assault
 	Texture(ability_hunter_onewithnature) # Exhilaration
 	Texture(ability_hunter_mendpet) # Mend Pet
 	Texture(inv_misc_pheonixpet_01) # Heart of the Phoenix
@@ -27,21 +27,20 @@ AddIcon
 	Texture(ability_physical_taunt) # Pet Growl
 	Texture(icon_orangebird_toy) # Call Pet
 	
-	# Artifact
-	Texture(inv_polearm_2h_artifacteagle_d_01) # Fury of the Eagle
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
-	Texture(inv_throwingaxepvp320_07) # Throwing Axes (T1)
-	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T2)
-	Texture(achievement_boss_epochhunter) # Snake Hunter (T2)
-	Texture(ability_ironmaidens_incindiarydevice) # Caltrops (T4)
+	Texture(ability_butcher_cleave) # Butchery (T2) (Replaces Carve)
+	Texture(ability_hunter_camouflage) # Camouflage (T3)
 	Texture(inv_pet_pettrap02) # Steel Trap (T4)
-	Texture(inv_misc_bomb_08) # Sticky Bomb (T5)
-	Texture(inv_misc_net_01) # Ranger's Net (T5)
-	Texture(ability_hunter_camouflage) # Camouflage (T5)
-	Texture(ability_butcher_cleave) # Butchery (T6)
-	Texture(spell_fire_incinerate) # Dragonsfire Grenade (T6)
-	Texture(ability_hunter_cobrastrikes) # Spitting Cobra (T7)
+	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T4)
+	Texture(spell_fire_incinerate) # Mongoose Bite (T6) (Replaces Raptor Strike)
+	Texture(ability_hunter_invigeration) # Flanking Strike (T6)
+	Texture(inv_wildfirebomb_shrapnel) # Wildfire Infusion Shrapnel (T7) (Replaces Wildfire Bomb)
+	Texture(inv_wildfirebomb_blood) # Wildfore Infusion Pheromone (T7) (Replaces Wildfire Bomb)
+	Texture(inv_wildfirebomb_poison) # Wildfire Infusion Volatile (T7) (Replaces Wildfire Bomb)
+	Texture(ability_glaivetoss) # Chakrams (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -57,11 +56,39 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

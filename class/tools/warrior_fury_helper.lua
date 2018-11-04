@@ -3,38 +3,41 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "WARRFURYhelp"
-	local desc = "[Xel][7.0.3] Spellhelper: Fury"
+	local desc = "[Xel][8.0] Spellhelper: Fury"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
 	Texture(ability_whirlwind) # Whirlwind
-	Texture(ability_warrior_weaponmastery) # Furious Slash
 	Texture(spell_nature_bloodlust) # Bloodthirst
 	Texture(warrior_wild_strike) # Raging Blow
 	Texture(inv_sword_48) # Execute
 	Texture(ability_warrior_rampage) # Rampage
 	Texture(ability_warrior_charge) # Charge
+	Texture(ability_warrior_devastate) # Victory Rush
 	Texture(inv_axe_66) # Heroic Throw
+	
+	# Interrupts
 	Texture(inv_gauntlets_04) # Pummel
+	Texture(ability_golemthunderclap) # Intimidating Shout
 
 	# Buffs
-	Texture(warrior_talent_icon_innerrage) # Battle Cry
+	Texture(ability_warrior_battleshout) # Battle Shout
 	Texture(spell_nature_ancestralguardian) # Berserker Rage
-
-	# Artifact
-	Texture(inv_sword_1h_artifactvigfus_d_01) # Odyn's Fury
-
+	Texture(warrior_talent_icon_innerrage) # Recklessness
+	Texture(ability_warrior_focusedrage) # Enraged Regeneration
+	
+	# Debuffs
+	Texture(spell_shadow_deathscream) # Piercing Howl
+	
 	# Talents
-	Texture(ability_warrior_shockwave) # Shockwave (T2)
+	Texture(spell_impending_victory) # Impending Victory (T2) (replaces Victory Rush)
 	Texture(warrior_talent_icon_stormbolt) # Storm Bolt (T2)
-	Texture(warrior_talent_icon_avatar) # Avatar (T3)
-	Texture(ability_warrior_defensivestance) # Defensive Stance (T4)
-	Texture(ability_warrior_focusedrage) # Focused Rage (T5)
-	Texture(ability_warrior_bloodbath) # Bloodbath (T6)
-	Texture(ability_warrior_bladestorm) # Bladestorm (T7)
-	Texture(ability_warrior_dragonroar) # Dragon Roar (T7)
+	Texture(ability_warrior_weaponmastery) # Furious Slash (T3)
+	Texture(ability_warrior_dragonroar) # Dragon Roar (T6)
+	Texture(ability_warrior_bladestorm) # Bladestorm (T6)
+	Texture(inv_mace_101) # Siegebreaker (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -51,11 +54,37 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 
