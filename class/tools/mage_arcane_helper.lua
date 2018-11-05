@@ -24,7 +24,7 @@ AddIcon
 	# Items
 	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 	
-	# Utils
+	# Utility
 	Texture(spell_arcane_arcane02) # Spellsteal
 	Texture(spell_nature_slow) # Slow
 	Texture(spell_frost_frostnova) # Frost Nova

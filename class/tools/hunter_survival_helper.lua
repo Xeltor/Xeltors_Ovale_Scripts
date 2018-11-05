@@ -16,6 +16,7 @@ AddIcon
 	Texture(inv_wildfirebomb) # Wildfire Bomb
 	Texture(ability_hunter_harpoon) # Harpoon
 	Texture(ability_hunter_negate) # Muzzle
+	Texture(ability_devour) # Intimidation
 
 	# Buffs
 	Texture(spell_hunter_aspectoftheironhawk) # Aspect of the Eagle
@@ -29,6 +30,10 @@ AddIcon
 	
 	# Items
 	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
+	# Utility
+	Texture(ability_rogue_trip) # Wing Clip
+	Texture(hunter_pvp_trackersnet) # Tracker's Net (Honor Talent)
 
 	# Talents
 	Texture(ability_butcher_cleave) # Butchery (T2) (Replaces Carve)
@@ -37,9 +42,9 @@ AddIcon
 	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T4)
 	Texture(spell_fire_incinerate) # Mongoose Bite (T6) (Replaces Raptor Strike)
 	Texture(ability_hunter_invigeration) # Flanking Strike (T6)
-	Texture(inv_wildfirebomb_shrapnel) # Wildfire Infusion Shrapnel (T7) (Replaces Wildfire Bomb)
-	Texture(inv_wildfirebomb_blood) # Wildfore Infusion Pheromone (T7) (Replaces Wildfire Bomb)
-	Texture(inv_wildfirebomb_poison) # Wildfire Infusion Volatile (T7) (Replaces Wildfire Bomb)
+	Texture(inv_wildfirebomb_shrapnel) # Wildfire Infusion: Shrapnel Bomb (T7) (Replaces Wildfire Bomb)
+	Texture(inv_wildfirebomb_blood) # Wildfore Infusion: Pheromone Bomb (T7) (Replaces Wildfire Bomb)
+	Texture(inv_wildfirebomb_poison) # Wildfire Infusion: Volatile Bomb (T7) (Replaces Wildfire Bomb)
 	Texture(ability_glaivetoss) # Chakrams (T7)
 
 	# Racials

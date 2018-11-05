@@ -64,11 +64,6 @@ AddIcon specialization=3 help=main
 	if InCombat() and target.Present() and not target.IsFriend() and not target.InRange(mangle) and target.InRange(wild_charge) and { TimeInCombat() < 6 or Falling() } Spell(wild_charge)
 	Travel()
 }
-
-AddFunction Boss
-{
-	target.Classification(worldboss) or { target.Level() >= {Level() + 2} and target.Classification(elite) and CheckBoxOff(raip) } or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() }
-}
 	
 # AddCheckBox(aoe "AoE 3+")
 AddCheckBox(magical "Magical?")

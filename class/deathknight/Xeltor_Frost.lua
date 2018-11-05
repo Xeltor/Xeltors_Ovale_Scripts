@@ -32,12 +32,7 @@ AddIcon specialization=2 help=main
     }
 }
 
-# Common functions.
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
-}
-
+# Custom functions.
 AddFunction InterruptActions
 {
 	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }

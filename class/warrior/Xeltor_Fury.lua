@@ -18,9 +18,9 @@ AddIcon specialization=2 help=main
 		#battle_shout
 		if not BuffPresent(attack_power_multiplier_buff any=1) and not target.IsFriend() Spell(battle_shout)
 	}
-	if InCombat() and { not target.IsFriend() or target.IsPvP() } 
+	if InCombat()
 	{
-		InterruptActions()
+		if not target.IsFriend() or target.IsPvP() InterruptActions()
 		ControlActions()
 	}
 	
@@ -47,11 +47,6 @@ AddIcon specialization=2 help=main
 	}
 }
 
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { target.Level() >= Level() and { target.Classification(elite) or target.Classification(rare) } }
-}
-
 AddFunction InterruptActions
 {
 	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
@@ -61,14 +56,15 @@ AddFunction InterruptActions
 		if target.InRange(storm_bolt) and not target.Classification(worldboss) Spell(storm_bolt)
 		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
 		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
-		if target.InRange(intimidating_shout) and not target.Classification(worldboss) Spell(intimidating_shout)
+		if target.InRange(intimidating_shout) and not target.Classification(worldboss) and target.IsPvP() Spell(intimidating_shout)
 	}
 }
 
 AddFunction ControlActions
 {
+	if IsStunned() Spell(every_man_for_himself)
 	if IsFeared() or IsIncapacitated() or DebuffPresent(sap_debuff) Spell(berserker_rage)
-	if not target.DebuffPresent(piercing_howl_debuff) and target.Distance(less 15) and target.IsPvP() Spell(piercing_howl)
+	if not target.DebuffPresent(piercing_howl_debuff) and not target.IsFriend() and target.Distance(less 15) and target.IsPvP() Spell(piercing_howl)
 }
 
 ### actions.default

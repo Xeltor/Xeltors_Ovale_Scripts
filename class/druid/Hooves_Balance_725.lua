@@ -36,10 +36,6 @@ AddIcon specialization=1 help=main
 	}
 }
 
-AddFunction Boss
-{
-	IsBossFight() or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
 ### actions.default
 AddCheckBox(opt_use_consumables L(opt_use_consumables) default specialization=balance)
 

@@ -40,11 +40,6 @@ AddIcon specialization=3 help=main
 	if InCombat() and not target.IsDead() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } GetInMeleeRange()
 }
 
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { target.Level() >= Level() and { target.Classification(elite) or target.Classification(rare) } }
-}
-
 AddFunction GetInMeleeRange
 {
 	if not target.InRange(kick)

@@ -14,7 +14,11 @@ Include(ovale_hunter_spells)
 AddIcon specialization=3 help=main
 {
 	# Silence
-	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
+	if InCombat() and { not target.IsFriend() or target.IsPvP() }
+	{
+		InterruptActions()
+		ControlActions()
+	}
 	
 	if HasFullControl() and InCombat() and target.Present() and target.InRange(serpent_sting_sv)
 	{
@@ -38,13 +42,9 @@ AddIcon specialization=3 help=main
 		if target.InRange(harpoon) Spell(harpoon)
 	}
 }
+AddCheckBox(opt_auto_range "Auto Eagle" default specialization=survival)
 
-# Common functions.
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { target.Level() >= Level() and { target.Classification(elite) or target.Classification(rare) } }
-}
-
+# Custom functions.
 AddFunction SummonPet
 {
  if pet.IsDead()
@@ -63,6 +63,25 @@ AddFunction InterruptActions
 		if target.InRange(muzzle) and target.IsInterruptible() Spell(muzzle)
 		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
 		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
+		if target.InRange(intimidation) and not target.Classification(worldboss) Spell(intimidation)
+	}
+}
+
+AddFunction ControlActions
+{
+	# Net anything that is to far away for wing clip or harpoon and hasnt been rooted yet.
+	if target.InRange(trackers_net) and { not target.InRange(harpoon) or SpellCooldown(harpoon) > GCD() } and not target.IsRooted() and { not target.DebuffPresent(wing_clip_debuff) or not target.InRange(wing_clip) } and target.IsPvP() Spell(trackers_net)
+	
+	# Wing clip anything that gets close enough
+	if target.InRange(wing_clip) and not target.DebuffPresent(wing_clip_debuff) and target.IsPvP() Spell(wing_clip)
+	
+	# 80% hit chance reduction to save your life.
+	if HealthPercent() < 30 and SpellCooldown(exhilaration) > GCD() and target.IsPvP() Spell(trackers_net)
+	
+	# Stun if no other option is available to us.
+	unless target.InRange(trackers_net) and { not target.InRange(harpoon) or SpellCooldown(harpoon) > GCD() } and not target.IsRooted() and { not target.DebuffPresent(wing_clip_debuff) or not target.InRange(wing_clip) } and target.IsPvP() and Spell(trackers_net) or target.InRange(wing_clip) and not target.DebuffPresent(wing_clip_debuff) and target.IsPvP() and Spell(wing_clip) or HealthPercent() < 30 and SpellCooldown(exhilaration) > GCD() and target.IsPvP() and Spell(trackers_net)
+	{
+		if not target.IsStunned() and target.IsPvP() Spell(intimidation)
 	}
 }
 
@@ -211,7 +230,7 @@ AddFunction SurvivalCdsMainPostConditions
 AddFunction SurvivalCdsShortCdActions
 {
  #aspect_of_the_eagle,if=target.distance>=6
- if target.Distance(more 6) Spell(aspect_of_the_eagle)
+ if target.Distance(more 8) and { not target.InRange(harpoon) or SpellCooldown(harpoon) > GCD() } and CheckBoxOn(opt_auto_range) Spell(aspect_of_the_eagle)
 }
 
 AddFunction SurvivalCdsShortCdPostConditions

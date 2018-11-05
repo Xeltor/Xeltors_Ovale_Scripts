@@ -28,7 +28,7 @@ AddIcon
 	Texture(warrior_talent_icon_innerrage) # Recklessness
 	Texture(ability_warrior_focusedrage) # Enraged Regeneration
 	
-	# Debuffs
+	# Utility
 	Texture(spell_shadow_deathscream) # Piercing Howl
 	
 	# Talents

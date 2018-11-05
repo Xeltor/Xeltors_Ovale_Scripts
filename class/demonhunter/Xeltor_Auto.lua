@@ -59,11 +59,6 @@ AddIcon specialization=2 help=main
 AddCheckBox(opt_cooldowns "Use cooldowns" default specialization=vengeance)
 
 # Common functions.
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { Enemies(tagged=1) >= 6 and target.Classification(elite) }
-}
-
 AddFunction InterruptActions
 {
 	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }

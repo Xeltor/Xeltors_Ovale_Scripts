@@ -24,8 +24,6 @@ Define(path_of_frost_buff 3714)
 Define(consumption 205223)
 	SpellInfo(consumption cd=45)
 
-
-
 AddIcon specialization=1 help=main
 {
 	# Path o' Frost

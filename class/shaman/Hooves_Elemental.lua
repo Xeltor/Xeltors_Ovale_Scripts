@@ -59,11 +59,6 @@ AddIcon specialization=1 help=main
 }
 AddCheckBox(doAOE "AoE")
 
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } 
-}
-
 AddFunction StandingStill
 {
 	{Speed() == 0}

@@ -35,11 +35,6 @@ AddIcon specialization=1 help=main
 	}
 }
 
-AddFunction Boss
-{
-	IsBossFight() or target.Classification(worldboss) or target.Classification(rareelite) or BuffPresent(burst_haste_buff any=1) or { target.IsPvP() and not target.IsFriend() } or { target.Level() >= Level() and { target.Classification(elite) or target.Classification(rare) } }
-}
-
 AddFunction InterruptActions
 {
 	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
