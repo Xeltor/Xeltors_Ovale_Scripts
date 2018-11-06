@@ -50,7 +50,7 @@ AddFunction SummonPet
  if pet.HealthPercent() <= 0
  {
   if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
-  Spell(revive_pet)
+  if Spell(revive_pet) Spell(revive_pet)
  }
  if not pet.HealthPercent() <= 0 and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
  if not pet.Present() and not pet.HealthPercent() <= 0 and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
