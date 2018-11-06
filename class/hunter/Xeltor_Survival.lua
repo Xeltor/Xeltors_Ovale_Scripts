@@ -39,7 +39,7 @@ AddIcon specialization=3 help=main
 	# Go forth and murder
 	if InCombat() and HasFullControl() and target.Present() and not target.InRange(raptor_strike) and { TimeInCombat() < 6 or Falling() }
 	{
-		if target.InRange(harpoon) Spell(harpoon)
+		if target.InRange(harpoon) and not BuffPresent(aspect_of_the_eagle_buff) Spell(harpoon)
 	}
 }
 AddCheckBox(opt_auto_range "Auto Eagle" default specialization=survival)
@@ -230,7 +230,7 @@ AddFunction SurvivalCdsMainPostConditions
 AddFunction SurvivalCdsShortCdActions
 {
  #aspect_of_the_eagle,if=target.distance>=6
- if target.Distance(more 8) and { not target.InRange(harpoon) or SpellCooldown(harpoon) > GCD() } and CheckBoxOn(opt_auto_range) Spell(aspect_of_the_eagle)
+ if target.Distance(more 8) and { not target.InRange(harpoon) or SpellCooldown(harpoon) > GCD() } and not PreviousSpell(harpoon) and CheckBoxOn(opt_auto_range) Spell(aspect_of_the_eagle)
 }
 
 AddFunction SurvivalCdsShortCdPostConditions
