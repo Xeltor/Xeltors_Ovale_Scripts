@@ -13,7 +13,7 @@ Include(ovale_warrior_spells)
 # Fury
 AddIcon specialization=2 help=main
 {
-	if not mounted() and not PlayerIsResting() and not IsDead()
+	if not mounted() and not PlayerIsResting() and not HealthPercent() <= 0
 	{
 		#battle_shout
 		if not BuffPresent(attack_power_multiplier_buff any=1) and not target.IsFriend() Spell(battle_shout)

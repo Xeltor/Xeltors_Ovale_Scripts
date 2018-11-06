@@ -47,13 +47,13 @@ AddCheckBox(opt_auto_range "Auto Eagle" default specialization=survival)
 # Custom functions.
 AddFunction SummonPet
 {
- if pet.IsDead()
+ if pet.HealthPercent() <= 0
  {
   if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
   Spell(revive_pet)
  }
- if not pet.IsDead() and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
- if not pet.Present() and not pet.IsDead() and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
+ if not pet.HealthPercent() <= 0 and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
+ if not pet.Present() and not pet.HealthPercent() <= 0 and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
 }
 
 AddFunction InterruptActions
