@@ -53,7 +53,7 @@ AddFunction SummonPet
   if Spell(revive_pet) Spell(revive_pet)
  }
  if not pet.HealthPercent() <= 0 and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) Spell(mend_pet)
- if not pet.Present() and not pet.HealthPercent() <= 0 and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
+ if not pet.Present() and not pet.Exists() and not PreviousSpell(revive_pet) Texture(icon_orangebird_toy)
 }
 
 AddFunction InterruptActions
