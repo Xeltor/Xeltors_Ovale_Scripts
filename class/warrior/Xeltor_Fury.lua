@@ -64,7 +64,7 @@ AddFunction ControlActions
 {
 	if IsStunned() Spell(every_man_for_himself)
 	if IsFeared() or IsIncapacitated() or DebuffPresent(sap_debuff) Spell(berserker_rage)
-	if not target.DebuffPresent(piercing_howl_debuff) and not target.IsFriend() and target.Distance(less 15) and target.IsPvP() Spell(piercing_howl)
+	if not target.DebuffPresent(piercing_howl_debuff) and not target.IsFriend() and target.Distance(less 15) and target.IsPvP() and not target.InRange(rampage) Spell(piercing_howl)
 }
 
 ### actions.default
