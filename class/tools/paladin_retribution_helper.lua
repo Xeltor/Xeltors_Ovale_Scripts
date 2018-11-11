@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Retrihelp"
-	local desc = "[Xel][7.x] Spellhelper: Retribution"
+	local desc = "[Xel][8.x] Spellhelper: Retribution"
 	local code = [[
 AddIcon
 {
@@ -22,22 +22,29 @@ AddIcon
 	Texture(spell_holy_greaterblessingofwisdom) # Greater Blessing of Wisdom
 	Texture(spell_holy_avenginewrath) # Avenging Wrath
 	Texture(ability_paladin_shieldofthetemplar) # Shield of Vengeance
-	
-	# Artifact
-	Texture(inv_sword_2h_artifactashbringer_d_01) # Wake of Ashes
 
+	# Utility
+	Texture(spell_holy_layonhands) # Lay on Hands
+	Texture(spell_holy_flashheal) # Flash of Light
+	Texture(spell_holy_divineshield) # Divine Shield
+	Texture(spell_holy_sealofprotection) # Blessing of Protection
+	Texture(spell_holy_sealofvalor) # Blessing of Freedom
+	Texture(ability_paladin_handofhindrance) # Hand of Hindrance
+	Texture(ability_paladin_enlightenedjudgements) # Hammer of Reckoning
+	
 	# Talents
+	Texture(spell_holy_sealofblood) # Zeal (T1)
 	Texture(spell_paladin_executionsentence) # Execution Sentence (T1)
-	Texture(spell_holy_innerfire) # Consecration (T1)
-	Texture(spell_holy_sealofblood) # Zeal (T2) (Replaces Crusader Strike)
+	Texture(spell_paladin_hammerofwrath) # Hammer of Wrath (T2)
 	Texture(spell_holy_prayerofhealing) # Repentance (T3)
 	Texture(ability_paladin_blindinglight) # Blinding Light (T3)
-	Texture(classicon_paladin) # Divine Hammer (T4) (Replaces Blade of Justice)
-	Texture(spell_holy_retributionaura) # Justicar's Vengeance (T5)
+	Texture(spell_holy_innerfire) # Consecration (T4)
+	Texture(inv_sword_2h_artifactashbringerfire_d_03) # Wake of Ashes (T4)
 	Texture(spell_paladin_inquisition) # Eye for an Eye (T5)
-	Texture(inv_helmet_96) # Word of Glory (T5)
+	Texture(spell_holy_retributionaura) # Justicar's Vengeance (T6)
+	Texture(inv_helmet_96) # Word of Glory (T6)
 	Texture(ability_paladin_sanctifiedwrath) # Crusade (T7) (Replaces Avenging Wrath)
-	Texture(spell_holy_vindication) # Holy Wrath (T7)
+	Texture(spell_paladin_inquisition) # Inquisition (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -53,6 +60,7 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	Texture(ability_racial_orbitalstrike) # Light's Judgment (Lightforged Draenei)
 	
 	
 	
