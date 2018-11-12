@@ -25,7 +25,7 @@ AddIcon specialization=3 help=main
 		ControlActions()
 	}
 	
-	if HasFullControl() and HealthPercent() > 0 and target.Present() and not target.IsFriend() and { InCombat() or not InCombat() and target.InRange(crusader_strike) }
+	if not IsFeared() and not IsIncapacitated() and not IsStunned() and HealthPercent() > 0 and target.Present() and not target.IsFriend() and { InCombat() or not InCombat() and target.InRange(crusader_strike) }
     {
 		if Boss() RetributionDefaultCdActions()
 		RetributionDefaultShortCdActions()
@@ -49,10 +49,11 @@ AddFunction ControlActions
 	if HealthPercent() < 20 and not DebuffPresent(forbearance_debuff) Spell(divine_shield)
 	if HealthPercent() < 20 and not DebuffPresent(forbearance_debuff) Spell(blessing_of_protection)
 	if HealthPercent() < 100 and { BuffPresent(divine_shield_buff) or BuffPresent(blessing_of_protection_buff) } and Speed() == 0 Spell(flash_of_light)
-	if CastTime(flash_of_light) <= 0 and HealthPercent() < 100 Spell(flash_of_light)
+	if CastTime(flash_of_light) <= 0 and HealthPercent() < 100 and SpellUsable(flash_of_light) Spell(flash_of_light)
 	if HealthPercent() < 50 Spell(word_of_glory)
+	if target.IsFriend() and { CastTime(flash_of_light) <= 0 or Speed() == 0 } and target.HealthPercent() < 80 and SpellUsable(flash_of_light) Spell(flash_of_light)
 	if target.InRange(hammer_of_reckoning) not target.IsFriend() Spell(hammer_of_reckoning)
-	if not HasFullControl() Spell(blessing_of_freedom)
+	if { IsFeared() or IsIncapacitated() or IsStunned() or IsRooted() } and SpellUsable(blessing_of_freedom) Spell(blessing_of_freedom)
 	if target.IsPvP() and target.InRange(hand_of_hindrance) and not target.InRange(crusader_strike) Spell(hand_of_hindrance)
 }
 
@@ -166,7 +167,7 @@ AddFunction RetributionCooldownsCdActions
  #potion,if=(buff.bloodlust.react|buff.avenging_wrath.up|buff.crusade.up&buff.crusade.remains<25|target.time_to_die<=40)
  # if { BuffPresent(burst_haste_buff any=1) or BuffPresent(avenging_wrath_buff) or BuffPresent(crusade_buff) and BuffRemaining(crusade_buff) < 25 or target.TimeToDie() <= 40 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(bursting_blood usable=1)
  #lights_judgment,if=spell_targets.lights_judgment>=2|(!raid_event.adds.exists|raid_event.adds.in>75)
- if { Enemies(tagged=1) >= 2 or not False(raid_event_adds_exists) or 600 > 75 } and Speed() == 0 and target.InRange(crusader_strike) Spell(lights_judgment)
+ if { Enemies(tagged=1) >= 2 or not target.InRange(crusader_strike) } and target.InRange(lights_judgment) and target.TimeToDie() > 3 Spell(lights_judgment)
  #fireblood,if=buff.avenging_wrath.up|buff.crusade.up&buff.crusade.stack=10
  if { BuffPresent(avenging_wrath_buff) or BuffPresent(crusade_buff) and BuffStacks(crusade_buff) == 10 } and target.InRange(crusader_strike) Spell(fireblood)
 
