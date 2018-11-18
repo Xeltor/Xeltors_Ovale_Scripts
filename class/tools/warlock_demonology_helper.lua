@@ -18,11 +18,15 @@ AddIcon
 	
 	# Survival stuff
 	Texture(spell_shadow_lifedrain02) # Drain Life
-	Texture(spell_shadow_lifedrain) # Health Funnel
+	Texture(ability_deathwing_bloodcorruption_death) # Health Funnel
+	Texture(inv_misc_gem_bloodstone_01) # Create Healthstone
+	Texture(inv_stone_04) # Healthstone
+	Texture(spell_shadow_demonictactics) # Unending Resolve
 
 	# Buffs
 	Texture(inv_summondemonictyrant) # Summon Demonic Tyrant
 	Texture(spell_warlock_calldreadstalkers) # Call Dreadstalkers
+	Texture(spell_shadow_demonbreath) # Unending Breath
 
 	# Talents
 	Texture(ability_warlock_demonicempowerment) # Demonic Strength (T1)

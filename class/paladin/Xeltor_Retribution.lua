@@ -53,7 +53,7 @@ AddFunction ControlActions
 	if HealthPercent() < 50 Spell(word_of_glory)
 	if target.IsFriend() and { CastTime(flash_of_light) <= 0 or Speed() == 0 } and target.HealthPercent() < 80 and SpellUsable(flash_of_light) Spell(flash_of_light)
 	if target.InRange(hammer_of_reckoning) not target.IsFriend() Spell(hammer_of_reckoning)
-	if { IsFeared() or IsIncapacitated() or IsStunned() or IsRooted() } and SpellUsable(blessing_of_freedom) Spell(blessing_of_freedom)
+	if { IsFeared() or IsIncapacitated() or IsStunned() or IsRooted() } and SpellCooldown(blessing_of_freedom) <= 0 Spell(blessing_of_freedom)
 	if target.IsPvP() and target.InRange(hand_of_hindrance) and not target.InRange(crusader_strike) Spell(hand_of_hindrance)
 }
 
@@ -155,7 +155,7 @@ AddFunction RetributionCooldownsMainPostConditions
 AddFunction RetributionCooldownsShortCdActions
 {
  #shield_of_vengeance
- if InCombat() and HealthPercent() < 100 Spell(shield_of_vengeance)
+ if InCombat() and HealthPercent() < 80 and DamageTaken(5) > 0 Spell(shield_of_vengeance)
 }
 
 AddFunction RetributionCooldownsShortCdPostConditions
