@@ -25,7 +25,7 @@ AddIcon specialization=1 help=main
 		# if ComboPoints() >0 and not BuffPresent(slice_and_dice_buff) Spell(slice_and_dice)
 	}
 	
-	if HealthPercent() < 50 and HealthPercent > 0 Spell(crimson_vial)
+	if HealthPercent() < 50 and HealthPercent() > 0 Spell(crimson_vial)
 	if InCombat() InterruptActions()
 	
 	if { Spell(mutilate) and target.InRange(mutilate) and HasFullControl() } or { Spell(sinister_strike) and target.InRange(sinister_strike) and HasFullControl() }

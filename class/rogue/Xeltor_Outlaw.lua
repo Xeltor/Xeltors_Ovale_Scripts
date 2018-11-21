@@ -22,7 +22,7 @@ AddIcon specialization=outlaw help=main
 	}
 
 	if InCombat() InterruptActions()
-	if HealthPercent() < 50 and HealthPercent > 0 Spell(crimson_vial)
+	if HealthPercent() < 50 and HealthPercent() > 0 Spell(crimson_vial)
 
 	if { target.InRange(sinister_strike_outlaw) or target.InRange(sinister_strike) } and HasFullControl()
 	{
