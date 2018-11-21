@@ -3,23 +3,22 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "ROGUESTABBY"
-	local desc = "[Xel][7.x] Spellhelper: Stabby (Assassination)"
+	local desc = "[Xel][8.x] Spellhelper: Stabby (Assassination)"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
-	Texture(ability_rogue_shadowstrikes) # Mutilate
+	Texture(spell_shadow_ritualofsacrifice) # Sinister Strike
+	Texture(ability_rogue_shadowstrikes) # Mutilate (replaces Sinister Strike)
 	Texture(ability_rogue_garrote) # Garrote
 	Texture(ability_rogue_rupture) # Rupture
 	Texture(ability_rogue_disembowel) # Envenom
 	Texture(ability_rogue_fanofknives) # Fan of Knives
+	Texture(ability_rogue_poisonedknife) # Poisoned Knife
 	Texture(ability_kick) # Kick
 	Texture(ability_rogue_kidneyshot) # Kidney Shot
 	Texture(ability_cheapshot) # Cheap Shot
-
-	# Artifact
-	Texture(inv_knife_1h_artifactgarona_d_01) # Kingsbane
 	
 	# Buffs
 	Texture(ability_stealth) # Stealth
@@ -27,14 +26,17 @@ AddIcon
 	Texture(ability_vanish) # Vanish
 	Texture(ability_rogue_crimsonvial) # Crimson Vial
 	Texture(ability_rogue_shadowstep) # Shadow Step
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
-	Texture(spell_shadow_lifedrain) # Hemorrhage (T1)
+	Texture(ability_rogue_focusedattacks) # Blindside (T1)
+	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T3)
 	Texture(rogue_leeching_poison) # Leeching Poison (T4)
 	Texture(inv_weapon_shortblade_62) # Toxic Blade (T6)
 	Texture(ability_deathwing_bloodcorruption_earth) # Exsanguinate (T6)
-	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T7)
-	Texture(spell_rogue_deathfromabove) # Death from Above (T7)
+	Texture(inv_knife_1h_cataclysm_c_05) # Crimson Tempest (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -48,6 +50,38 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

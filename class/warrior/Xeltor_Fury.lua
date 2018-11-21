@@ -62,8 +62,8 @@ AddFunction InterruptActions
 
 AddFunction ControlActions
 {
-	if IsStunned() Spell(every_man_for_himself)
-	if IsFeared() or IsIncapacitated() or DebuffPresent(sap_debuff) Spell(berserker_rage)
+	if { IsIncapacitated() or IsStunned() } and SpellCooldown(every_man_for_himself) <= 0 Spell(every_man_for_himself)
+	if { IsFeared() or IsIncapacitated() or IsStunned() or IsRooted() } and SpellCooldown(berserker_rage) <= 0 Spell(berserker_rage)
 	if not target.DebuffPresent(piercing_howl_debuff) and not target.IsFriend() and target.Distance(less 15) and target.IsPvP() and not target.InRange(rampage) Spell(piercing_howl)
 }
 

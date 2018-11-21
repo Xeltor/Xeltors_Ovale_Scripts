@@ -3,44 +3,36 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "ROGUEPOKEY"
-	local desc = "[Xel][7.x] Spellhelper: Pokey (Outlaw)"
+	local desc = "[Xel][8.x] Spellhelper: Pokey (Outlaw)"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
-	Texture(ability_rogue_sabreslash) # Saber Slash
+	Texture(spell_shadow_ritualofsacrifice) # Sinister Strike
 	Texture(ability_rogue_ambush) # Ambush (Stealth only)
 	Texture(ability_rogue_pistolshot) # Pistol Shot
-	Texture(inv_weapon_rifle_07) # Blunderbuss (Replaces Pistol Shot)
 	Texture(inv_weapon_rifle_01) # Between the Eyes
-	Texture(ability_rogue_waylay) # Run Through
+	Texture(ability_rogue_waylay) # Dispatch
 	Texture(ability_kick) # Kick
 	Texture(ability_gouge) # Gouge
 	Texture(ability_cheapshot) # Cheap Shot
-	Texture(spell_shadow_mindsteal) # Blind
-
-	# Artifact
-	Texture(inv_sword_1h_artifactskywall_d_01dual) # Curse of the Dreadblades
 	
 	# Buffs
 	Texture(ability_rogue_rollthebones) # Roll the Bones
-	Texture(spell_shadow_nethercloak) # Cloak of Shadows
 	Texture(ability_stealth) # Stealth
 	Texture(ability_vanish) # Vanish
 	Texture(spell_shadow_shadowworddominate) # Adrenaline Rush
 	Texture(ability_rogue_crimsonvial) # Crimson Vial
-	Texture(ability_warrior_punishingblow) # Blade Flurry On
-	Texture(ability_warrior_warbringer) # Blade Flurry Off
-	Texture(ability_rogue_sprint) # Sprint
+	Texture(ability_warrior_punishingblow) # Blade Flurry
 
 	# Talents
 	Texture(ability_creature_cursed_02) # Ghostly Strike (T1)
+	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T3)
 	Texture(ability_rogue_cannonballbarrage) # Cannonball Barrage (T6)
-	Texture(ability_rogue_murderspree) # Killing Spree (T6)
-	Texture(ability_rogue_slicedice) # Slice and Dice (T7)
-	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T7)
-	Texture(spell_rogue_deathfromabove) # Death from Above (T7)
+	Texture(ability_rogue_slicedice) # Slice and Dice (T6) (replaces Roll the Bones)
+	Texture(ability_arakkoa_spinning_blade) # Blade Rush (T7)
+	Texture(ability_rogue_murderspree) # Killing Spree (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -55,6 +47,37 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
 	Texture(ability_racial_forceshield) # Arcane Pulse (Nightborne)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 
