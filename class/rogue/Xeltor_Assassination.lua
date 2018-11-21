@@ -15,7 +15,7 @@ Include(ovale_rogue_spells)
 AddIcon specialization=1 help=main
 {
 	# Stealth
-	if not Stealthed() and not PlayerIsResting() and not InCombat() and not mounted() and HealthPercent > 0 Spell(stealth)
+	if not Stealthed() and not PlayerIsResting() and not InCombat() and not mounted() and HealthPercent() > 0 Spell(stealth)
 	
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
@@ -41,6 +41,7 @@ AddIcon specialization=1 help=main
 	}
 	
 	if InCombat() and target.Present() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } AssassinationGetInMeleeRange()
+	if InCombat() and target.Present() and not target.IsFriend() and not target.InRange(kick) and not target.DebuffPresent(deadly_poison_debuff) Spell(poisoned_knife)
 }
 
 AddFunction VanishAllowed
@@ -386,16 +387,16 @@ AddFunction AssassinationStealthedMainActions
  #rupture,if=combo_points>=4&(talent.nightstalker.enabled|talent.subterfuge.enabled&(talent.exsanguinate.enabled&cooldown.exsanguinate.remains<=2|!ticking)&variable.single_target)&target.time_to_die-remains>6
  if ComboPoints() >= 4 and { Talent(nightstalker_talent) or Talent(subterfuge_talent) and { Talent(exsanguinate_talent) and SpellCooldown(exsanguinate) <= 2 or not target.DebuffPresent(rupture_debuff) } and single_target() } and target.TimeToDie() - target.DebuffRemaining(rupture_debuff) > 6 Spell(rupture)
  #garrote,cycle_targets=1,if=talent.subterfuge.enabled&refreshable&target.time_to_die-remains>2
- if Talent(subterfuge_talent) and target.Refreshable(garrote_debuff) and target.TimeToDie() - target.DebuffRemaining(garrote_debuff) > 2 Spell(garrote)
+ if Talent(subterfuge_talent) and target.Refreshable(garrote_debuff) and target.TimeToDie() - target.DebuffRemaining(garrote_debuff) > 2 and SpellUsable(garrote) Texture(ability_skeer_bloodletting)
  #garrote,cycle_targets=1,if=talent.subterfuge.enabled&remains<=10&pmultiplier<=1&target.time_to_die-remains>2
- if Talent(subterfuge_talent) and target.DebuffRemaining(garrote_debuff) <= 10 and PersistentMultiplier(garrote_debuff) <= 1 and target.TimeToDie() - target.DebuffRemaining(garrote_debuff) > 2 Spell(garrote)
+ if Talent(subterfuge_talent) and target.DebuffRemaining(garrote_debuff) <= 10 and PersistentMultiplier(garrote_debuff) <= 1 and target.TimeToDie() - target.DebuffRemaining(garrote_debuff) > 2 and SpellUsable(garrote) Texture(ability_skeer_bloodletting)
  #rupture,if=talent.subterfuge.enabled&azerite.shrouded_suffocation.enabled&!dot.rupture.ticking
  if Talent(subterfuge_talent) and HasAzeriteTrait(shrouded_suffocation_trait) and not target.DebuffPresent(rupture_debuff) Spell(rupture)
  #garrote,cycle_targets=1,if=talent.subterfuge.enabled&azerite.shrouded_suffocation.enabled&target.time_to_die>remains&combo_points.deficit>1
- if Talent(subterfuge_talent) and HasAzeriteTrait(shrouded_suffocation_trait) and target.TimeToDie() > target.DebuffRemaining(garrote_debuff) and ComboPointsDeficit() > 1 Spell(garrote)
+ if Talent(subterfuge_talent) and HasAzeriteTrait(shrouded_suffocation_trait) and target.TimeToDie() > target.DebuffRemaining(garrote_debuff) and ComboPointsDeficit() > 1 and SpellUsable(garrote) Texture(ability_skeer_bloodletting)
  #pool_resource,for_next=1
  #garrote,if=talent.subterfuge.enabled&talent.exsanguinate.enabled&cooldown.exsanguinate.remains<1&prev_gcd.1.rupture&dot.rupture.remains>5+4*cp_max_spend
- if Talent(subterfuge_talent) and Talent(exsanguinate_talent) and SpellCooldown(exsanguinate) < 1 and PreviousGCDSpell(rupture) and target.DebuffRemaining(rupture_debuff) > 5 + 4 * MaxComboPoints() Spell(garrote)
+ if Talent(subterfuge_talent) and Talent(exsanguinate_talent) and SpellCooldown(exsanguinate) < 1 and PreviousGCDSpell(rupture) and target.DebuffRemaining(rupture_debuff) > 5 + 4 * MaxComboPoints() and SpellUsable(garrote) Texture(ability_skeer_bloodletting)
 }
 
 AddFunction AssassinationStealthedMainPostConditions

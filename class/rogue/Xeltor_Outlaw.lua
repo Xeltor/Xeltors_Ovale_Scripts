@@ -14,7 +14,7 @@ Include(ovale_rogue_spells)
 AddIcon specialization=outlaw help=main
 {
 	# Precombat
-	if not mounted() and not Stealthed() and not InCombat() and not IsDead() and not PlayerIsResting() and HealthPercent > 0 Spell(stealth)
+	if not mounted() and not Stealthed() and not InCombat() and not IsDead() and not PlayerIsResting() and HealthPercent() > 0 Spell(stealth)
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
 		#marked_for_death
