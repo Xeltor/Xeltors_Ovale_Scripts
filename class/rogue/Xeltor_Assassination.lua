@@ -62,8 +62,8 @@ AddFunction InterruptActions
 
 AddFunction AssassinationUseItemActions
 {
- if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
- if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
+ # if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+ # if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
 }
 
 AddFunction AssassinationGetInMeleeRange
@@ -264,6 +264,7 @@ AddFunction AssassinationDirectMainActions
 {
  #envenom,if=combo_points>=4+talent.deeper_stratagem.enabled&(debuff.vendetta.up|debuff.toxic_blade.up|energy.deficit<=25+variable.energy_regen_combined|!variable.single_target)&(!talent.exsanguinate.enabled|cooldown.exsanguinate.remains>2)
  if ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) and { target.DebuffPresent(vendetta_debuff) or target.DebuffPresent(toxic_blade_debuff) or EnergyDeficit() <= 25 + energy_regen_combined() or not single_target() } and { not Talent(exsanguinate_talent) or SpellCooldown(exsanguinate) > 2 } Spell(envenom)
+ if ComboPoints() >= 4 + TalentPoints(deeper_stratagem_talent) and { target.DebuffPresent(vendetta_debuff) or target.DebuffPresent(toxic_blade_debuff) or EnergyDeficit() <= 25 + energy_regen_combined() or not single_target() } and { not Talent(exsanguinate_talent) or SpellCooldown(exsanguinate) > 2 } and not Spell(envenom) Texture(ability_rogue_disembowel)
  #variable,name=use_filler,value=combo_points.deficit>1|energy.deficit<=25+variable.energy_regen_combined|!variable.single_target
  #poisoned_knife,if=variable.use_filler&buff.sharpened_blades.stack>=29
  if use_filler() and BuffStacks(sharpened_blades_buff) >= 29 Spell(poisoned_knife)
