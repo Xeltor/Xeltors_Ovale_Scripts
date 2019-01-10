@@ -23,7 +23,7 @@ AddIcon specialization=2 help=main
 	# Save ass
 	SaveActions()
 	
-	if wet() Spell(unending_breath)
+	if wet() and not mounted() Spell(unending_breath)
 	
 	# Rotation
 	if InCombat() and target.InRange(shadow_bolt) and HasFullControl()
@@ -46,7 +46,7 @@ AddIcon specialization=2 help=main
 			# Default rotation
 			DemonologyDefaultMainActions()
 		}
-		if Speed() > 0 and SoulShards() < 5 and BuffStacks(demonic_core_buff) >= 1 Spell(demonbolt)
+		if Speed() > 0 and SoulShards() < 4 and BuffStacks(demonic_core_buff) >= 1 Spell(demonbolt)
 	}
 	
 	if not InCombat() and not mounted() OutOfCombatActions()
