@@ -28,10 +28,8 @@ AddIcon specialization=2 help=main
 	# Rotation
 	if InCombat() and target.InRange(shadow_bolt) and HasFullControl()
     {
-		#life_tap
-		# if ManaPercent() <= 30 Spell(life_tap)
 		PetStuff()
-		if HealthPercent() < 30 and target.Present() and not target.IsFriend() and not Boss() and Speed() == 0 Spell(drain_life)
+		if HealthPercent() < 50 and target.Present() and not target.IsFriend() and not Boss() and not Item(healthstone usable=1) and Speed() == 0 Spell(drain_life)
 		
 		# Control stuff
 		
@@ -54,7 +52,7 @@ AddIcon specialization=2 help=main
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
 		# Felhunter Spell Lock
 		if target.Distance() - pet.Distance() <= 40 and pet.CreatureFamily(Felhunter) Spell(spell_lock_fh)
@@ -70,7 +68,7 @@ AddFunction PetStuff
 AddFunction SaveActions
 {
 	if HealthPercent() < 30 and InCombat() Spell(unending_resolve)
-	if HealthPercent() < 30 and ItemCharges(healthstone) > 0 and Item(healthstone usable=1) Texture(inv_stone_04)
+	if HealthPercent() < 50 and ItemCharges(healthstone) > 0 and Item(healthstone usable=1) Texture(inv_stone_04)
 }
 
 AddFunction OutOfCombatActions
