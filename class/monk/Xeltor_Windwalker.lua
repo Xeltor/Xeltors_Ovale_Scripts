@@ -31,17 +31,13 @@ AddIcon specialization=3 help=main
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
-		if target.InRange(spear_hand_strike) Spell(spear_hand_strike)
-		if not target.Classification(worldboss)
-		{
-			if target.InRange(paralysis) Spell(paralysis)
-			if target.InRange(quaking_palm) Spell(quaking_palm)
-			if target.InRange(spear_hand_strike) Spell(leg_sweep)
-			if target.InRange(spear_hand_strike) Spell(ring_of_peace)
-			if target.InRange(spear_hand_strike) Spell(war_stomp)
-		}
+		if target.InRange(paralysis) and not target.Classification(worldboss) Spell(paralysis)
+		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
+		if target.InRange(spear_hand_strike) and target.IsInterruptible() Spell(spear_hand_strike)
+		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
+		if target.Distance(less 5) and not target.Classification(worldboss) Spell(leg_sweep)
 	}
 }
 
