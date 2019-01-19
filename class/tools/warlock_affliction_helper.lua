@@ -3,35 +3,41 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "WLKAFFLICTIONhelp"
-	local desc = "[Xel][7.x] Spellhelper: Affliction"
+	local desc = "[Xel][8.x] Spellhelper: Affliction"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
+	Texture(spell_shadow_shadowbolt) # Shadow Bolt
 	Texture(spell_shadow_curseofsargeras) # Agony
 	Texture(spell_shadow_abominationexplosion) # Corruption
 	Texture(spell_shadow_unstableaffliction_3) # Unstable Affliction
-	Texture(spell_shadow_haunting) # Drain Soul
+	Texture(spell_shadow_lifedrain02) # Drain Life
 	Texture(spell_shadow_seedofdestruction) # Seed of Corruption
+	Texture(inv_beholderwarlock) # Summon Darkglare
 	Texture(spell_shadow_mindrot) # Spel Lock (Felhunter)
 	Texture(spell_shadow_painandsuffering) # Shadow Lock (Doomguard)
 
-	# Buffs
-	Texture(spell_shadow_burningspirit) # Life Tap
-	Texture(warlock_summon_doomguard) # Summon Doomguard
-	Texture(spell_shadow_summoninfernal) # Summon Infernal
-	Texture(spell_shadow_lifedrain) # Health Funnel
+	# Survival stuff
+	Texture(ability_deathwing_bloodcorruption_death) # Health Funnel
+	Texture(inv_misc_gem_bloodstone_01) # Create Healthstone
+	Texture(inv_stone_04) # Healthstone
+	Texture(spell_shadow_demonictactics) # Unending Resolve
 	
-	# Artifact
-	Texture(inv_staff_2h_artifactdeadwind_d_01) # Reap Souls
+	# Buffs
+	Texture(spell_shadow_demonbreath) # Unending Breath
 	
 	# Talents
-	Texture(ability_warlock_haunt) # Haunt (T1)
+	Texture(spell_shadow_haunting) # Drain Soul (T1) (replaces Shadow Bolt)
+	Texture(spell_fire_twilightflamebolt) # Deathbolt (T1)
+	Texture(spell_shadow_requiem) # Siphon Life (T2)
 	Texture(inv_enchant_voidsphere) # Phantom Singularity (T4)
-	Texture(spell_warlock_demonsoul) # Soul Harvest (T4)
-	Texture(spell_shadow_summonfelhunter) # Grimoire of Service (T6) (Grimoire: Felhunter)
-	Texture(spell_shadow_requiem) # Siphon Life (T7)
+	Texture(sha_spell_shadow_shadesofdarkness_nightborne) # Vile Taint (T4)
+	Texture(ability_warlock_mortalcoil) # Mortal Coil (T5)
+	Texture(ability_warlock_haunt) # Haunt (T6)
+	Texture(warlock_grimoireofsacrifice) # Grimoire of Sacrifice (T6)
+	Texture(spell_warlock_soulburn) # Dark Soul: Misery (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -43,6 +49,40 @@ AddIcon
 	Texture(spell_shadow_charm) # Every Man for Himself (Human)
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 
