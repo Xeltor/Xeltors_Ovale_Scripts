@@ -2,8 +2,8 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_restoration"
-	local desc = "[Xel][7.3] Druid: Restoration"
+	local name = "xeltor_restoration_a"
+	local desc = "[Xel][8.1] Druid: Restoration"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -13,61 +13,44 @@ Include(ovale_druid_spells)
 AddIcon specialization=4 help=main
 {
 	# Don't fucking dismount me asshole script.
-	unless Stance(2) or Stance(3) or mounted() or IsDead()
+	if not Stance(2) and not Stance(3) and not mounted()
 	{
-		if not IsDead() and HealthPercent() < 70 Spell(renewal)
+		if HealthPercent() > 0 and HealthPercent() < 70 Spell(renewal)
 		
-		# Dont heal if we are not in a healing spec.
-		unless BuffPresent(bear_form)
+		# Ress dead ally
+		if target.HealthPercent() <= 0 and target.IsFriend()
 		{
-			# Ress dead ally
-			if target.IsDead() and target.IsFriend()
-			{
-				if InCombat() and Spell(rebirth) and target.InRange(rebirth) and not PreviousGCDSpell(rebirth) Spell(rebirth)
-				if not InCombat() and Spell(revitalize) and not PreviousGCDSpell(revitalize) and { Speed() == 0 or CanMove() > 0 } Spell(revitalize)
-			}
-			
-			if CheckBoxOn(auto) Party_Auto_Target()
-			
-			# Do main rotation.
-			if target.Present() and target.IsFriend() and target.InRange(lifebloom) and { target.Health() / target.MaxHealth() } * 100 < 100
-			{
-				Cooldowns()
-				
-				Rotation()
-			}
-			
-			# Keep up focus stuff regardless of target.
-			if HasFocus()
-			{
-				# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
-				if focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
-			}
+			if InCombat() and not focus.Present() and focus.Exists() and focus.InRange(lifebloom) and target.IsFocus() and Spell(rebirth) and target.InRange(rebirth) and not PreviousGCDSpell(rebirth) Spell(rebirth)
+			if not InCombat() and Spell(revitalize) and not PreviousGCDSpell(revitalize) and { Speed() == 0 or CanMove() > 0 } Spell(revitalize)
 		}
 		
-		# Alternate DPS rotations.
-		if target.InRange(mangle) and HasFullControl() and target.Present() and not target.IsFriend()
+		if CheckBoxOn(auto) Party_Auto_Target()
+		
+		# Do main rotation.
+		if target.Present() and target.IsFriend() and target.InRange(lifebloom) and target.HealthPercent() < 100
 		{
-			if BuffPresent(bear_form) Guardian_Affinity()
+			Cooldowns()
+			
+			Rotation()
 		}
+		
+		# Keep up focus stuff regardless of target.
+		if HasFocus()
+		{
+			# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
+			if focus.BuffRemains(lifebloom_buff) <= GCD() * 2 Spell(lifebloom)
+		}
+		
+		# Bored do some dps.
+		if target.IsFriend() and targettarget.Present() and not targettarget.IsFriend() and targettarget.HealthPercent() < 100 and InCombat() and targettarget.InRange(moonfire) TTDPS()
+		if not target.IsFriend() and target.Present() and target.InRange(moonfire) and InCombat() DPS()
 	}
 }
-AddCheckBox(hard "Heal harder")
 AddCheckBox(auto "Party auto target")
-
-# Travel!
-AddFunction Travel
-{
-	if not InCombat() and Falling()
-	{
-		if not Stance(3) and not Indoors() and not mounted() Spell(travel_form)
-		# if not Stance(3) and not Stance(druid_cat_form) and not Wet() and Indoors() Spell(cat_form)
-	}
-}
 
 AddFunction HasFocus
 {
-	focus.Present() and focus.InRange(lifebloom) and not focus.IsDead()
+	focus.Present() and focus.InRange(lifebloom) and focus.HealthPercent() > 0
 }
 
 # Party auto target system
@@ -75,36 +58,17 @@ AddFunction Party_Auto_Target
 {
 	unless UnitInRaid()
 	{
-		# Anti non friend selection bit.
-		if not target.IsFriend() and target.Exists() and InCombat() ThePlayer()
-
-		# Prioritize low health
-		if HealthPercent() < 60 and { target.HealthPercent() >= 60 or HealthPercent() < target.HealthPercent() or not target.Present() } ThePlayer()
-		if party1.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party1.HealthPercent() < target.HealthPercent() or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
-		if party2.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party2.HealthPercent() < target.HealthPercent() or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) PartyMemberTwo()
-		if party3.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party3.HealthPercent() < target.HealthPercent() or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) PartyMemberThree()
-		if party4.HealthPercent() < 60 and { target.HealthPercent() >= 60 or party4.HealthPercent() < target.HealthPercent() or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) PartyMemberFour()
-		
-		# Prioritize putting rejuvenation on people
-		unless HealthPercent() < 60 or party1.HealthPercent() < 60 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 60 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 60 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 60 and party4.Present() and party4.InRange(rejuvenation)
-		{
-			if HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } ThePlayer()
-			if party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
-			if party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) PartyMemberTwo()
-			if party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) PartyMemberThree()
-			if party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(rejuvenation_buff) > 3.5 or target.HealthPercent() >= 100 or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) PartyMemberFour()
-		}
-		
-		# Normal healing.
-		unless HealthPercent() < 60 or HealthPercent() < 100 and BuffRemains(rejuvenation_buff) <= 3.5 or party1.HealthPercent() < 60 and party1.Present() and party1.InRange(rejuvenation) or party1.HealthPercent() < 100 and party1.BuffRemains(rejuvenation_buff) <= 3.5 and party1.Present() and party1.InRange(rejuvenation) or party2.HealthPercent() < 60 and party2.Present() and party2.InRange(rejuvenation) or party2.HealthPercent() < 100 and party2.BuffRemains(rejuvenation_buff) <= 3.5 and party2.Present() and party2.InRange(rejuvenation) or party3.HealthPercent() < 60 and party3.Present() and party3.InRange(rejuvenation) or party3.HealthPercent() < 100 and party3.BuffRemains(rejuvenation_buff) <= 3.5 and party3.Present() and party3.InRange(rejuvenation) or party4.HealthPercent() < 60 and party4.Present() and party4.InRange(rejuvenation) or party4.HealthPercent() < 100 and party4.BuffRemains(rejuvenation_buff) <= 3.5 and party4.Present() and party4.InRange(rejuvenation)
-		{
-			if HealthPercent() < 89 and { target.HealthPercent() >= 89 or HealthPercent() < target.HealthPercent() or not target.Present() } ThePlayer()
-			if party1.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party1.HealthPercent() < target.HealthPercent() or not target.Present() } and party1.Present() and party1.InRange(rejuvenation) PartyMemberOne()
-			if party2.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party2.HealthPercent() < target.HealthPercent() or not target.Present() } and party2.Present() and party2.InRange(rejuvenation) PartyMemberTwo()
-			if party3.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party3.HealthPercent() < target.HealthPercent() or not target.Present() } and party3.Present() and party3.InRange(rejuvenation) PartyMemberThree()
-			if party4.HealthPercent() < 89 and { target.HealthPercent() >= 89 or party4.HealthPercent() < target.HealthPercent() or not target.Present() } and party4.Present() and party4.InRange(rejuvenation) PartyMemberFour()
-		}
+		if PartyMemberWithLowestHealth() == 1 ThePlayer()
+		if PartyMemberWithLowestHealth() == 2 PartyMemberOne()
+		if PartyMemberWithLowestHealth() == 3 PartyMemberTwo()
+		if PartyMemberWithLowestHealth() == 4 PartyMemberThree()
+		if PartyMemberWithLowestHealth() == 5 PartyMemberFour()
 	}
+}
+
+AddFunction HotCount
+{
+	BuffCountOnAny(rejuvenation_buff) + BuffCountOnAny(regrowth_buff) + BuffCountOnAny(wild_growth_buff) + BuffCountOnAny(lifebloom_buff) + BuffCountOnAny(tranquility_buff) + BuffCountOnAny(cenarion_ward_hot_buff)
 }
 
 AddFunction ThePlayer
@@ -136,43 +100,26 @@ AddFunction PartyMemberFour
 
 AddFunction Cooldowns 
 {
-	# We are on a healing frenzy
-	if CheckBoxOn(hard) and { Speed() == 0 or CanMove() }
+	if UnitInRaid() and RaidMembersInRange(wild_growth) >= 6 and RaidMembersWithHealthPercent(less 90) >= 6 and { Speed() == 0 or CanMove() > 0 } or not UnitInRaid() and PartyMembersInRange(wild_growth) >= 4 and PartyMembersWithHealthPercent(less 90) >= 4 and { Speed() == 0 or CanMove() > 0 }
 	{
 		Spell(berserking)
 		Spell(innervate)
+		if BuffCountOnAny(wild_growth_buff) == 0 and SpellCooldown(wild_growth) > GCD() Spell(tranquility)
 	}
-	if InCombat()
-	{
-		# Use Cenarion Ward on cooldown.
-		Spell(cenarion_ward)
-		# Save the tank / save the target.
-		if target.HealthPercent() < 50 Spell(ironbark)
-	}
-	# Use Flourish and Essence of G'Hanir as often as possible (no need to use them together).
-	if { UnitInRaid() and BuffCountOnAny(rejuvenation_buff) >= 5 } or { not UnitInRaid() and BuffCountOnAny(wild_growth_buff) >= PartyMemberCount() }
-	{
-		Spell(flourish)
-		Spell(essence_of_ghanir)
-	}
+	if HotCount() >= 10 Spell(flourish)
 }
 
 AddFunction Rotation
 {
+	# Save dying players immediate.
+	if target.HealthPercent() < 35 HotFix()
 	# Keep Lifebloom on an active tank. Refreshing it with less than 4.5 seconds left in order to proc the final Bloom and not lose any ticks is recommended.
 	if HasFocus() and focus.BuffRemains(lifebloom_buff) <= 4 Spell(lifebloom)
-	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
-	if target.HealthPercent() < 35 Spell(swiftmend)
-	# Force wild growth
-	if CheckBoxOn(hard) and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
 	# Use Wild Growth when at least 6 members of the raid are damaged and you have some Rejuvenations up.
-	if UnitInRaid() and RaidMembersInRange(wild_growth) >= 4 and { RaidMembersWithHealthPercent(less 70) >= 4 or RaidMembersWithHealthPercent(less 80) >= 6 } and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
+	if UnitInRaid() and RaidMembersInRange(wild_growth) >= 6 and RaidMembersWithHealthPercent(less 90) >= 6 and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
 	# Use Wild Growth when at least 4 members of the group are damaged.
-	if not UnitInRaid() and PartyMembersInRange(wild_growth) >= 3 and { PartyMembersWithHealthPercent(less 70) >= 3 or PartyMembersWithHealthPercent(less 80) >= 4 } and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
-	# Use Regrowth as an emergency heal.
-	if target.HealthPercent() <= 60 and not target.BuffPresent(regrowth_buff) and { Speed() == 0 or CanMove() > 0 } Spell(regrowth)
-	# Use Clearcasting procs on one of the tanks.
-	if { BuffPresent(clearcasting_restoration_buff) and HasFocus() and target.IsFocus() and { Speed() == 0 or CanMove() > 0 } } or { not HasFocus() and BuffPresent(clearcasting_restoration_buff) and { Speed() == 0 or CanMove() > 0 } and target.HealthPercent() <= 80 } Spell(regrowth)
+	if not UnitInRaid() and PartyMembersInRange(rejuvenation) >= 4 and PartyMembersWithHealthPercent(less 90) >= 3 and { Speed() == 0 or CanMove() > 0 } Spell(wild_growth)
+	if InCombat() Spell(cenarion_ward)
 	# Keep Rejuvenation on the tank and on members of the group that just took damage or are about to take damage.
 	if not Talent(germination_talent) and target.BuffRemains(rejuvenation_buff) <= 3.5 Spell(rejuvenation)
 	if Talent(germination_talent) and target.BuffRemains(rejuvenation_buff) <= 3.5 and { target.BuffRemains(germination_buff) > target.BuffRemains(rejuvenation_buff) or not target.BuffPresent(germination_buff) } Spell(rejuvenation)
@@ -180,20 +127,42 @@ AddFunction Rotation
 	if Talent(germination_talent) and { Talent(abundance_talent) or target.HealthPercent() < 89 } and target.BuffRemains(germination_buff) <= 3.5 and target.BuffPresent(rejuvenation_buff) and target.BuffRemains(germination_buff) < target.BuffRemains(rejuvenation_buff) Spell(rejuvenation)
 	# Use Swiftmend on a player that just took heavy damage. If they are not in immediate danger, you should apply Rejuvenation to him first.
 	if target.HealthPercent() <= 45 Spell(swiftmend)
-	if target.HealthPercent() <= 60 and { Speed() == 0 or CanMove() > 0 } Spell(regrowth)
-	if target.HealthPercent() <= 89 and { Speed() == 0 or CanMove() > 0 } Spell(healing_touch)
+	if target.HealthPercent() <= 80 and { Speed() == 0 or CanMove() > 0 } Spell(regrowth)
 }
 
-# Guardian Affinity
-AddFunction Guardian_Affinity
+AddFunction HotFix
 {
-	if not BuffPresent(bear_form) Spell(bear_form)
-	if IncomingDamage(5) / MaxHealth() >= 0.2 or Health() <= MaxHealth() * 0.65 Spell(frenzied_regeneration)
-	if Rage() > 55 Spell(ironfur)
-	Spell(thrash_bear)
-	if target.DebuffExpires(moonfire_debuff) Spell(moonfire)
-	Spell(mangle)
+	if SpellCooldown(swiftmend) > GCD() Spell(ironbark)
+	Spell(swiftmend)
+}
+
+AddFunction TTDPS
+{
+	if targettarget.DebuffRemains(sunfire_debuff) <= GCD() * 2 and ManaPercent() > 75 Spell(sunfire)
+	if targettarget.DebuffRemains(moonfire_debuff) <= GCD() * 2 and ManaPercent() > 75 Spell(moonfire)
+	if Speed() == 0 or CanMove() > 0 Spell(solar_wrath)
+}
+
+AddFunction DPS
+{
+	if HealthPercent() < 100
+	{
+		Spell(cenarion_ward)
+		if BuffRemains(rejuvenation_buff) <= 3.5 Spell(rejuvenation)
+		if Speed() == 0 and HealthPercent() < 50 Spell(regrowth)
+	}
+	
+	if Talent(balance_affinity_talent) and not Stance(4) Spell(moonkin_form)
+	if target.DebuffRemains(sunfire_debuff) <= GCD() * 2 Spell(sunfire)
+	if target.DebuffRemains(moonfire_debuff) <= GCD() * 2 Spell(moonfire)
+	if Speed() == 0 or CanMove() > 0
+	{
+		if Talent(balance_affinity_talent) Spell(starsurge)
+		if { BuffPresent(lunar_empowerment_buff) or Enemies(tagged=1) > 3 } and Talent(balance_affinity_talent) Spell(lunar_strike)
+		Spell(solar_wrath)
+	}
 }
 ]]
+
 	OvaleScripts:RegisterScript("DRUID", "restoration", name, desc, code, "script")
 end

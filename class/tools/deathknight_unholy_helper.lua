@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "DKUhelp"
-	local desc = "[Xel][8.0] Spellhelper: Unholy"
+	local desc = "[Xel][8.x] Spellhelper: Unholy"
 	local code = [[
 AddIcon
 {
@@ -17,14 +17,19 @@ AddIcon
 	Texture(spell_shadow_deathanddecay) # Death and Decay
 	Texture(spell_deathknight_butcher2) # Death Strike
 	Texture(spell_deathknight_mindfreeze) # Mind Freeze
+	Texture(spell_frost_chainsofice) # Chains of Ice
 
 	# Buffs
 	Texture(inv_pet_ghoul) # Raise Dead
 	Texture(achievement_boss_festergutrotface) # Dark Transformation
 	Texture(spell_deathknight_armyofthedead) # Army of the Dead
+	Texture(spell_deathknight_pathoffrost) # Path of Frost
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Trinkets
 
 	# Talents
-	Texture(warlock_curse_shadow) # Clawing Shadows (T1)
+	Texture(warlock_curse_shadow) # Clawing Shadows (T1) (Replaces Scourge Strike)
 	Texture(spell_shadow_contagion) # Unholy Blight (T2)
 	Texture(ability_deathknight_asphixiate) # Asphyxiate (T3)
 	Texture(ability_deathknight_soulreaper) # Soul Reaper (T4)
@@ -34,7 +39,10 @@ AddIcon
 	Texture(spell_nature_nullifydisease) # Epidemic (T6)
 	Texture(spell_shadow_unholyfrenzy) # Unholy Frenzy (T7)
 	Texture(ability_deathknight_summongargoyle) # Summon Gargoyle (T7)
-
+	
+	# PvP Talents
+	Texture(achievement_boss_patchwerk) # Raise Abomination (Replaces Army)
+	
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
 	Texture(racial_troll_berserk) # Berserking (Troll)
@@ -48,6 +56,45 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 
 

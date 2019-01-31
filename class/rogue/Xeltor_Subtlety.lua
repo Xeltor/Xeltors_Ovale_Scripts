@@ -37,16 +37,17 @@ AddIcon specialization=3 help=main
 		SubtletyDefaultMainActions()
 	}
 	
-	if InCombat() and not target.IsDead() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() } GetInMeleeRange()
+	if InCombat() and not target.IsDead() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() or not IsBossFight() } GetInMeleeRange()
 }
 
 AddFunction GetInMeleeRange
 {
 	if not target.InRange(kick)
 	{
-		if target.InRange(shadowstep) and Stealthed() Spell(shadowstrike)
+		if target.InRange(shadowstrike) and Stealthed() Spell(shadowstrike)
 		if target.InRange(shadowstep) Spell(shadowstep)
 		# Texture(misc_arrowlup help=L(not_in_melee_range))
+		if target.InRange(shadowstrike) and not Stealthed() and SpellCooldown(shadowstep) > GCD() AcquireStealth()
 	}
 }
 
@@ -59,6 +60,13 @@ AddFunction InterruptActions
 		if target.InRange(cheap_shot) and not target.Classification(worldboss) Spell(cheap_shot)
 		if target.InRange(kick) and target.IsInterruptible() Spell(kick)
 	}
+}
+
+AddFunction AcquireStealth
+{
+	if VanishAllowed() Spell(vanish)
+	if not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
+	if not InCombat() Spell(stealth)
 }
 
 AddFunction VanishAllowed
@@ -149,7 +157,7 @@ AddFunction SubtletyDefaultMainPostConditions
 AddFunction SubtletyDefaultShortCdActions
 {
  #stealth
- Spell(stealth)
+ if not InCombat() Spell(stealth)
  #call_action_list,name=cds
  SubtletyCdsShortCdActions()
 

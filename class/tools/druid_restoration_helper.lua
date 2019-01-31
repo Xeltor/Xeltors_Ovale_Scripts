@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Restorationhelper"
-	local desc = "[Xel][7.x] Spellhelper: Restoration"
+	local desc = "[Xel][8.x] Spellhelper: Restoration"
 	local code = [[
 AddIcon
 {
@@ -11,21 +11,26 @@ AddIcon
 	# Spells
 	Texture(inv_misc_herb_felblossom) # Lifebloom
 	Texture(spell_nature_rejuvenation) # Rejuvenation
-	Texture(spell_nature_healingtouch) # Healing Touch
 	Texture(spell_nature_resistnature) # Regrowth
 	Texture(inv_relics_idolofrejuvenation) # Swiftmend
 	Texture(ability_druid_flourish) # Wild Growth
 	Texture(spell_nature_tranquility) # Tranquility
 	Texture(spell_nature_reincarnation) # Rebirth
 	Texture(ability_druid_empoweredtouch) # Revitalize
+	Texture(ability_mage_firestarter) # Sunfire
+	Texture(spell_nature_starfall) # Moonfire
+	Texture(spell_nature_wrathv2) # Solar Wrath
 	
 	# Buffs
 	Texture(ability_druid_catform) # Cat Form
 	Texture(ability_druid_travelform) # Travel Form
 	Texture(spell_druid_ironbark) # Ironbark
+	Texture(spell_nature_lightning) # Innervate
 	
-	# Artifact
-	Texture(inv_staff_2h_artifactnordrassil_d_01) # Essence of G'Hanir
+	# Chicken talent
+	Texture(spell_nature_forceofnature) # Moonkin Form
+	Texture(spell_arcane_starfire) # Lunar Strike
+	Texture(spell_arcane_arcane03) # Starsurge
 	
 	# Talents
 	Texture(ability_druid_naturalperfection) # Cenarion Ward (T1)
@@ -51,27 +56,32 @@ AddIcon
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 	
 	# Party auto targeting system
-	Texture(misc_arrowdown) # Link to F1 (target self)
-	Texture(ships_ability_boardingparty) # Link to F2 (target party member 2)
-	Texture(ships_ability_boardingpartyalliance) # Link to F3 (target party member 3)
-	Texture(ships_ability_boardingpartyhorde) # Link to F4 (target party member 4)
-	Texture(inv_helm_misc_starpartyhat) # Link to F5 (target party member 5)
+	Texture(misc_arrowdown) # Bind to F1 (target self)
+	Texture(ships_ability_boardingparty) # Bind to F2 (target party member 2)
+	Texture(ships_ability_boardingpartyalliance) # Bind to F3 (target party member 3)
+	Texture(ships_ability_boardingpartyhorde) # Bind to F4 (target party member 4)
+	Texture(inv_helm_misc_starpartyhat) # Bind to F5 (target party member 5)
 	
-	# Guardian Affinity
-	Texture(ability_racial_bearform) # Bear Form
-	Texture(ability_druid_mangle2) # Mangle
-	Texture(spell_druid_thrash) # Thrash
-	Texture(spell_nature_starfall) # Moonfire
-	Texture(ability_druid_ironfur) # Ironfur
-	Texture(ability_bullrush) # Frenzied Regeneration
 	
-	# Balance Affinity
-	Texture(spell_nature_forceofnature) # Moonkin Form
-	Texture(spell_nature_wrathv2) # Solar Wrath
-	Texture(spell_arcane_starfire) # Lunar Strike
-	Texture(ability_mage_firestarter) # Sunfire
-	Texture(spell_nature_starfall) # Moonfire
-	Texture(spell_arcane_arcane03) # Starsurge
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "SHAWMUNELEMhelp"
-	local desc = "[Xel][7.x] Spellhelper: Elemental"
+	local desc = "[Xel][8.x] Spellhelper: Elemental"
 	local code = [[
 AddIcon
 {
@@ -23,24 +23,23 @@ AddIcon
 	# Buffs
 	Texture(spell_fire_elemental_totem) # Fire Elemental Totem
 	Texture(spell_nature_earthelemental_totem) # Earth Elemental Totem
+	Texture(spell_nature_healingway) # Healing Surge
+	Texture(ability_shaman_astralshift) # Astral Shift
 	
-	# Artifact
-	Texture(inv_hand_1h_artifactstormfist_d_01) # Stormkeeper
+	# Items
+	Texture(inv_jewelry_talisman_12) # Trinkets
 
 	# Talents
-	Texture(spell_nature_wrathofair_totem) # Totem Mastery (T1)
-	Texture(ability_skyreach_four_wind) # Gust of Wind (T2)
-	Texture(ability_shaman_ancestralguidance) # Ancestral Guidance (T2)
-	Texture(ability_shaman_windwalktotem) # Wind Rush Totem (T2)
-	Texture(spell_nature_brilliance) # Lightning Surge Totem (T3)
-	Texture(spell_nature_stranglevines) # Earthgrab Totem (T3)
-	Texture(spell_totem_wardofdraining) # Voodoo Totem (T3)
-	Texture(shaman_talent_elementalblast) # Elemental Blast (T4)
-	Texture(spell_frost_iceshard) # Icefury (T5)
-	Texture(spell_nature_wispheal) # Elemental Mastery (T6)
-	Texture(spell_shaman_measuredinsight) # Storm Elemental (T6)(Replaces Fire Elemental Totem)
+	Texture(shaman_talent_elementalblast) # Elemental Blast (T1)
+	Texture(spell_nature_wrathofair_totem) # Totem Mastery (T2)
+	Texture(spell_nature_skinofearth) # Earth Shield (T3)
+	Texture(inv_stormelemental) # Storm Elemental (T4)(Replaces Fire Elemental Totem)
+	Texture(spell_shaman_spewlava) # Liquid Magma Totem (T4)
+	Texture(ability_shaman_ancestralguidance) # Ancestral Guidance (T5)
+	Texture(ability_shaman_windwalktotem) # Wind Rush Totem (T5)
+	Texture(spell_frost_iceshard) # Icefury (T6)
+	Texture(ability_thunderking_lightningwhip) # Stormkeeper (T6)
 	Texture(spell_fire_elementaldevastation) # Ascendance (T7)
-	Texture(spell_shaman_spewlava) # Liquid Magma Totem (T7)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
@@ -51,6 +50,38 @@ AddIcon
 	Texture(pandarenracial_quiveringpain) # Quaking Palm (Pandaren)
 	Texture(spell_shadow_unholystrength) # Stoneform (Dwarf)
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

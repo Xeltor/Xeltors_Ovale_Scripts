@@ -27,6 +27,7 @@ AddIcon
 	Texture(inv_summondemonictyrant) # Summon Demonic Tyrant
 	Texture(spell_warlock_calldreadstalkers) # Call Dreadstalkers
 	Texture(spell_shadow_demonbreath) # Unending Breath
+	Texture(spell_warlock_summonwrathguard) # Summon Felguard
 	
 	# Items
 	Texture(inv_jewelry_talisman_12) # Trinkets

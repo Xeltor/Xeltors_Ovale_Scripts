@@ -3,209 +3,176 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_elemental"
-	local desc = "[Xel][7.3.5] Shaman: Elemental"
+	local desc = "[Xel][8.1] Shaman: Elemental"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_shaman_spells)
 
-Define(ghost_wolf_buff 2645)
-
 # Elemental
 AddIcon specialization=1 help=main
 {
 	if not InCombat() and not target.IsFriend() and not mounted() and target.Present() and Speed() == 0
 	{
-		if BuffRemaining(resonance_totem_buff) < 2 Spell(totem_mastery)
+		if TotemRemaining(totem_mastery_elemental) < 2 and not BuffPresent(ele_resonance_totem_buff) and Boss() Spell(totem_mastery_elemental)
 	}
 	
 	# Interrupt
 	if InCombat() InterruptActions()
 	
+	# Save ass
+	if not mounted() SaveActions()
+	
 	if target.InRange(lightning_bolt_elemental) and HasFullControl() and InCombat()
     {
 		# Cooldowns
-		if Boss()
-		{
-			if Speed() == 0 or CanMove() > 0 ElementalDefaultCdActions()
-		}
+		if Boss() and { Speed() == 0 or CanMove() > 0 } ElementalDefaultCdActions()
 		
 		# Short Cooldowns
 		if Speed() == 0 or CanMove() > 0 ElementalDefaultShortCdActions()
 		
 		# Default rotation
 		if Speed() == 0 or CanMove() > 0 ElementalDefaultMainActions()
+
 		
+		#lava_burst,moving=1,if=talent.ascendance.enabled
+		if Speed() > 0 and Talent(ascendance_talent) Spell(lava_burst)
 		#flame_shock,moving=1,target_if=refreshable
 		if Speed() > 0 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
-		#earth_shock,moving=1
-		if Speed() > 0 Spell(earth_shock)
 		#flame_shock,moving=1,if=movement.distance>6
 		if Speed() > 0 and target.Distance() > 6 Spell(flame_shock)
+		#frost_shock,moving=1
+		if Speed() > 0 Spell(frost_shock)
 	}
 }
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend() and target.IsInterruptible() and { target.MustBeInterrupted() or Level() < 100 or target.IsPVP() }
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
-		if target.InRange(wind_shear) and target.IsInterruptible() Spell(wind_shear)
-		if not target.Classification(worldboss) and target.RemainingCastTime() > 2 and not mouseover.IsFriend() and mouseover.Present() Spell(lightning_surge_totem)
-		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
+		if target.InRange(hex) and not target.Classification(worldboss) and target.RemainingCastTime() > CastTime(hex) + GCDRemaining() and target.CreatureType(Humanoid Beast) Spell(hex)
 		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
-		if target.InRange(hex) and not target.Classification(worldboss) and target.RemainingCastTime() > CastTime(hex) + GCDRemaining() and target.CreatureType(Humanoid Beast) and { Speed() == 0 or CanMove() > 0 } Spell(hex)
+		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
+		# if not target.Classification(worldboss) and target.RemainingCastTime() > 2 Spell(capacitor_totem)
+		if target.InRange(wind_shear) and target.IsInterruptible() Spell(wind_shear)
 	}
+}
+
+AddFunction SaveActions
+{
+	if HealthPercent() <= 50 and InCombat() Spell(astral_shift)
+	if { Speed() == 0 or CanMove() > 0 } and HealthPercent() <= 50 and ManaPercent() > 25 and CanCast(healing_surge) and { not InCombat() or target.istargetingplayer() } Spell(healing_surge)
+	if not BuffPresent(earth_shield_buff) and HealthPercent() < 100 and target.istargetingplayer() Spell(earth_shield)
+	if target.istargetingplayer() and HealthPercent() < 50 Spell(earth_elemental)
+}
+
+AddFunction ElementalUseItemActions
+{
+	if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+	if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
 }
 
 ### actions.default
 
 AddFunction ElementalDefaultMainActions
 {
- #totem_mastery,if=buff.resonance_totem.remains<2
- if TotemRemaining(totem_mastery) < 2 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 Spell(totem_mastery)
- #storm_elemental
- Spell(storm_elemental)
+ #totem_mastery,if=talent.totem_mastery.enabled&buff.resonance_totem.remains<2
+ if Talent(totem_mastery_talent_elemental) and TotemRemaining(totem_mastery_elemental) < 2 and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() Spell(totem_mastery_elemental)
  #run_action_list,name=aoe,if=active_enemies>2&(spell_targets.chain_lightning>2|spell_targets.lava_beam>2)
  if Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } ElementalAoeMainActions()
 
  unless Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeMainPostConditions()
  {
-  #run_action_list,name=single_asc,if=talent.ascendance.enabled
-  if Talent(ascendance_talent) ElementalSingleAscMainActions()
-
-  unless Talent(ascendance_talent) and ElementalSingleAscMainPostConditions()
-  {
-   #run_action_list,name=single_if,if=talent.icefury.enabled
-   if Talent(icefury_talent) ElementalSingleIfMainActions()
-
-   unless Talent(icefury_talent) and ElementalSingleIfMainPostConditions()
-   {
-    #run_action_list,name=single_lr,if=talent.lightning_rod.enabled
-    if Talent(lightning_rod_talent) ElementalSingleLrMainActions()
-   }
-  }
+  #run_action_list,name=single_target
+  ElementalSingleTargetMainActions()
  }
 }
 
 AddFunction ElementalDefaultMainPostConditions
 {
- Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeMainPostConditions() or Talent(ascendance_talent) and ElementalSingleAscMainPostConditions() or Talent(icefury_talent) and ElementalSingleIfMainPostConditions() or Talent(lightning_rod_talent) and ElementalSingleLrMainPostConditions()
+ Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeMainPostConditions() or ElementalSingleTargetMainPostConditions()
 }
 
 AddFunction ElementalDefaultShortCdActions
 {
- unless TotemRemaining(totem_mastery) < 2 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Spell(storm_elemental)
+ unless Talent(totem_mastery_talent_elemental) and TotemRemaining(totem_mastery_elemental) < 2 and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental)
  {
   #run_action_list,name=aoe,if=active_enemies>2&(spell_targets.chain_lightning>2|spell_targets.lava_beam>2)
   if Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } ElementalAoeShortCdActions()
 
   unless Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeShortCdPostConditions()
   {
-   #run_action_list,name=single_asc,if=talent.ascendance.enabled
-   if Talent(ascendance_talent) ElementalSingleAscShortCdActions()
-
-   unless Talent(ascendance_talent) and ElementalSingleAscShortCdPostConditions()
-   {
-    #run_action_list,name=single_if,if=talent.icefury.enabled
-    if Talent(icefury_talent) ElementalSingleIfShortCdActions()
-
-    unless Talent(icefury_talent) and ElementalSingleIfShortCdPostConditions()
-    {
-     #run_action_list,name=single_lr,if=talent.lightning_rod.enabled
-     if Talent(lightning_rod_talent) ElementalSingleLrShortCdActions()
-    }
-   }
+   #run_action_list,name=single_target
+   ElementalSingleTargetShortCdActions()
   }
  }
 }
 
 AddFunction ElementalDefaultShortCdPostConditions
 {
- TotemRemaining(totem_mastery) < 2 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Spell(storm_elemental) or Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeShortCdPostConditions() or Talent(ascendance_talent) and ElementalSingleAscShortCdPostConditions() or Talent(icefury_talent) and ElementalSingleIfShortCdPostConditions() or Talent(lightning_rod_talent) and ElementalSingleLrShortCdPostConditions()
+ Talent(totem_mastery_talent_elemental) and TotemRemaining(totem_mastery_elemental) < 2 and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeShortCdPostConditions() or ElementalSingleTargetShortCdPostConditions()
 }
 
 AddFunction ElementalDefaultCdActions
 {
- #bloodlust,if=target.health.pct<25|time>0.500
- # if target.HealthPercent() < 25 or TimeInCombat() > 0.5 ElementalBloodlust()
- #potion,if=cooldown.fire_elemental.remains>280|target.time_to_die<=60
- # if { SpellCooldown(fire_elemental) > 280 or target.TimeToDie() <= 60 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ #bloodlust,if=azerite.ancestral_resonance.enabled
+ # if HasAzeriteTrait(ancestral_resonance_trait) ElementalBloodlust()
+ #potion,if=expected_combat_length-time<30|cooldown.fire_elemental.remains>120|cooldown.storm_elemental.remains>120
+ # if { 600 - TimeInCombat() < 30 or SpellCooldown(fire_elemental) > 120 or SpellCooldown(storm_elemental) > 120 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_intellect usable=1)
  #wind_shear
  # ElementalInterruptActions()
 
- unless TotemRemaining(totem_mastery) < 2 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery)
+ unless Talent(totem_mastery_talent_elemental) and TotemRemaining(totem_mastery_elemental) < 2 and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental)
  {
-  #fire_elemental
-  Spell(fire_elemental)
+  #fire_elemental,if=!talent.storm_elemental.enabled
+  if not Talent(storm_elemental_talent) Spell(fire_elemental)
+  #storm_elemental,if=talent.storm_elemental.enabled&(!talent.icefury.enabled|!buff.icefury.up&!cooldown.icefury.up)
+  if Talent(storm_elemental_talent) and { not Talent(icefury_talent) or not BuffPresent(icefury_buff) and not { not SpellCooldown(icefury) > 0 } } Spell(storm_elemental)
+  #earth_elemental,if=!talent.primal_elementalist.enabled|talent.primal_elementalist.enabled&(cooldown.fire_elemental.remains<120&!talent.storm_elemental.enabled|cooldown.storm_elemental.remains<120&talent.storm_elemental.enabled)
+  if not Talent(primal_elementalist_talent) or Talent(primal_elementalist_talent) and { SpellCooldown(fire_elemental) < 120 and not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 and Talent(storm_elemental_talent) } Spell(earth_elemental)
+  #use_items
+  ElementalUseItemActions()
+  #blood_fury,if=!talent.ascendance.enabled|buff.ascendance.up|cooldown.ascendance.remains>50
+  if not Talent(ascendance_talent) or BuffPresent(ascendance_elemental_buff) or SpellCooldown(ascendance_elemental) > 50 Spell(blood_fury_apsp)
+  #berserking,if=!talent.ascendance.enabled|buff.ascendance.up
+  if not Talent(ascendance_talent) or BuffPresent(ascendance_elemental_buff) Spell(berserking)
+  #fireblood,if=!talent.ascendance.enabled|buff.ascendance.up|cooldown.ascendance.remains>50
+  if not Talent(ascendance_talent) or BuffPresent(ascendance_elemental_buff) or SpellCooldown(ascendance_elemental) > 50 Spell(fireblood)
+  #ancestral_call,if=!talent.ascendance.enabled|buff.ascendance.up|cooldown.ascendance.remains>50
+  if not Talent(ascendance_talent) or BuffPresent(ascendance_elemental_buff) or SpellCooldown(ascendance_elemental) > 50 Spell(ancestral_call)
+  #run_action_list,name=aoe,if=active_enemies>2&(spell_targets.chain_lightning>2|spell_targets.lava_beam>2)
+  if Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } ElementalAoeCdActions()
 
-  unless Spell(storm_elemental)
+  unless Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeCdPostConditions()
   {
-   #elemental_mastery
-   Spell(elemental_mastery)
-   #use_items
-   # ElementalUseItemActions()
-   #use_item,name=gnawed_thumb_ring,if=equipped.gnawed_thumb_ring&(talent.ascendance.enabled&!buff.ascendance.up|!talent.ascendance.enabled)
-   # if HasEquippedItem(gnawed_thumb_ring) and { Talent(ascendance_talent) and not BuffPresent(ascendance_elemental_buff) or not Talent(ascendance_talent) } ElementalUseItemActions()
-   #blood_fury,if=!talent.ascendance.enabled|buff.ascendance.up|cooldown.ascendance.remains>50
-   if not Talent(ascendance_talent) or BuffPresent(ascendance_elemental_buff) or SpellCooldown(ascendance_elemental) > 50 Spell(blood_fury_apsp)
-   #berserking,if=!talent.ascendance.enabled|buff.ascendance.up
-   if not Talent(ascendance_talent) or BuffPresent(ascendance_elemental_buff) Spell(berserking)
-   #run_action_list,name=aoe,if=active_enemies>2&(spell_targets.chain_lightning>2|spell_targets.lava_beam>2)
-   if Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } ElementalAoeCdActions()
-
-   unless Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeCdPostConditions()
-   {
-    #run_action_list,name=single_asc,if=talent.ascendance.enabled
-    if Talent(ascendance_talent) ElementalSingleAscCdActions()
-
-    unless Talent(ascendance_talent) and ElementalSingleAscCdPostConditions()
-    {
-     #run_action_list,name=single_if,if=talent.icefury.enabled
-     if Talent(icefury_talent) ElementalSingleIfCdActions()
-
-     unless Talent(icefury_talent) and ElementalSingleIfCdPostConditions()
-     {
-      #run_action_list,name=single_lr,if=talent.lightning_rod.enabled
-      if Talent(lightning_rod_talent) ElementalSingleLrCdActions()
-     }
-    }
-   }
+   #run_action_list,name=single_target
+   ElementalSingleTargetCdActions()
   }
  }
 }
 
 AddFunction ElementalDefaultCdPostConditions
 {
- TotemRemaining(totem_mastery) < 2 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Spell(storm_elemental) or Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeCdPostConditions() or Talent(ascendance_talent) and ElementalSingleAscCdPostConditions() or Talent(icefury_talent) and ElementalSingleIfCdPostConditions() or Talent(lightning_rod_talent) and ElementalSingleLrCdPostConditions()
+ Talent(totem_mastery_talent_elemental) and TotemRemaining(totem_mastery_elemental) < 2 and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Enemies(tagged=1) > 2 and { Enemies(tagged=1) > 2 or Enemies(tagged=1) > 2 } and ElementalAoeCdPostConditions() or ElementalSingleTargetCdPostConditions()
 }
 
 ### actions.aoe
 
 AddFunction ElementalAoeMainActions
 {
- #stormkeeper
- Spell(stormkeeper)
- #flame_shock,if=spell_targets.chain_lightning<4&maelstrom>=20,target_if=refreshable
- if Enemies(tagged=1) < 4 and Maelstrom() >= 20 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earthquake
- if not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #lava_burst,if=dot.flame_shock.remains>cast_time&buff.lava_surge.up&!talent.lightning_rod.enabled&spell_targets.chain_lightning<4
- if target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and BuffPresent(lava_surge_buff) and not Talent(lightning_rod_talent) and Enemies(tagged=1) < 4 Spell(lava_burst)
- #elemental_blast,if=!talent.lightning_rod.enabled&spell_targets.chain_lightning<4
- if not Talent(lightning_rod_talent) and Enemies(tagged=1) < 4 Spell(elemental_blast)
- #lava_beam,target_if=debuff.lightning_rod.down
- if target.DebuffExpires(lightning_rod_debuff) Spell(lava_beam)
- #lava_beam
- Spell(lava_beam)
- #chain_lightning,target_if=debuff.lightning_rod.down
- if target.DebuffExpires(lightning_rod_debuff) Spell(chain_lightning)
+ #flame_shock,target_if=refreshable&spell_targets.chain_lightning<5&(!talent.storm_elemental.enabled|cooldown.storm_elemental.remains<120|spell_targets.chain_lightning=3&buff.wind_gust.stack<14)
+ if target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) < 5 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 and Boss() or Enemies(tagged=1) == 3 and BuffStacks(wind_gust_buff) < 14 } Spell(flame_shock)
+ #earthquake,if=!talent.master_of_the_elements.enabled|buff.stormkeeper.up|maelstrom>=(100-4*spell_targets.chain_lightning)|buff.master_of_the_elements.up|spell_targets.chain_lightning>3
+ if not Talent(master_of_the_elements_talent) or BuffPresent(stormkeeper_buff) or Maelstrom() >= 100 - 4 * Enemies(tagged=1) or BuffPresent(master_of_the_elements_buff) or Enemies(tagged=1) > 3 Spell(earthquake)
+ #lava_burst,if=(buff.lava_surge.up|buff.ascendance.up)&spell_targets.chain_lightning<4&(!talent.storm_elemental.enabled|cooldown.storm_elemental.remains<120)
+ if { BuffPresent(lava_surge_buff) or BuffPresent(ascendance_elemental_buff) } and Enemies(tagged=1) < 4 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 } Spell(lava_burst)
+ #elemental_blast,if=talent.elemental_blast.enabled&spell_targets.chain_lightning<4&(!talent.storm_elemental.enabled|cooldown.storm_elemental.remains<120)
+ if Talent(elemental_blast_talent) and Enemies(tagged=1) < 4 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 } Spell(elemental_blast)
+ #lava_beam,if=talent.ascendance.enabled
+ if Talent(ascendance_talent) Spell(lava_beam)
  #chain_lightning
- Spell(chain_lightning)
- #lava_burst,moving=1
- if Speed() > 0 Spell(lava_burst)
- #flame_shock,moving=1,target_if=refreshable
- if Speed() > 0 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
+ Spell(chain_lightning_elemental)
 }
 
 AddFunction ElementalAoeMainPostConditions
@@ -214,30 +181,29 @@ AddFunction ElementalAoeMainPostConditions
 
 AddFunction ElementalAoeShortCdActions
 {
- unless Spell(stormkeeper)
- {
-  #liquid_magma_totem
-  Spell(liquid_magma_totem)
- }
+ #stormkeeper,if=talent.stormkeeper.enabled
+ if Talent(stormkeeper_talent) Spell(stormkeeper)
+ #liquid_magma_totem,if=talent.liquid_magma_totem.enabled
+ if Talent(liquid_magma_totem_talent) Spell(liquid_magma_totem)
 }
 
 AddFunction ElementalAoeShortCdPostConditions
 {
- Spell(stormkeeper) or Enemies(tagged=1) < 4 and Maelstrom() >= 20 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and BuffPresent(lava_surge_buff) and not Talent(lightning_rod_talent) and Enemies(tagged=1) < 4 and Spell(lava_burst) or not Talent(lightning_rod_talent) and Enemies(tagged=1) < 4 and Spell(elemental_blast) or target.DebuffExpires(lightning_rod_debuff) and Spell(lava_beam) or Spell(lava_beam) or target.DebuffExpires(lightning_rod_debuff) and Spell(chain_lightning) or Spell(chain_lightning) or Speed() > 0 and Spell(lava_burst) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock)
+ target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) < 5 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 or Enemies(tagged=1) == 3 and BuffStacks(wind_gust_buff) < 14 } and Spell(flame_shock) or { not Talent(master_of_the_elements_talent) or BuffPresent(stormkeeper_buff) or Maelstrom() >= 100 - 4 * Enemies(tagged=1) or BuffPresent(master_of_the_elements_buff) or Enemies(tagged=1) > 3 } and Spell(earthquake) or { BuffPresent(lava_surge_buff) or BuffPresent(ascendance_elemental_buff) } and Enemies(tagged=1) < 4 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 } and Spell(lava_burst) or Talent(elemental_blast_talent) and Enemies(tagged=1) < 4 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 } and Spell(elemental_blast) or Talent(ascendance_talent) and Spell(lava_beam) or Spell(chain_lightning_elemental) or Speed() > 0 and Talent(ascendance_talent) and Spell(lava_burst) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(frost_shock)
 }
 
 AddFunction ElementalAoeCdActions
 {
- unless Spell(stormkeeper)
+ unless Talent(stormkeeper_talent) and Spell(stormkeeper)
  {
-  #ascendance
-  if BuffExpires(ascendance_elemental_buff) Spell(ascendance_elemental)
+  #ascendance,if=talent.ascendance.enabled&(talent.storm_elemental.enabled&cooldown.storm_elemental.remains<120&cooldown.storm_elemental.remains>15|!talent.storm_elemental.enabled)
+  if Talent(ascendance_talent) and { Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 120 and SpellCooldown(storm_elemental) > 15 or not Talent(storm_elemental_talent) } and BuffExpires(ascendance_elemental_buff) Spell(ascendance_elemental)
  }
 }
 
 AddFunction ElementalAoeCdPostConditions
 {
- Spell(stormkeeper) or Spell(liquid_magma_totem) or Enemies(tagged=1) < 4 and Maelstrom() >= 20 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and BuffPresent(lava_surge_buff) and not Talent(lightning_rod_talent) and Enemies(tagged=1) < 4 and Spell(lava_burst) or not Talent(lightning_rod_talent) and Enemies(tagged=1) < 4 and Spell(elemental_blast) or target.DebuffExpires(lightning_rod_debuff) and Spell(lava_beam) or Spell(lava_beam) or target.DebuffExpires(lightning_rod_debuff) and Spell(chain_lightning) or Spell(chain_lightning) or Speed() > 0 and Spell(lava_burst) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock)
+ Talent(stormkeeper_talent) and Spell(stormkeeper) or Talent(liquid_magma_totem_talent) and Spell(liquid_magma_totem) or target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) < 5 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 or Enemies(tagged=1) == 3 and BuffStacks(wind_gust_buff) < 14 } and Spell(flame_shock) or { not Talent(master_of_the_elements_talent) or BuffPresent(stormkeeper_buff) or Maelstrom() >= 100 - 4 * Enemies(tagged=1) or BuffPresent(master_of_the_elements_buff) or Enemies(tagged=1) > 3 } and Spell(earthquake) or { BuffPresent(lava_surge_buff) or BuffPresent(ascendance_elemental_buff) } and Enemies(tagged=1) < 4 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 } and Spell(lava_burst) or Talent(elemental_blast_talent) and Enemies(tagged=1) < 4 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) < 120 } and Spell(elemental_blast) or Talent(ascendance_talent) and Spell(lava_beam) or Spell(chain_lightning_elemental) or Speed() > 0 and Talent(ascendance_talent) and Spell(lava_burst) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(frost_shock)
 }
 
 ### actions.precombat
@@ -249,9 +215,11 @@ AddFunction ElementalPrecombatMainActions
  #augmentation
  #snapshot_stats
  #totem_mastery
- if { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 Spell(totem_mastery)
- #elemental_blast
- Spell(elemental_blast)
+ if { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() Spell(totem_mastery_elemental)
+ #elemental_blast,if=talent.elemental_blast.enabled
+ if Talent(elemental_blast_talent) Spell(elemental_blast)
+ #lava_burst,if=!talent.elemental_blast.enabled
+ if not Talent(elemental_blast_talent) Spell(lava_burst)
 }
 
 AddFunction ElementalPrecombatMainPostConditions
@@ -260,254 +228,122 @@ AddFunction ElementalPrecombatMainPostConditions
 
 AddFunction ElementalPrecombatShortCdActions
 {
+ unless { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental)
+ {
+  #stormkeeper,if=talent.stormkeeper.enabled&(raid_event.adds.count<3|raid_event.adds.in>50)
+  if Talent(stormkeeper_talent) and { 0 < 3 or 600 > 50 } Spell(stormkeeper)
+ }
 }
 
 AddFunction ElementalPrecombatShortCdPostConditions
 {
- { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Spell(elemental_blast)
+ { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Talent(elemental_blast_talent) and Spell(elemental_blast) or not Talent(elemental_blast_talent) and Spell(lava_burst)
 }
 
 AddFunction ElementalPrecombatCdActions
 {
- unless { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery)
+ unless { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental)
  {
-  #fire_elemental
-  Spell(fire_elemental)
-  #potion
-  # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+  #earth_elemental,if=!talent.primal_elementalist.enabled
+  if not Talent(primal_elementalist_talent) Spell(earth_elemental)
+
+  unless Talent(stormkeeper_talent) and { 0 < 3 or 600 > 50 } and Spell(stormkeeper)
+  {
+   #fire_elemental,if=!talent.storm_elemental.enabled
+   if not Talent(storm_elemental_talent) Spell(fire_elemental)
+   #storm_elemental,if=talent.storm_elemental.enabled
+   if Talent(storm_elemental_talent) Spell(storm_elemental)
+   #potion
+   # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_intellect usable=1)
+  }
  }
 }
 
 AddFunction ElementalPrecombatCdPostConditions
 {
- { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Spell(elemental_blast)
+ { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Talent(stormkeeper_talent) and { 0 < 3 or 600 > 50 } and Spell(stormkeeper) or Talent(elemental_blast_talent) and Spell(elemental_blast) or not Talent(elemental_blast_talent) and Spell(lava_burst)
 }
 
-### actions.single_asc
+### actions.single_target
 
-AddFunction ElementalSingleAscMainActions
+AddFunction ElementalSingleTargetMainActions
 {
- #flame_shock,if=!ticking|dot.flame_shock.remains<=gcd
- if not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() Spell(flame_shock)
- #flame_shock,if=maelstrom>=20&remains<=buff.ascendance.duration&cooldown.ascendance.remains+buff.ascendance.duration<=duration
- if Maelstrom() >= 20 and target.DebuffRemaining(flame_shock_debuff) <= BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) <= BaseDuration(flame_shock_debuff) Spell(flame_shock)
- #elemental_blast
- Spell(elemental_blast)
- #earthquake,if=buff.echoes_of_the_great_sundering.up&(buff.earthen_strength.up|buff.echoes_of_the_great_sundering.duration<=3|maelstrom>=117)|(buff.earthen_strength.up|maelstrom>=104)&spell_targets.earthquake>1&!equipped.echoes_of_the_great_sundering
- if BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) and not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #earth_shock,if=(maelstrom>=117|!artifact.swelling_maelstrom.enabled&maelstrom>=92)&(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)
- if { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } Spell(earth_shock)
- #stormkeeper,if=(raid_event.adds.count<3|raid_event.adds.in>50)&time>5&!buff.ascendance.up
- if { 0 < 3 or 600 > 50 } and TimeInCombat() > 5 and not BuffPresent(ascendance_elemental_buff) Spell(stormkeeper)
- #lightning_bolt,if=buff.power_of_the_maelstrom.up&buff.stormkeeper.up&spell_targets.chain_lightning<3
- if BuffPresent(power_of_the_maelstrom_buff) and BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 3 Spell(lightning_bolt_elemental)
- #lava_burst,if=dot.flame_shock.remains>cast_time&(cooldown_react|buff.ascendance.up)
- if target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and { not SpellCooldown(lava_burst) > 0 or BuffPresent(ascendance_elemental_buff) } Spell(lava_burst)
- #flame_shock,if=maelstrom>=20&buff.elemental_focus.up,target_if=refreshable
- if Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earthquake,if=buff.echoes_of_the_great_sundering.up&(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=86|equipped.the_deceivers_blood_pact&maelstrom>85&talent.aftershock.enabled)
- if BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #earth_shock,if=(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)&(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=86|equipped.the_deceivers_blood_pact&talent.aftershock.enabled&(maelstrom>85&equipped.echoes_of_the_great_sundering|maelstrom>70&equipped.smoldering_heart))
- if { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } Spell(earth_shock)
- #totem_mastery,if=buff.resonance_totem.remains<10|(buff.resonance_totem.remains<(buff.ascendance.duration+cooldown.ascendance.remains)&cooldown.ascendance.remains<15)
- if { TotemRemaining(totem_mastery) < 10 or TotemRemaining(totem_mastery) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 Spell(totem_mastery)
- #lava_beam,if=active_enemies>1&spell_targets.lava_beam>1
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 Spell(lava_beam)
- #lightning_bolt,if=buff.power_of_the_maelstrom.up&spell_targets.chain_lightning<3
- if BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 Spell(lightning_bolt_elemental)
- #chain_lightning,if=active_enemies>1&spell_targets.chain_lightning>1
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 Spell(chain_lightning)
+ #flame_shock,if=(!ticking|talent.storm_elemental.enabled&cooldown.storm_elemental.remains<2*gcd|dot.flame_shock.remains<=gcd|talent.ascendance.enabled&dot.flame_shock.remains<(cooldown.ascendance.remains+buff.ascendance.duration)&cooldown.ascendance.remains<4&(!talent.storm_elemental.enabled|talent.storm_elemental.enabled&cooldown.storm_elemental.remains<120))&buff.wind_gust.stack<14
+ if { not target.DebuffPresent(flame_shock_debuff) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 2 * GCD() and Boss() or target.DebuffRemaining(flame_shock_debuff) <= GCD() or Talent(ascendance_talent) and Boss() and target.DebuffRemaining(flame_shock_debuff) < SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) < 4 and { not Talent(storm_elemental_talent) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 120 } } and BuffStacks(wind_gust_buff) < 14 Spell(flame_shock)
+ #elemental_blast,if=talent.elemental_blast.enabled&(talent.master_of_the_elements.enabled&buff.master_of_the_elements.up&maelstrom<60|!talent.master_of_the_elements.enabled)&(!(cooldown.storm_elemental.remains>120&talent.storm_elemental.enabled)|azerite.natural_harmony.rank=3&buff.wind_gust.stack<14)
+ if Talent(elemental_blast_talent) and { Talent(master_of_the_elements_talent) and BuffPresent(master_of_the_elements_buff) and Maelstrom() < 60 or not Talent(master_of_the_elements_talent) } and { not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } or AzeriteTraitRank(natural_harmony_trait) == 3 and BuffStacks(wind_gust_buff) < 14 } Spell(elemental_blast)
+ #lightning_bolt,if=buff.stormkeeper.up&spell_targets.chain_lightning<2&(buff.master_of_the_elements.up&!talent.surge_of_power.enabled|buff.surge_of_power.up)
+ if BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 and { BuffPresent(master_of_the_elements_buff) and not Talent(surge_of_power_talent) or BuffPresent(surge_of_power_buff) } Spell(lightning_bolt_elemental)
+ #earthquake,if=active_enemies>1&spell_targets.chain_lightning>1&(!talent.surge_of_power.enabled|!dot.flame_shock.refreshable|cooldown.storm_elemental.remains>120)&(!talent.master_of_the_elements.enabled|buff.master_of_the_elements.up|maelstrom>=92)
+ if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and { not Talent(surge_of_power_talent) or not target.DebuffRefreshable(flame_shock_debuff) or SpellCooldown(storm_elemental) > 120 } and { not Talent(master_of_the_elements_talent) or BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 } Spell(earthquake)
+ #earth_shock,if=!buff.surge_of_power.up&talent.master_of_the_elements.enabled&(buff.master_of_the_elements.up|maelstrom>=92+30*talent.call_the_thunder.enabled|buff.stormkeeper.up&active_enemies<2)|!talent.master_of_the_elements.enabled&(buff.stormkeeper.up|maelstrom>=90+30*talent.call_the_thunder.enabled|!(cooldown.storm_elemental.remains>120&talent.storm_elemental.enabled)&expected_combat_length-time-cooldown.storm_elemental.remains-150*floor((expected_combat_length-time-cooldown.storm_elemental.remains)%150)>=30*(1+(azerite.echo_of_the_elementals.rank>=2)))
+ if not BuffPresent(surge_of_power_buff) and Talent(master_of_the_elements_talent) and { BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 + 30 * TalentPoints(call_the_thunder_talent) or BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 } or not Talent(master_of_the_elements_talent) and { BuffPresent(stormkeeper_buff) or Maelstrom() >= 90 + 30 * TalentPoints(call_the_thunder_talent) or not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } and 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } >= 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } } Spell(earth_shock)
+ #earth_shock,if=talent.surge_of_power.enabled&!buff.surge_of_power.up&cooldown.lava_burst.remains<=gcd&(!talent.storm_elemental.enabled&!(cooldown.fire_elemental.remains>120)|talent.storm_elemental.enabled&!(cooldown.storm_elemental.remains>120))
+ if Talent(surge_of_power_talent) and not BuffPresent(surge_of_power_buff) and SpellCooldown(lava_burst) <= GCD() and { not Talent(storm_elemental_talent) and not SpellCooldown(fire_elemental) > 120 or Talent(storm_elemental_talent) and not SpellCooldown(storm_elemental) > 120 } Spell(earth_shock)
+ #lightning_bolt,if=cooldown.storm_elemental.remains>120&talent.storm_elemental.enabled
+ if SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) Spell(lightning_bolt_elemental)
+ #frost_shock,if=talent.icefury.enabled&talent.master_of_the_elements.enabled&buff.icefury.up&buff.master_of_the_elements.up
+ if Talent(icefury_talent) and Talent(master_of_the_elements_talent) and BuffPresent(icefury_buff) and BuffPresent(master_of_the_elements_buff) Spell(frost_shock)
+ #lava_burst,if=buff.ascendance.up
+ if BuffPresent(ascendance_elemental_buff) Spell(lava_burst)
+ #flame_shock,target_if=refreshable&active_enemies>1&buff.surge_of_power.up
+ if target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) > 1 and BuffPresent(surge_of_power_buff) Spell(flame_shock)
+ #lava_burst,if=talent.storm_elemental.enabled&cooldown_react&buff.surge_of_power.up&(expected_combat_length-time-cooldown.storm_elemental.remains-150*floor((expected_combat_length-time-cooldown.storm_elemental.remains)%150)<30*(1+(azerite.echo_of_the_elementals.rank>=2))|(1.16*(expected_combat_length-time)-cooldown.storm_elemental.remains-150*floor((1.16*(expected_combat_length-time)-cooldown.storm_elemental.remains)%150))<(expected_combat_length-time-cooldown.storm_elemental.remains-150*floor((expected_combat_length-time-cooldown.storm_elemental.remains)%150)))
+ if Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } } Spell(lava_burst)
+ #lava_burst,if=!talent.storm_elemental.enabled&cooldown_react&buff.surge_of_power.up&(expected_combat_length-time-cooldown.fire_elemental.remains-150*floor((expected_combat_length-time-cooldown.fire_elemental.remains)%150)<30*(1+(azerite.echo_of_the_elementals.rank>=2))|(1.16*(expected_combat_length-time)-cooldown.fire_elemental.remains-150*floor((1.16*(expected_combat_length-time)-cooldown.fire_elemental.remains)%150))<(expected_combat_length-time-cooldown.fire_elemental.remains-150*floor((expected_combat_length-time-cooldown.fire_elemental.remains)%150)))
+ if not Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } } Spell(lava_burst)
+ #lightning_bolt,if=buff.surge_of_power.up
+ if BuffPresent(surge_of_power_buff) Spell(lightning_bolt_elemental)
+ #lava_burst,if=cooldown_react
+ if not SpellCooldown(lava_burst) > 0 Spell(lava_burst)
+ #flame_shock,target_if=refreshable&!buff.surge_of_power.up
+ if target.Refreshable(flame_shock_debuff) and not BuffPresent(surge_of_power_buff) Spell(flame_shock)
+ #totem_mastery,if=talent.totem_mastery.enabled&(buff.resonance_totem.remains<6|(buff.resonance_totem.remains<(buff.ascendance.duration+cooldown.ascendance.remains)&cooldown.ascendance.remains<15))
+ if Talent(totem_mastery_talent_elemental) and { TotemRemaining(totem_mastery_elemental) < 6 or TotemRemaining(totem_mastery_elemental) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() Spell(totem_mastery_elemental)
+ #frost_shock,if=talent.icefury.enabled&buff.icefury.up&(buff.icefury.remains<gcd*4*buff.icefury.stack|buff.stormkeeper.up|!talent.master_of_the_elements.enabled)
+ if Talent(icefury_talent) and BuffPresent(icefury_buff) and { BuffRemaining(icefury_buff) < GCD() * 4 * BuffStacks(icefury_buff) or BuffPresent(stormkeeper_buff) or not Talent(master_of_the_elements_talent) } Spell(frost_shock)
  #lightning_bolt
  Spell(lightning_bolt_elemental)
- #flame_shock,moving=1,target_if=refreshable
- if Speed() > 0 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earth_shock,moving=1
- if Speed() > 0 Spell(earth_shock)
- #flame_shock,moving=1,if=movement.distance>6
- if Speed() > 0 and target.Distance() > 6 Spell(flame_shock)
 }
 
-AddFunction ElementalSingleAscMainPostConditions
+AddFunction ElementalSingleTargetMainPostConditions
 {
 }
 
-AddFunction ElementalSingleAscShortCdActions
+AddFunction ElementalSingleTargetShortCdActions
 {
- unless { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Maelstrom() >= 20 and target.DebuffRemaining(flame_shock_debuff) <= BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) <= BaseDuration(flame_shock_debuff) and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and TimeInCombat() > 5 and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper)
+ unless { not target.DebuffPresent(flame_shock_debuff) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 2 * GCD() or target.DebuffRemaining(flame_shock_debuff) <= GCD() or Talent(ascendance_talent) and target.DebuffRemaining(flame_shock_debuff) < SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) < 4 and { not Talent(storm_elemental_talent) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 120 } } and BuffStacks(wind_gust_buff) < 14 and Spell(flame_shock) or Talent(elemental_blast_talent) and { Talent(master_of_the_elements_talent) and BuffPresent(master_of_the_elements_buff) and Maelstrom() < 60 or not Talent(master_of_the_elements_talent) } and { not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } or AzeriteTraitRank(natural_harmony_trait) == 3 and BuffStacks(wind_gust_buff) < 14 } and Spell(elemental_blast)
  {
-  #liquid_magma_totem,if=raid_event.adds.count<3|raid_event.adds.in>50
-  if 0 < 3 or 600 > 50 Spell(liquid_magma_totem)
+  #stormkeeper,if=talent.stormkeeper.enabled&(raid_event.adds.count<3|raid_event.adds.in>50)&(!talent.surge_of_power.enabled|buff.surge_of_power.up|maelstrom>=44)
+  if Talent(stormkeeper_talent) and { 0 < 3 or 600 > 50 } and { not Talent(surge_of_power_talent) or BuffPresent(surge_of_power_buff) or Maelstrom() >= 44 } Spell(stormkeeper)
+  #liquid_magma_totem,if=talent.liquid_magma_totem.enabled&(raid_event.adds.count<3|raid_event.adds.in>50)
+  if Talent(liquid_magma_totem_talent) and { 0 < 3 or 600 > 50 } Spell(liquid_magma_totem)
+
+  unless BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 and { BuffPresent(master_of_the_elements_buff) and not Talent(surge_of_power_talent) or BuffPresent(surge_of_power_buff) } and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and { not Talent(surge_of_power_talent) or not target.DebuffRefreshable(flame_shock_debuff) or SpellCooldown(storm_elemental) > 120 } and { not Talent(master_of_the_elements_talent) or BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 } and Spell(earthquake) or { not BuffPresent(surge_of_power_buff) and Talent(master_of_the_elements_talent) and { BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 + 30 * TalentPoints(call_the_thunder_talent) or BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 } or not Talent(master_of_the_elements_talent) and { BuffPresent(stormkeeper_buff) or Maelstrom() >= 90 + 30 * TalentPoints(call_the_thunder_talent) or not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } and 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } >= 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } } } and Spell(earth_shock) or Talent(surge_of_power_talent) and not BuffPresent(surge_of_power_buff) and SpellCooldown(lava_burst) <= GCD() and { not Talent(storm_elemental_talent) and not SpellCooldown(fire_elemental) > 120 or Talent(storm_elemental_talent) and not SpellCooldown(storm_elemental) > 120 } and Spell(earth_shock) or SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) and Spell(lightning_bolt_elemental) or Talent(icefury_talent) and Talent(master_of_the_elements_talent) and BuffPresent(icefury_buff) and BuffPresent(master_of_the_elements_buff) and Spell(frost_shock) or BuffPresent(ascendance_elemental_buff) and Spell(lava_burst) or target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) > 1 and BuffPresent(surge_of_power_buff) and Spell(flame_shock) or Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } } and Spell(lava_burst) or not Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } } and Spell(lava_burst) or BuffPresent(surge_of_power_buff) and Spell(lightning_bolt_elemental) or not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or target.Refreshable(flame_shock_debuff) and not BuffPresent(surge_of_power_buff) and Spell(flame_shock) or Talent(totem_mastery_talent_elemental) and { TotemRemaining(totem_mastery_elemental) < 6 or TotemRemaining(totem_mastery_elemental) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Talent(icefury_talent) and BuffPresent(icefury_buff) and { BuffRemaining(icefury_buff) < GCD() * 4 * BuffStacks(icefury_buff) or BuffPresent(stormkeeper_buff) or not Talent(master_of_the_elements_talent) } and Spell(frost_shock)
+  {
+   #icefury,if=talent.icefury.enabled
+   if Talent(icefury_talent) Spell(icefury)
+  }
  }
 }
 
-AddFunction ElementalSingleAscShortCdPostConditions
+AddFunction ElementalSingleTargetShortCdPostConditions
 {
- { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Maelstrom() >= 20 and target.DebuffRemaining(flame_shock_debuff) <= BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) <= BaseDuration(flame_shock_debuff) and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and TimeInCombat() > 5 and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or BuffPresent(power_of_the_maelstrom_buff) and BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and { not SpellCooldown(lava_burst) > 0 or BuffPresent(ascendance_elemental_buff) } and Spell(lava_burst) or Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } and Spell(earth_shock) or { TotemRemaining(totem_mastery) < 10 or TotemRemaining(totem_mastery) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(lava_beam) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(chain_lightning) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(earth_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock)
+ { not target.DebuffPresent(flame_shock_debuff) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 2 * GCD() or target.DebuffRemaining(flame_shock_debuff) <= GCD() or Talent(ascendance_talent) and target.DebuffRemaining(flame_shock_debuff) < SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) < 4 and { not Talent(storm_elemental_talent) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 120 } } and BuffStacks(wind_gust_buff) < 14 and Spell(flame_shock) or Talent(elemental_blast_talent) and { Talent(master_of_the_elements_talent) and BuffPresent(master_of_the_elements_buff) and Maelstrom() < 60 or not Talent(master_of_the_elements_talent) } and { not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } or AzeriteTraitRank(natural_harmony_trait) == 3 and BuffStacks(wind_gust_buff) < 14 } and Spell(elemental_blast) or BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 and { BuffPresent(master_of_the_elements_buff) and not Talent(surge_of_power_talent) or BuffPresent(surge_of_power_buff) } and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and { not Talent(surge_of_power_talent) or not target.DebuffRefreshable(flame_shock_debuff) or SpellCooldown(storm_elemental) > 120 } and { not Talent(master_of_the_elements_talent) or BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 } and Spell(earthquake) or { not BuffPresent(surge_of_power_buff) and Talent(master_of_the_elements_talent) and { BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 + 30 * TalentPoints(call_the_thunder_talent) or BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 } or not Talent(master_of_the_elements_talent) and { BuffPresent(stormkeeper_buff) or Maelstrom() >= 90 + 30 * TalentPoints(call_the_thunder_talent) or not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } and 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } >= 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } } } and Spell(earth_shock) or Talent(surge_of_power_talent) and not BuffPresent(surge_of_power_buff) and SpellCooldown(lava_burst) <= GCD() and { not Talent(storm_elemental_talent) and not SpellCooldown(fire_elemental) > 120 or Talent(storm_elemental_talent) and not SpellCooldown(storm_elemental) > 120 } and Spell(earth_shock) or SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) and Spell(lightning_bolt_elemental) or Talent(icefury_talent) and Talent(master_of_the_elements_talent) and BuffPresent(icefury_buff) and BuffPresent(master_of_the_elements_buff) and Spell(frost_shock) or BuffPresent(ascendance_elemental_buff) and Spell(lava_burst) or target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) > 1 and BuffPresent(surge_of_power_buff) and Spell(flame_shock) or Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } } and Spell(lava_burst) or not Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } } and Spell(lava_burst) or BuffPresent(surge_of_power_buff) and Spell(lightning_bolt_elemental) or not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or target.Refreshable(flame_shock_debuff) and not BuffPresent(surge_of_power_buff) and Spell(flame_shock) or Talent(totem_mastery_talent_elemental) and { TotemRemaining(totem_mastery_elemental) < 6 or TotemRemaining(totem_mastery_elemental) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Talent(icefury_talent) and BuffPresent(icefury_buff) and { BuffRemaining(icefury_buff) < GCD() * 4 * BuffStacks(icefury_buff) or BuffPresent(stormkeeper_buff) or not Talent(master_of_the_elements_talent) } and Spell(frost_shock) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock) or Speed() > 0 and Spell(frost_shock)
 }
 
-AddFunction ElementalSingleAscCdActions
+AddFunction ElementalSingleTargetCdActions
 {
- #ascendance,if=dot.flame_shock.remains>buff.ascendance.duration&(time>=60|buff.bloodlust.up)&cooldown.lava_burst.remains>0&!buff.stormkeeper.up
- if target.DebuffRemaining(flame_shock_debuff) > BaseDuration(ascendance_elemental_buff) and { TimeInCombat() >= 60 or BuffPresent(burst_haste_buff any=1) } and SpellCooldown(lava_burst) > 0 and not BuffPresent(stormkeeper_buff) and BuffExpires(ascendance_elemental_buff) Spell(ascendance_elemental)
-}
-
-AddFunction ElementalSingleAscCdPostConditions
-{
- { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Maelstrom() >= 20 and target.DebuffRemaining(flame_shock_debuff) <= BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) <= BaseDuration(flame_shock_debuff) and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and TimeInCombat() > 5 and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or { 0 < 3 or 600 > 50 } and Spell(liquid_magma_totem) or BuffPresent(power_of_the_maelstrom_buff) and BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and { not SpellCooldown(lava_burst) > 0 or BuffPresent(ascendance_elemental_buff) } and Spell(lava_burst) or Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } and Spell(earth_shock) or { TotemRemaining(totem_mastery) < 10 or TotemRemaining(totem_mastery) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(lava_beam) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(chain_lightning) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(earth_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock)
-}
-
-### actions.single_if
-
-AddFunction ElementalSingleIfMainActions
-{
- #flame_shock,if=!ticking|dot.flame_shock.remains<=gcd
- if not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() Spell(flame_shock)
- #elemental_blast
- Spell(elemental_blast)
- #earthquake,if=buff.echoes_of_the_great_sundering.up&(buff.earthen_strength.up|buff.echoes_of_the_great_sundering.duration<=3|maelstrom>=117)|(buff.earthen_strength.up|maelstrom>=104)&spell_targets.earthquake>1&!equipped.echoes_of_the_great_sundering
- if BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) and not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #earth_shock,if=(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=92)&(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)&buff.earthen_strength.up
- if { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and BuffPresent(earthen_strength_buff) Spell(earth_shock)
- #frost_shock,if=buff.icefury.up&maelstrom>=20&!buff.ascendance.up&buff.earthen_strength.up
- if BuffPresent(icefury_buff) and Maelstrom() >= 20 and not BuffPresent(ascendance_elemental_buff) and BuffPresent(earthen_strength_buff) Spell(frost_shock)
- #earth_shock,if=(maelstrom>=117|!artifact.swelling_maelstrom.enabled&maelstrom>=92)&(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)
- if { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } Spell(earth_shock)
- #stormkeeper,if=(raid_event.adds.count<3|raid_event.adds.in>50)&!buff.ascendance.up
- if { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) Spell(stormkeeper)
- #icefury,if=(raid_event.movement.in<5|maelstrom<=101&artifact.swelling_maelstrom.enabled|!artifact.swelling_maelstrom.enabled&maelstrom<=76)&!buff.ascendance.up
- if { 600 < 5 or Maelstrom() <= 101 and HasArtifactTrait(swelling_maelstrom) or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() <= 76 } and not BuffPresent(ascendance_elemental_buff) Spell(icefury)
- #lightning_bolt,if=buff.power_of_the_maelstrom.up&buff.stormkeeper.up&spell_targets.chain_lightning<3
- if BuffPresent(power_of_the_maelstrom_buff) and BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 3 Spell(lightning_bolt_elemental)
- #lava_burst,if=dot.flame_shock.remains>cast_time&cooldown_react
- if target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and not SpellCooldown(lava_burst) > 0 Spell(lava_burst)
- #frost_shock,if=buff.icefury.up&((maelstrom>=20&raid_event.movement.in>buff.icefury.remains)|buff.icefury.remains<(1.5*spell_haste*buff.icefury.stack+1))
- if BuffPresent(icefury_buff) and { Maelstrom() >= 20 and 600 > BuffRemaining(icefury_buff) or BuffRemaining(icefury_buff) < 1.5 * { 100 / { 100 + SpellHaste() } } * BuffStacks(icefury_buff) + 1 } Spell(frost_shock)
- #flame_shock,if=maelstrom>=20&buff.elemental_focus.up,target_if=refreshable
- if Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earthquake,if=buff.echoes_of_the_great_sundering.up&(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=86|equipped.the_deceivers_blood_pact&maelstrom>85&talent.aftershock.enabled)
- if BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #frost_shock,moving=1,if=buff.icefury.up
- if Speed() > 0 and BuffPresent(icefury_buff) Spell(frost_shock)
- #earth_shock,if=(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)&(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=86|equipped.the_deceivers_blood_pact&talent.aftershock.enabled&(maelstrom>85&equipped.echoes_of_the_great_sundering|maelstrom>70&equipped.smoldering_heart))
- if { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } Spell(earth_shock)
- #totem_mastery,if=buff.resonance_totem.remains<10
- if TotemRemaining(totem_mastery) < 10 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 Spell(totem_mastery)
- #lightning_bolt,if=buff.power_of_the_maelstrom.up&spell_targets.chain_lightning<3
- if BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 Spell(lightning_bolt_elemental)
- #lava_beam,if=active_enemies>1&spell_targets.lava_beam>1
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 Spell(lava_beam)
- #chain_lightning,if=active_enemies>1&spell_targets.chain_lightning>1
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 Spell(chain_lightning)
- #lightning_bolt
- Spell(lightning_bolt_elemental)
- #flame_shock,moving=1,target_if=refreshable
- if Speed() > 0 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earth_shock,moving=1
- if Speed() > 0 Spell(earth_shock)
- #flame_shock,moving=1,if=movement.distance>6
- if Speed() > 0 and target.Distance() > 6 Spell(flame_shock)
-}
-
-AddFunction ElementalSingleIfMainPostConditions
-{
-}
-
-AddFunction ElementalSingleIfShortCdActions
-{
- unless { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and BuffPresent(earthen_strength_buff) and Spell(earth_shock) or BuffPresent(icefury_buff) and Maelstrom() >= 20 and not BuffPresent(ascendance_elemental_buff) and BuffPresent(earthen_strength_buff) and Spell(frost_shock) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or { 600 < 5 or Maelstrom() <= 101 and HasArtifactTrait(swelling_maelstrom) or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() <= 76 } and not BuffPresent(ascendance_elemental_buff) and Spell(icefury)
+ unless { not target.DebuffPresent(flame_shock_debuff) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 2 * GCD() or target.DebuffRemaining(flame_shock_debuff) <= GCD() or Talent(ascendance_talent) and target.DebuffRemaining(flame_shock_debuff) < SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) < 4 and { not Talent(storm_elemental_talent) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 120 } } and BuffStacks(wind_gust_buff) < 14 and Spell(flame_shock)
  {
-  #liquid_magma_totem,if=raid_event.adds.count<3|raid_event.adds.in>50
-  if 0 < 3 or 600 > 50 Spell(liquid_magma_totem)
+  #ascendance,if=talent.ascendance.enabled&(time>=60|buff.bloodlust.up)&cooldown.lava_burst.remains>0&(!talent.storm_elemental.enabled|cooldown.storm_elemental.remains>120)&(!talent.icefury.enabled|!buff.icefury.up&!cooldown.icefury.up)
+  if Talent(ascendance_talent) and { TimeInCombat() >= 60 or BuffPresent(burst_haste_buff any=1) } and SpellCooldown(lava_burst) > 0 and { not Talent(storm_elemental_talent) or SpellCooldown(storm_elemental) > 120 } and { not Talent(icefury_talent) or not BuffPresent(icefury_buff) and not { not SpellCooldown(icefury) > 0 } } and BuffExpires(ascendance_elemental_buff) Spell(ascendance_elemental)
  }
 }
 
-AddFunction ElementalSingleIfShortCdPostConditions
+AddFunction ElementalSingleTargetCdPostConditions
 {
- { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and BuffPresent(earthen_strength_buff) and Spell(earth_shock) or BuffPresent(icefury_buff) and Maelstrom() >= 20 and not BuffPresent(ascendance_elemental_buff) and BuffPresent(earthen_strength_buff) and Spell(frost_shock) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or { 600 < 5 or Maelstrom() <= 101 and HasArtifactTrait(swelling_maelstrom) or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() <= 76 } and not BuffPresent(ascendance_elemental_buff) and Spell(icefury) or BuffPresent(power_of_the_maelstrom_buff) and BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or BuffPresent(icefury_buff) and { Maelstrom() >= 20 and 600 > BuffRemaining(icefury_buff) or BuffRemaining(icefury_buff) < 1.5 * { 100 / { 100 + SpellHaste() } } * BuffStacks(icefury_buff) + 1 } and Spell(frost_shock) or Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or Speed() > 0 and BuffPresent(icefury_buff) and Spell(frost_shock) or { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } and Spell(earth_shock) or TotemRemaining(totem_mastery) < 10 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(lava_beam) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(chain_lightning) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(earth_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock)
-}
-
-AddFunction ElementalSingleIfCdActions
-{
-}
-
-AddFunction ElementalSingleIfCdPostConditions
-{
- { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and BuffPresent(earthen_strength_buff) and Spell(earth_shock) or BuffPresent(icefury_buff) and Maelstrom() >= 20 and not BuffPresent(ascendance_elemental_buff) and BuffPresent(earthen_strength_buff) and Spell(frost_shock) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or { 600 < 5 or Maelstrom() <= 101 and HasArtifactTrait(swelling_maelstrom) or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() <= 76 } and not BuffPresent(ascendance_elemental_buff) and Spell(icefury) or { 0 < 3 or 600 > 50 } and Spell(liquid_magma_totem) or BuffPresent(power_of_the_maelstrom_buff) and BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or BuffPresent(icefury_buff) and { Maelstrom() >= 20 and 600 > BuffRemaining(icefury_buff) or BuffRemaining(icefury_buff) < 1.5 * { 100 / { 100 + SpellHaste() } } * BuffStacks(icefury_buff) + 1 } and Spell(frost_shock) or Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or Speed() > 0 and BuffPresent(icefury_buff) and Spell(frost_shock) or { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } and Spell(earth_shock) or TotemRemaining(totem_mastery) < 10 and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(lava_beam) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(chain_lightning) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(earth_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock)
-}
-
-### actions.single_lr
-
-AddFunction ElementalSingleLrMainActions
-{
- #flame_shock,if=!ticking|dot.flame_shock.remains<=gcd
- if not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() Spell(flame_shock)
- #elemental_blast
- Spell(elemental_blast)
- #earthquake,if=buff.echoes_of_the_great_sundering.up&(buff.earthen_strength.up|buff.echoes_of_the_great_sundering.duration<=3|maelstrom>=117)|(buff.earthen_strength.up|maelstrom>=104)&spell_targets.earthquake>1&!equipped.echoes_of_the_great_sundering
- if BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) and not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #earth_shock,if=(maelstrom>=117|!artifact.swelling_maelstrom.enabled&maelstrom>=92)&(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)
- if { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } Spell(earth_shock)
- #stormkeeper,if=(raid_event.adds.count<3|raid_event.adds.in>50)&!buff.ascendance.up
- if { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) Spell(stormkeeper)
- #lava_burst,if=dot.flame_shock.remains>cast_time&cooldown_react
- if target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and not SpellCooldown(lava_burst) > 0 Spell(lava_burst)
- #flame_shock,if=maelstrom>=20&buff.elemental_focus.up,target_if=refreshable
- if Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earthquake,if=buff.echoes_of_the_great_sundering.up&(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=86|equipped.the_deceivers_blood_pact&maelstrom>85&talent.aftershock.enabled)
- if BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() Spell(earthquake)
- #earth_shock,if=(spell_targets.earthquake=1|equipped.echoes_of_the_great_sundering)&(maelstrom>=111|!artifact.swelling_maelstrom.enabled&maelstrom>=86|equipped.the_deceivers_blood_pact&talent.aftershock.enabled&(maelstrom>85&equipped.echoes_of_the_great_sundering|maelstrom>70&equipped.smoldering_heart))
- if { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } Spell(earth_shock)
- #totem_mastery,if=buff.resonance_totem.remains<10|(buff.resonance_totem.remains<(buff.ascendance.duration+cooldown.ascendance.remains)&cooldown.ascendance.remains<15)
- if { TotemRemaining(totem_mastery) < 10 or TotemRemaining(totem_mastery) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 Spell(totem_mastery)
- #lightning_bolt,if=buff.power_of_the_maelstrom.up&spell_targets.chain_lightning<3,target_if=debuff.lightning_rod.down
- if BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and target.DebuffExpires(lightning_rod_debuff) Spell(lightning_bolt_elemental)
- #lightning_bolt,if=buff.power_of_the_maelstrom.up&spell_targets.chain_lightning<3
- if BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 Spell(lightning_bolt_elemental)
- #lava_beam,if=active_enemies>1&spell_targets.lava_beam>1,target_if=debuff.lightning_rod.down
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and target.DebuffExpires(lightning_rod_debuff) Spell(lava_beam)
- #lava_beam,if=active_enemies>1&spell_targets.lava_beam>1
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 Spell(lava_beam)
- #chain_lightning,if=active_enemies>1&spell_targets.chain_lightning>1,target_if=debuff.lightning_rod.down
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and target.DebuffExpires(lightning_rod_debuff) Spell(chain_lightning)
- #chain_lightning,if=active_enemies>1&spell_targets.chain_lightning>1
- if Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 Spell(chain_lightning)
- #lightning_bolt,target_if=debuff.lightning_rod.down
- if target.DebuffExpires(lightning_rod_debuff) Spell(lightning_bolt_elemental)
- #lightning_bolt
- Spell(lightning_bolt_elemental)
- #flame_shock,moving=1,target_if=refreshable
- if Speed() > 0 and target.Refreshable(flame_shock_debuff) Spell(flame_shock)
- #earth_shock,moving=1
- if Speed() > 0 Spell(earth_shock)
- #flame_shock,moving=1,if=movement.distance>6
- if Speed() > 0 and target.Distance() > 6 Spell(flame_shock)
-}
-
-AddFunction ElementalSingleLrMainPostConditions
-{
-}
-
-AddFunction ElementalSingleLrShortCdActions
-{
- unless { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper)
- {
-  #liquid_magma_totem,if=raid_event.adds.count<3|raid_event.adds.in>50
-  if 0 < 3 or 600 > 50 Spell(liquid_magma_totem)
- }
-}
-
-AddFunction ElementalSingleLrShortCdPostConditions
-{
- { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } and Spell(earth_shock) or { TotemRemaining(totem_mastery) < 10 or TotemRemaining(totem_mastery) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and target.DebuffExpires(lightning_rod_debuff) and Spell(lightning_bolt_elemental) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and target.DebuffExpires(lightning_rod_debuff) and Spell(lava_beam) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(lava_beam) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and target.DebuffExpires(lightning_rod_debuff) and Spell(chain_lightning) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(chain_lightning) or target.DebuffExpires(lightning_rod_debuff) and Spell(lightning_bolt_elemental) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(earth_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock)
-}
-
-AddFunction ElementalSingleLrCdActions
-{
-}
-
-AddFunction ElementalSingleLrCdPostConditions
-{
- { not target.DebuffPresent(flame_shock_debuff) or target.DebuffRemaining(flame_shock_debuff) <= GCD() } and Spell(flame_shock) or Spell(elemental_blast) or { BuffPresent(echoes_of_the_great_sundering_buff) and { BuffPresent(earthen_strength_buff) or BaseDuration(echoes_of_the_great_sundering_buff) <= 3 or Maelstrom() >= 117 } or { BuffPresent(earthen_strength_buff) or Maelstrom() >= 104 } and Enemies(tagged=1) > 1 and not HasEquippedItem(echoes_of_the_great_sundering) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Maelstrom() >= 117 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 92 } and { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and Spell(earth_shock) or { 0 < 3 or 600 > 50 } and not BuffPresent(ascendance_elemental_buff) and Spell(stormkeeper) or { 0 < 3 or 600 > 50 } and Spell(liquid_magma_totem) or target.DebuffRemaining(flame_shock_debuff) > CastTime(lava_burst) and not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or Maelstrom() >= 20 and BuffPresent(elemental_focus_buff) and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or BuffPresent(echoes_of_the_great_sundering_buff) and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Maelstrom() > 85 and Talent(aftershock_talent) } and not mouseover.IsFriend() and mouseover.Present() and Spell(earthquake) or { Enemies(tagged=1) == 1 or HasEquippedItem(echoes_of_the_great_sundering) } and { Maelstrom() >= 111 or not HasArtifactTrait(swelling_maelstrom) and Maelstrom() >= 86 or HasEquippedItem(the_deceivers_blood_pact) and Talent(aftershock_talent) and { Maelstrom() > 85 and HasEquippedItem(echoes_of_the_great_sundering) or Maelstrom() > 70 and HasEquippedItem(smoldering_heart) } } and Spell(earth_shock) or { TotemRemaining(totem_mastery) < 10 or TotemRemaining(totem_mastery) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { not TotemPresent(totem_mastery) or InCombat() } and Speed() == 0 and Spell(totem_mastery) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and target.DebuffExpires(lightning_rod_debuff) and Spell(lightning_bolt_elemental) or BuffPresent(power_of_the_maelstrom_buff) and Enemies(tagged=1) < 3 and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and target.DebuffExpires(lightning_rod_debuff) and Spell(lava_beam) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(lava_beam) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and target.DebuffExpires(lightning_rod_debuff) and Spell(chain_lightning) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and Spell(chain_lightning) or target.DebuffExpires(lightning_rod_debuff) and Spell(lightning_bolt_elemental) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and Spell(earth_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock)
+ { not target.DebuffPresent(flame_shock_debuff) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 2 * GCD() or target.DebuffRemaining(flame_shock_debuff) <= GCD() or Talent(ascendance_talent) and target.DebuffRemaining(flame_shock_debuff) < SpellCooldown(ascendance_elemental) + BaseDuration(ascendance_elemental_buff) and SpellCooldown(ascendance_elemental) < 4 and { not Talent(storm_elemental_talent) or Talent(storm_elemental_talent) and SpellCooldown(storm_elemental) < 120 } } and BuffStacks(wind_gust_buff) < 14 and Spell(flame_shock) or Talent(elemental_blast_talent) and { Talent(master_of_the_elements_talent) and BuffPresent(master_of_the_elements_buff) and Maelstrom() < 60 or not Talent(master_of_the_elements_talent) } and { not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } or AzeriteTraitRank(natural_harmony_trait) == 3 and BuffStacks(wind_gust_buff) < 14 } and Spell(elemental_blast) or Talent(stormkeeper_talent) and { 0 < 3 or 600 > 50 } and { not Talent(surge_of_power_talent) or BuffPresent(surge_of_power_buff) or Maelstrom() >= 44 } and Spell(stormkeeper) or Talent(liquid_magma_totem_talent) and { 0 < 3 or 600 > 50 } and Spell(liquid_magma_totem) or BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 and { BuffPresent(master_of_the_elements_buff) and not Talent(surge_of_power_talent) or BuffPresent(surge_of_power_buff) } and Spell(lightning_bolt_elemental) or Enemies(tagged=1) > 1 and Enemies(tagged=1) > 1 and { not Talent(surge_of_power_talent) or not target.DebuffRefreshable(flame_shock_debuff) or SpellCooldown(storm_elemental) > 120 } and { not Talent(master_of_the_elements_talent) or BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 } and Spell(earthquake) or { not BuffPresent(surge_of_power_buff) and Talent(master_of_the_elements_talent) and { BuffPresent(master_of_the_elements_buff) or Maelstrom() >= 92 + 30 * TalentPoints(call_the_thunder_talent) or BuffPresent(stormkeeper_buff) and Enemies(tagged=1) < 2 } or not Talent(master_of_the_elements_talent) and { BuffPresent(stormkeeper_buff) or Maelstrom() >= 90 + 30 * TalentPoints(call_the_thunder_talent) or not { SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) } and 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } >= 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } } } and Spell(earth_shock) or Talent(surge_of_power_talent) and not BuffPresent(surge_of_power_buff) and SpellCooldown(lava_burst) <= GCD() and { not Talent(storm_elemental_talent) and not SpellCooldown(fire_elemental) > 120 or Talent(storm_elemental_talent) and not SpellCooldown(storm_elemental) > 120 } and Spell(earth_shock) or SpellCooldown(storm_elemental) > 120 and Talent(storm_elemental_talent) and Spell(lightning_bolt_elemental) or Talent(icefury_talent) and Talent(master_of_the_elements_talent) and BuffPresent(icefury_buff) and BuffPresent(master_of_the_elements_buff) and Spell(frost_shock) or BuffPresent(ascendance_elemental_buff) and Spell(lava_burst) or target.Refreshable(flame_shock_debuff) and Enemies(tagged=1) > 1 and BuffPresent(surge_of_power_buff) and Spell(flame_shock) or Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(storm_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(storm_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(storm_elemental) } / 150 } } and Spell(lava_burst) or not Talent(storm_elemental_talent) and not SpellCooldown(lava_burst) > 0 and BuffPresent(surge_of_power_buff) and { 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } < 30 * { 1 + { AzeriteTraitRank(echo_of_the_elementals_trait) >= 2 } } or 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) - 150 * { { 1.16 * { 600 - TimeInCombat() } - SpellCooldown(fire_elemental) } / 150 } < 600 - TimeInCombat() - SpellCooldown(fire_elemental) - 150 * { { 600 - TimeInCombat() - SpellCooldown(fire_elemental) } / 150 } } and Spell(lava_burst) or BuffPresent(surge_of_power_buff) and Spell(lightning_bolt_elemental) or not SpellCooldown(lava_burst) > 0 and Spell(lava_burst) or target.Refreshable(flame_shock_debuff) and not BuffPresent(surge_of_power_buff) and Spell(flame_shock) or Talent(totem_mastery_talent_elemental) and { TotemRemaining(totem_mastery_elemental) < 6 or TotemRemaining(totem_mastery_elemental) < BaseDuration(ascendance_elemental_buff) + SpellCooldown(ascendance_elemental) and SpellCooldown(ascendance_elemental) < 15 } and { InCombat() or not BuffPresent(ele_resonance_totem_buff) } and Boss() and Spell(totem_mastery_elemental) or Talent(icefury_talent) and BuffPresent(icefury_buff) and { BuffRemaining(icefury_buff) < GCD() * 4 * BuffStacks(icefury_buff) or BuffPresent(stormkeeper_buff) or not Talent(master_of_the_elements_talent) } and Spell(frost_shock) or Talent(icefury_talent) and Spell(icefury) or Spell(lightning_bolt_elemental) or Speed() > 0 and target.Refreshable(flame_shock_debuff) and Spell(flame_shock) or Speed() > 0 and target.Distance() > 6 and Spell(flame_shock) or Speed() > 0 and Spell(frost_shock)
 }
 ]]
 

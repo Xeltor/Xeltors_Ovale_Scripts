@@ -17,6 +17,8 @@ Define(pet_auto_spin 89751)
 
 AddIcon specialization=2 help=main
 {
+	# if not Mounted() and not Pet.CreatureFamily(Felguard) and not Pet.Present() and not Pet.Exists() Texture(spell_warlock_summonwrathguard)
+	
 	# Interrupt
 	if InCombat() InterruptActions()
 	
@@ -29,7 +31,7 @@ AddIcon specialization=2 help=main
 	if InCombat() and target.InRange(shadow_bolt) and HasFullControl()
     {
 		PetStuff()
-		if HealthPercent() < 50 and target.Present() and not target.IsFriend() and not Boss() and not Item(healthstone usable=1) and Speed() == 0 Spell(drain_life)
+		if HealthPercent() < 50 and target.Present() and not target.IsFriend() and not Boss() and ItemCooldown(healthstone) > GCD() and Speed() == 0 Spell(drain_life)
 		
 		# Control stuff
 		
@@ -68,7 +70,7 @@ AddFunction PetStuff
 AddFunction SaveActions
 {
 	if HealthPercent() < 30 and InCombat() Spell(unending_resolve)
-	if HealthPercent() < 50 and ItemCharges(healthstone) > 0 and Item(healthstone usable=1) Texture(inv_stone_04)
+	if HealthPercent() < 50 and ItemCharges(healthstone) > 0 and ItemCooldown(healthstone) <= GCD() and Item(healthstone usable=1) Texture(inv_stone_04)
 }
 
 AddFunction OutOfCombatActions
@@ -107,7 +109,7 @@ AddFunction DemonologyDefaultMainActions
    #hand_of_guldan,if=soul_shard>=5|(soul_shard>=3&cooldown.call_dreadstalkers.remains>4&(!talent.summon_vilefiend.enabled|cooldown.summon_vilefiend.remains>3))
    if SoulShards() >= 5 or SoulShards() >= 3 and SpellCooldown(call_dreadstalkers) > 4 and { not Talent(summon_vilefiend_talent) or SpellCooldown(summon_vilefiend) > 3 } Spell(hand_of_guldan)
    #soul_strike,if=soul_shard<5&buff.demonic_core.stack<=2
-   if SoulShards() < 5 and BuffStacks(demonic_core_buff) <= 2 Spell(soul_strike)
+   if SoulShards() < 5 and BuffStacks(demonic_core_buff) <= 2 and Pet.CreatureFamily(Felguard) Spell(soul_strike)
    #demonbolt,if=soul_shard<=3&buff.demonic_core.up&((cooldown.summon_demonic_tyrant.remains<10|cooldown.summon_demonic_tyrant.remains>22)|buff.demonic_core.stack>=3|buff.demonic_core.remains<5|time_to_die<25)
    if SoulShards() <= 3 and BuffPresent(demonic_core_buff) and { SpellCooldown(summon_demonic_tyrant) < 10 or SpellCooldown(summon_demonic_tyrant) > 22 or BuffStacks(demonic_core_buff) >= 3 or BuffRemaining(demonic_core_buff) < 5 or target.TimeToDie() < 25 } Spell(demonbolt)
    #call_action_list,name=build_a_shard
@@ -126,7 +128,7 @@ AddFunction DemonologyDefaultShortCdActions
  unless not target.DebuffPresent(doom_debuff) and target.TimeToDie() > 30 and Enemies(tagged=1) < 2 and Spell(doom)
  {
   #demonic_strength,if=(buff.wild_imps.stack<6|buff.demonic_power.up)|spell_targets.implosion<2
-  if { Demons(wild_imp) < 6 or DebuffPresent(demonic_power) or Enemies(tagged=1) < 2 } and not pet.BuffPresent(pet_auto_spin) Spell(demonic_strength)
+  if { Demons(wild_imp) < 6 or DebuffPresent(demonic_power) or Enemies(tagged=1) < 2 } and not pet.BuffPresent(pet_auto_spin) and Pet.CreatureFamily(Felguard) Spell(demonic_strength)
   #call_action_list,name=nether_portal,if=talent.nether_portal.enabled&spell_targets.implosion<=2
   if Talent(nether_portal_talent) and Enemies(tagged=1) <= 2 DemonologyNetherPortalShortCdActions()
 
@@ -211,7 +213,7 @@ AddFunction DemonologyDefaultCdPostConditions
 AddFunction DemonologyBuildAShardMainActions
 {
  #soul_strike
- Spell(soul_strike)
+ if Pet.CreatureFamily(Felguard) Spell(soul_strike)
  #shadow_bolt
  Spell(shadow_bolt)
 }
@@ -253,7 +255,7 @@ AddFunction DemonologyImplosionMainActions
  #demonbolt,if=prev_gcd.1.hand_of_guldan&soul_shard>=1&(buff.wild_imps.stack<=3|prev_gcd.3.hand_of_guldan)&soul_shard<4&buff.demonic_core.up
  if PreviousGCDSpell(hand_of_guldan) and SoulShards() >= 1 and { Demons(wild_imp) <= 3 or PreviousGCDSpell(hand_of_guldan) } and SoulShards() < 4 and BuffPresent(demonic_core_buff) Spell(demonbolt)
  #soul_strike,if=soul_shard<5&buff.demonic_core.stack<=2
- if SoulShards() < 5 and BuffStacks(demonic_core_buff) <= 2 Spell(soul_strike)
+ if SoulShards() < 5 and BuffStacks(demonic_core_buff) <= 2 and Pet.CreatureFamily(Felguard) Spell(soul_strike)
  #demonbolt,if=soul_shard<=3&buff.demonic_core.up&(buff.demonic_core.stack>=3|buff.demonic_core.remains<=gcd*5.7)
  if SoulShards() <= 3 and BuffPresent(demonic_core_buff) and { BuffStacks(demonic_core_buff) >= 3 or BuffRemaining(demonic_core_buff) <= GCD() * 5.7 } Spell(demonbolt)
  #doom,cycle_targets=1,max_cycle_targets=7,if=refreshable
