@@ -14,15 +14,22 @@ Include(ovale_rogue_spells)
 AddIcon specialization=outlaw help=main
 {
 	# Precombat
-	if not mounted() and not Stealthed() and not InCombat() and not IsDead() and not PlayerIsResting() and HealthPercent() > 0 Spell(stealth)
-	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
+	if not mounted() and not Stealthed() and not InCombat() and not Dead() and not PlayerIsResting()
 	{
+		unless target.Present() and target.Distance(less 5)
+		{
+			Spell(stealth)
+		}
+	}
+	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted() and not Dead()
+	{
+		if target.InRange(marked_for_death) and Stealthed() Spell(cold_blood)
 		#marked_for_death
-		if target.InRange(marked_for_death) Spell(marked_for_death)
+		if target.InRange(marked_for_death) and ComboPoints() < 5 Spell(marked_for_death)
 	}
 
-	if InCombat() InterruptActions()
-	if HealthPercent() < 50 and HealthPercent() > 0 Spell(crimson_vial)
+	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
+	if { HealthPercent() <= 25 or HealthPercent() < 70 and not InCombat() and not mounted() } and not Dead() and Energy() > 24 Spell(crimson_vial)
 
 	if { target.InRange(sinister_strike_outlaw) or target.InRange(sinister_strike) } and HasFullControl()
 	{
@@ -36,10 +43,7 @@ AddIcon specialization=outlaw help=main
 		OutlawDefaultMainActions()
 	}
 
-	if InCombat() and not target.InRange(sinister_strike_outlaw) and target.InRange(pistol_shot) and not Stealthed()
-	{
-		if ComboPointsDeficit() >= 1 or TimeToMaxEnergy() <= GCD() or BuffPresent(opportunity_buff) Spell(pistol_shot)
-	}
+	if InCombat() and not target.IsDead() and not target.IsFriend() and target.Distance(more 5) OutlawGetInMeleeRange()
 }
 
 AddFunction InterruptActions
@@ -59,9 +63,22 @@ AddFunction VanishAllowed
 	{ not target.istargetingplayer() or unitinparty() or unitinraid() }
 }
 
+AddFunction OutlawGetInMeleeRange
+{
+	if { not IsBossFight() or Falling() } and { target.Health() < target.MaxHealth() or target.istargetingplayer() } Spell(shadowstep)
+	# Texture(misc_arrowlup help=L(not_in_melee_range))
+	if target.Health() < target.MaxHealth() or target.istargetingplayer() Spell(pistol_shot)
+}
+
+AddFunction OutlawUseItemActions
+{
+ if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+ if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
+}
+
 AddFunction rtb_reroll
 {
- if HasAzeriteTrait(snake_eyes_trait) BuffCount(roll_the_bones_buff) < 2 or AzeriteTraitRank(snake_eyes_trait) == 3 and BuffCount(roll_the_bones_buff) < 5
+ if AzeriteTraitRank(snake_eyes_trait) >= 2 BuffCount(roll_the_bones_buff) < 2
  if HasAzeriteTrait(deadshot_trait) or HasAzeriteTrait(ace_up_your_sleeve_trait) BuffCount(roll_the_bones_buff) < 2 and { BuffPresent(loaded_dice_buff) or BuffRemaining(ruthless_precision_buff) <= SpellCooldown(between_the_eyes) }
  BuffCount(roll_the_bones_buff) < 2 and { BuffPresent(loaded_dice_buff) or not BuffPresent(grand_melee_buff) and not BuffPresent(ruthless_precision_buff) }
 }
@@ -82,7 +99,7 @@ AddFunction OutlawDefaultMainActions
 {
  #variable,name=rtb_reroll,value=rtb_buffs<2&(buff.loaded_dice.up|!buff.grand_melee.up&!buff.ruthless_precision.up)
  #variable,name=rtb_reroll,op=set,if=azerite.deadshot.enabled|azerite.ace_up_your_sleeve.enabled,value=rtb_buffs<2&(buff.loaded_dice.up|buff.ruthless_precision.remains<=cooldown.between_the_eyes.remains)
- #variable,name=rtb_reroll,op=set,if=azerite.snake_eyes.enabled,value=rtb_buffs<2|(azerite.snake_eyes.rank=3&rtb_buffs<5)
+ #variable,name=rtb_reroll,op=set,if=azerite.snake_eyes.rank>=2,value=rtb_buffs<2
  #variable,name=rtb_reroll,op=reset,if=azerite.snake_eyes.rank>=2&buff.snake_eyes.stack>=2-buff.broadside.up
  #variable,name=ambush_condition,value=combo_points.deficit>=2+2*(talent.ghostly_strike.enabled&cooldown.ghostly_strike.remains<1)+buff.broadside.up&energy>60&!buff.skull_and_crossbones.up
  #variable,name=blade_flurry_sync,value=spell_targets.blade_flurry<2&raid_event.adds.in>20|buff.blade_flurry.up
@@ -116,10 +133,10 @@ AddFunction OutlawDefaultMainPostConditions
 AddFunction OutlawDefaultShortCdActions
 {
  #stealth
- if not InCombat() and not Stealthed() Spell(stealth)
+ # Spell(stealth)
  #variable,name=rtb_reroll,value=rtb_buffs<2&(buff.loaded_dice.up|!buff.grand_melee.up&!buff.ruthless_precision.up)
  #variable,name=rtb_reroll,op=set,if=azerite.deadshot.enabled|azerite.ace_up_your_sleeve.enabled,value=rtb_buffs<2&(buff.loaded_dice.up|buff.ruthless_precision.remains<=cooldown.between_the_eyes.remains)
- #variable,name=rtb_reroll,op=set,if=azerite.snake_eyes.enabled,value=rtb_buffs<2|(azerite.snake_eyes.rank=3&rtb_buffs<5)
+ #variable,name=rtb_reroll,op=set,if=azerite.snake_eyes.rank>=2,value=rtb_buffs<2
  #variable,name=rtb_reroll,op=reset,if=azerite.snake_eyes.rank>=2&buff.snake_eyes.stack>=2-buff.broadside.up
  #variable,name=ambush_condition,value=combo_points.deficit>=2+2*(talent.ghostly_strike.enabled&cooldown.ghostly_strike.remains<1)+buff.broadside.up&energy>60&!buff.skull_and_crossbones.up
  #variable,name=blade_flurry_sync,value=spell_targets.blade_flurry<2&raid_event.adds.in>20|buff.blade_flurry.up
@@ -155,7 +172,7 @@ AddFunction OutlawDefaultCdActions
  # OutlawInterruptActions()
  #variable,name=rtb_reroll,value=rtb_buffs<2&(buff.loaded_dice.up|!buff.grand_melee.up&!buff.ruthless_precision.up)
  #variable,name=rtb_reroll,op=set,if=azerite.deadshot.enabled|azerite.ace_up_your_sleeve.enabled,value=rtb_buffs<2&(buff.loaded_dice.up|buff.ruthless_precision.remains<=cooldown.between_the_eyes.remains)
- #variable,name=rtb_reroll,op=set,if=azerite.snake_eyes.enabled,value=rtb_buffs<2|(azerite.snake_eyes.rank=3&rtb_buffs<5)
+ #variable,name=rtb_reroll,op=set,if=azerite.snake_eyes.rank>=2,value=rtb_buffs<2
  #variable,name=rtb_reroll,op=reset,if=azerite.snake_eyes.rank>=2&buff.snake_eyes.stack>=2-buff.broadside.up
  #variable,name=ambush_condition,value=combo_points.deficit>=2+2*(talent.ghostly_strike.enabled&cooldown.ghostly_strike.remains<1)+buff.broadside.up&energy>60&!buff.skull_and_crossbones.up
  #variable,name=blade_flurry_sync,value=spell_targets.blade_flurry<2&raid_event.adds.in>20|buff.blade_flurry.up
@@ -204,7 +221,6 @@ AddFunction OutlawBuildMainActions
  if ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) + TalentPoints(quick_draw_talent) and BuffPresent(opportunity_buff) Spell(pistol_shot)
  #sinister_strike
  Spell(sinister_strike_outlaw)
- Spell(sinister_strike)
 }
 
 AddFunction OutlawBuildMainPostConditions
@@ -268,6 +284,8 @@ AddFunction OutlawCdsCdActions
 {
  #potion,if=buff.bloodlust.react|buff.adrenaline_rush.up
  # if { BuffPresent(burst_haste_buff any=1) or BuffPresent(adrenaline_rush_buff) } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_agility usable=1)
+ #use_item,name=variable_intensity_gigavolt_oscillating_reactor,if=buff.bloodlust.react|target.time_to_die<=20|combo_points.deficit<=2
+ if BuffPresent(burst_haste_buff any=1) or target.TimeToDie() <= 20 or ComboPointsDeficit() <= 2 OutlawUseItemActions()
  #blood_fury
  Spell(blood_fury_ap)
  #berserking

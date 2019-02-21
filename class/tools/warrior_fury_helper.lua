@@ -31,6 +31,9 @@ AddIcon
 	# Utility
 	Texture(spell_shadow_deathscream) # Piercing Howl
 	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
 	# Talents
 	Texture(spell_impending_victory) # Impending Victory (T2) (replaces Victory Rush)
 	Texture(warrior_talent_icon_stormbolt) # Storm Bolt (T2)

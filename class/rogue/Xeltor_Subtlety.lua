@@ -13,22 +13,27 @@ Include(ovale_rogue_spells)
 # Subtlety (Shanky)
 AddIcon specialization=3 help=main
 {
-	if not mounted() and not Stealthed() and not InCombat() and not IsDead() and not PlayerIsResting() Spell(stealth)
-	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
+	if not mounted() and not Stealthed() and not InCombat() and not Dead() and not PlayerIsResting()
 	{
+		unless target.Present() and target.Distance(less 5)
+		{
+			Spell(stealth)
+		}
+	}
+	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted() and not Dead()
+	{
+		if target.InRange(marked_for_death) and Stealthed() Spell(cold_blood)
 		#marked_for_death
-		if target.InRange(marked_for_death) Spell(marked_for_death)
-		#symbols_of_death
-		if not Talent(death_from_above_talent) and not BuffPresent(symbols_of_death_buff) Spell(symbols_of_death)
+		if target.InRange(marked_for_death) and ComboPoints() < 5 Spell(marked_for_death)
 	}
 	
 	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
-	if HealthPercent() <= 25 and HealthPercent() > 0 or HealthPercent() < 100 and HealthPercent() > 0 and not InCombat() and not mounted() Spell(crimson_vial)
+	if { HealthPercent() <= 25 or HealthPercent() < 70 and not InCombat() and not mounted() } and not Dead() and Energy() > 24 Spell(crimson_vial)
 	
 	if target.InRange(backstab) and HasFullControl()
 	{
 		# Cooldowns
-		if Boss() SubtletyDefaultCdActions()
+		SubtletyDefaultCdActions()
 		
 		# Short Cooldowns
 		SubtletyDefaultShortCdActions()
@@ -37,7 +42,7 @@ AddIcon specialization=3 help=main
 		SubtletyDefaultMainActions()
 	}
 	
-	if InCombat() and not target.IsDead() and not target.IsFriend() and { TimeInCombat() < 6 or Falling() or not IsBossFight() } GetInMeleeRange()
+	if InCombat() and not target.IsDead() and not target.IsFriend() and target.Distance(more 5) and { not IsBossFight() or Falling() } and { target.Health() < target.MaxHealth() or target.istargetingplayer() } GetInMeleeRange()
 }
 
 AddFunction GetInMeleeRange
@@ -48,6 +53,7 @@ AddFunction GetInMeleeRange
 		if target.InRange(shadowstep) Spell(shadowstep)
 		# Texture(misc_arrowlup help=L(not_in_melee_range))
 		if target.InRange(shadowstrike) and not Stealthed() and SpellCooldown(shadowstep) > GCD() AcquireStealth()
+		if not Stealthed() and target.InRange(shuriken_toss) Spell(shuriken_toss)
 	}
 }
 
@@ -64,14 +70,14 @@ AddFunction InterruptActions
 
 AddFunction AcquireStealth
 {
-	if VanishAllowed() Spell(vanish)
-	if not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
 	if not InCombat() Spell(stealth)
+	if VanishAllowed() and InCombat() Spell(vanish)
+	if not BuffPresent(shadow_dance_buff) and InCombat() and not BuffPresent(shadow_dance_buff) Spell(shadow_dance)
 }
 
 AddFunction VanishAllowed
 {
-	{ not target.istargetingplayer() or unitinparty() or unitinraid() }
+	{ not target.istargetingplayer() or target.IsPvP() or unitinparty() or unitinraid() }
 }
 
 AddFunction SubtletyUseItemActions
@@ -339,6 +345,8 @@ AddFunction SubtletyCdsShortCdActions
  if Enemies(tagged=1) >= 3 and Talent(shadow_focus_talent) and target.DebuffPresent(nightblade_debuff) and BuffPresent(symbols_of_death_buff) Spell(shuriken_tornado)
  #shadow_dance,if=!buff.shadow_dance.up&target.time_to_die<=5+talent.subterfuge.enabled&!raid_event.adds.up
  if not BuffPresent(shadow_dance_buff) and target.TimeToDie() <= 5 + TalentPoints(subterfuge_talent) and not False(raid_event_adds_exists) Spell(shadow_dance)
+ #cold_blood,if=stealthed.all
+ if Stealthed() Spell(cold_blood)
 }
 
 AddFunction SubtletyCdsShortCdPostConditions
@@ -360,7 +368,7 @@ AddFunction SubtletyCdsCdActions
  #ancestral_call,if=buff.symbols_of_death.up
  if BuffPresent(symbols_of_death_buff) Spell(ancestral_call)
  #shadow_blades,if=combo_points.deficit>=2+stealthed.all
- if ComboPointsDeficit() >= 2 + Stealthed() Spell(shadow_blades)
+ if ComboPointsDeficit() >= 2 + Stealthed() and Boss() Spell(shadow_blades)
 }
 
 AddFunction SubtletyCdsCdPostConditions
@@ -497,7 +505,7 @@ AddFunction SubtletyStealthCdsCdPostConditions
 AddFunction SubtletyStealthedMainActions
 {
  #shadowstrike,if=buff.stealth.up
- if BuffPresent(stealthed_buff any=1) Spell(shadowstrike)
+ if BuffPresent(stealth_buff) Spell(shadowstrike)
  #call_action_list,name=finish,if=combo_points.deficit<=1-(talent.deeper_stratagem.enabled&buff.vanish.up)
  if ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } SubtletyFinishMainActions()
 
@@ -521,7 +529,7 @@ AddFunction SubtletyStealthedMainPostConditions
 
 AddFunction SubtletyStealthedShortCdActions
 {
- unless BuffPresent(stealthed_buff any=1) and Spell(shadowstrike)
+ unless BuffPresent(stealth_buff) and Spell(shadowstrike)
  {
   #call_action_list,name=finish,if=combo_points.deficit<=1-(talent.deeper_stratagem.enabled&buff.vanish.up)
   if ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } SubtletyFinishShortCdActions()
@@ -530,12 +538,12 @@ AddFunction SubtletyStealthedShortCdActions
 
 AddFunction SubtletyStealthedShortCdPostConditions
 {
- BuffPresent(stealthed_buff any=1) and Spell(shadowstrike) or ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishShortCdPostConditions() or Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 and Spell(shadowstrike) or not Talent(deeper_stratagem_talent) and AzeriteTraitRank(blade_in_the_shadows_trait) == 3 and Enemies(tagged=1) == 3 and Spell(shadowstrike) or Enemies(tagged=1) >= 3 and Spell(shuriken_storm) or Spell(shadowstrike)
+ BuffPresent(stealth_buff) and Spell(shadowstrike) or ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishShortCdPostConditions() or Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 and Spell(shadowstrike) or not Talent(deeper_stratagem_talent) and AzeriteTraitRank(blade_in_the_shadows_trait) == 3 and Enemies(tagged=1) == 3 and Spell(shadowstrike) or Enemies(tagged=1) >= 3 and Spell(shuriken_storm) or Spell(shadowstrike)
 }
 
 AddFunction SubtletyStealthedCdActions
 {
- unless BuffPresent(stealthed_buff any=1) and Spell(shadowstrike)
+ unless BuffPresent(stealth_buff) and Spell(shadowstrike)
  {
   #call_action_list,name=finish,if=combo_points.deficit<=1-(talent.deeper_stratagem.enabled&buff.vanish.up)
   if ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } SubtletyFinishCdActions()
@@ -544,7 +552,7 @@ AddFunction SubtletyStealthedCdActions
 
 AddFunction SubtletyStealthedCdPostConditions
 {
- BuffPresent(stealthed_buff any=1) and Spell(shadowstrike) or ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishCdPostConditions() or Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 and Spell(shadowstrike) or not Talent(deeper_stratagem_talent) and AzeriteTraitRank(blade_in_the_shadows_trait) == 3 and Enemies(tagged=1) == 3 and Spell(shadowstrike) or Enemies(tagged=1) >= 3 and Spell(shuriken_storm) or Spell(shadowstrike)
+ BuffPresent(stealth_buff) and Spell(shadowstrike) or ComboPointsDeficit() <= 1 - { Talent(deeper_stratagem_talent) and BuffPresent(vanish_buff) } and SubtletyFinishCdPostConditions() or Talent(secret_technique_talent) and Talent(find_weakness_talent) and target.DebuffRemaining(find_weakness_debuff) < 1 and Enemies(tagged=1) == 2 and target.TimeToDie() - target.DebuffRemaining(shadowstrike) > 6 and Spell(shadowstrike) or not Talent(deeper_stratagem_talent) and AzeriteTraitRank(blade_in_the_shadows_trait) == 3 and Enemies(tagged=1) == 3 and Spell(shadowstrike) or Enemies(tagged=1) >= 3 and Spell(shuriken_storm) or Spell(shadowstrike)
 }
 ]]
 

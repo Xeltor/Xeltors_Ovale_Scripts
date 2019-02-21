@@ -17,6 +17,7 @@ AddIcon
 	Texture(ability_kick) # Kick
 	Texture(ability_rogue_kidneyshot) # Kidney Shot
 	Texture(ability_cheapshot) # Cheap Shot
+	Texture(inv_throwingknife_07) # Shuriken Toss
 
 	# Buffs
 	Texture(ability_stealth) # Stealth
@@ -26,6 +27,9 @@ AddIcon
 	Texture(ability_rogue_shadowdance) # Shadow Dance
 	Texture(ability_vanish) # Vanish
 	Texture(inv_knife_1h_grimbatolraid_d_03) # Shadow Blades
+	
+	# Buffs PvP (Used in PvE)
+	Texture(spell_ice_lament) # Cold Blood
 	
 	# Items
 	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
