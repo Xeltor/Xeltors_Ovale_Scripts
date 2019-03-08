@@ -29,7 +29,6 @@ AddIcon
 	# Talents
 	Texture(ability_creature_cursed_02) # Ghostly Strike (T1)
 	Texture(achievement_bg_killingblow_berserker) # Marked for Death (T3)
-	Texture(ability_rogue_cannonballbarrage) # Cannonball Barrage (T6)
 	Texture(ability_rogue_slicedice) # Slice and Dice (T6) (replaces Roll the Bones)
 	Texture(ability_arakkoa_spinning_blade) # Blade Rush (T7)
 	Texture(ability_rogue_murderspree) # Killing Spree (T7)
