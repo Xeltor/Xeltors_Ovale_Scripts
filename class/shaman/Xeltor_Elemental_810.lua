@@ -2,8 +2,8 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_elemental"
-	local desc = "[Xel][8.1] Shaman: Elemental"
+	local name = "xeltor_elemental_810"
+	local desc = "[Xel][8.1.0] Shaman: Elemental"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
