@@ -28,6 +28,9 @@ AddIcon
 	# Buffs
 	Texture(spell_shadow_demonbreath) # Unending Breath
 	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Trinkets
+	
 	# Talents
 	Texture(spell_shadow_haunting) # Drain Soul (T1) (replaces Shadow Bolt)
 	Texture(spell_fire_twilightflamebolt) # Deathbolt (T1)

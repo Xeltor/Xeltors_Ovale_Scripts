@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_affliction"
-	local desc = "[Xel][8.1] Warlock: Affliction"
+	local desc = "[Xel][8.1.5] Warlock: Affliction"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -23,7 +23,7 @@ AddIcon specialization=1 help=main
 	# Save ass
 	SaveActions()
 	
-	if wet() and not mounted() Spell(unending_breath)
+	if wet() and not mounted() and not InCombat() Spell(unending_breath)
 	
 	if InCombat() and target.InRange(agony) and HasFullControl()
     {
@@ -115,7 +115,7 @@ AddFunction AfflictionDefaultMainActions
   #haunt,if=spell_targets.seed_of_corruption_aoe<=2+raid_event.invulnerable.up
   if Enemies(tagged=1) <= 2 + False(raid_events_invulnerable_up) Spell(haunt)
   #agony,target_if=min:dot.agony.remains,if=remains<=gcd+action.shadow_bolt.execute_time&target.time_to_die>8
-  if target.DebuffRemaining(agony_debuff) <= GCD() + ExecuteTime(shadow_bolt_affliction) + 1 and target.TimeToDie() > 8 Spell(agony)
+  if target.DebuffRemaining(agony_debuff) <= GCD() + ExecuteTime(shadow_bolt_affliction) and target.TimeToDie() > 8 Spell(agony)
   #unstable_affliction,target_if=!contagion&target.time_to_die<=8
   if not BuffRemaining(unstable_affliction_buff) and target.TimeToDie() <= 8 Spell(unstable_affliction)
   #drain_soul,target_if=min:debuff.shadow_embrace.remains,cancel_if=ticks_remain<5,if=talent.shadow_embrace.enabled&variable.maintain_se&debuff.shadow_embrace.remains&debuff.shadow_embrace.remains<=gcd*2

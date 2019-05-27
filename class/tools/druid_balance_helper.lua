@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Balancehelper"
-	local desc = "[Xel][7.x] Spellhelper: Balance"
+	local desc = "[Xel][8.x] Spellhelper: Balance"
 	local code = [[
 AddIcon
 {
@@ -19,27 +19,33 @@ AddIcon
 	
 	# Buffs
 	Texture(spell_nature_forceofnature) # Moonkin Form
+	Texture(ability_druid_travelform) # Travel Form
+	Texture(ability_druid_catform) # Cat Form
 	Texture(spell_nature_natureguardian) # Celestial Alignment
+	Texture(ability_druid_dash) # Dash
+	Texture(ability_druid_prowl) # Prowl
+	Texture(spell_nature_resistnature) # Regrowth
+	Texture(spell_nature_rejuvenation) # Rejuvenation
+	Texture(inv_relics_idolofrejuvenation) # Swiftmend
 	
-	# Artifact (All icons are the same button)
-	Texture(artifactability_balancedruid_newmoon) # New Moon
-	Texture(artifactability_balancedruid_halfmoon) # Half Moon
-	Texture(artifactability_balancedruid_fullmoon) # Full Moon
+	# Items
+	Texture(inv_jewelry_talisman_12) # Trinkets
 	
 	# Talents
-	Texture(ability_druid_forceofnature) # Force of Nature (T1)
 	Texture(spell_holy_elunesgrace) # Warrior of Elune (T1)
+	Texture(ability_druid_forceofnature) # Force of Nature (T1)
+	Texture(ability_druid_dash_orange) # Tiger Dash (T2)
 	Texture(spell_nature_natureblessing) # Renewal (T2)
-	Texture(spell_druid_displacement) # Displacer Beast (T2)
 	Texture(spell_druid_wildcharge) # Wild Charge (T2)
 	Texture(ability_druid_bash) # Mighty Bash (T4)
 	Texture(spell_druid_massentanglement) # Mass Entanglement (T4)
 	Texture(ability_druid_typhoon) # Typhoon (T4)
 	Texture(spell_druid_incarnation) # Incarnation (T5)
-	Texture(ability_druid_stellarflare) # Stellar Flare (T5)
-	Texture(talentspec_druid_balance) # Astral Communion (T6)
-	Texture(inv_pet_ancientprotector) # Blessing of the Ancients (T6)
+	Texture(ability_druid_stellarflare) # Stellar Flare (T6)
 	Texture(ability_druid_dreamstate) # Fury of Elune (T7)
+	Texture(artifactability_balancedruid_newmoon) # New Moon (T7)
+	Texture(artifactability_balancedruid_halfmoon) # Half Moon (T7)
+	Texture(artifactability_balancedruid_fullmoon) # Full Moon (T7)
 	
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
