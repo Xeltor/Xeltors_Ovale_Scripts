@@ -40,7 +40,7 @@ AddIcon
 	Texture(ability_hunter_camouflage) # Camouflage (T3)
 	Texture(inv_pet_pettrap02) # Steel Trap (T4)
 	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T4)
-	Texture(spell_fire_incinerate) # Mongoose Bite (T6) (Replaces Raptor Strike)
+	Texture(ability_hunter_mongoosebite) # Mongoose Bite (T6) (Replaces Raptor Strike)
 	Texture(ability_hunter_invigeration) # Flanking Strike (T6)
 	Texture(inv_wildfirebomb_shrapnel) # Wildfire Infusion: Shrapnel Bomb (T7) (Replaces Wildfire Bomb)
 	Texture(inv_wildfirebomb_blood) # Wildfore Infusion: Pheromone Bomb (T7) (Replaces Wildfire Bomb)
