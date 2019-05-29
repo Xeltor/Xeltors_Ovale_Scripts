@@ -22,6 +22,9 @@ AddIcon
 	
 	# Buffs
 	Texture(spell_nature_giftofthewild) # Storm, Earth, and Fire
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Trinkets
 
 	# Talents
 	Texture(ability_monk_chiwave) # Chi Wave (T1)
