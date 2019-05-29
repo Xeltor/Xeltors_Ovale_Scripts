@@ -22,9 +22,9 @@ AddIcon
 	Texture(spell_frost_coldhearted) # Icy Veins
 	Texture(spell_ice_lament) # Ice Barrier
 	Texture(ability_mage_timewarp) # Time Warp
-
-	# Artifact
-	Texture(artifactability_frostmage_ebonbolt) # Ebonbolt
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_mage_rayoffrost) # Ray of Frost (T1)
@@ -51,6 +51,36 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

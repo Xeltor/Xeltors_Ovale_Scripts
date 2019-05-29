@@ -20,6 +20,9 @@ AddIcon
 	# Buffs
 	Texture(spell_shadow_lifedrain) # Vampiric Blood
 	Texture(inv_sword_07) # Dancing Rune Weapon
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_animusdraw) # Blooddrinker (T1)

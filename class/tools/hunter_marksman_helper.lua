@@ -20,8 +20,8 @@ AddIcon
 	Texture(ability_trueshot) # True Shot
 	Texture(ability_hunter_onewithnature) # Exhilaration
 	
-	# Artifact
-	Texture(inv_bow_1h_artifactwindrunner_d_02) # Windburst
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(spell_shadow_painspike) # Black Arrow (T2)
@@ -50,11 +50,41 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

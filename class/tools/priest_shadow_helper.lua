@@ -23,6 +23,9 @@ AddIcon
 	Texture(spell_holy_wordfortitude) # Power Word: Fortitude
 	Texture(spell_shadow_dispersion) # Dispersion
 	Texture(spell_shadow_shadowfiend) # Shadowfiend
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(spell_mage_presenceofmind) # Shadow Word: Void (T1) (Replaces Mind Blast)

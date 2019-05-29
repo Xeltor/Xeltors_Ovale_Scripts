@@ -26,9 +26,9 @@ AddIcon
 	Texture(spell_holy_avenginewrath) # Avenging Wrath
 	Texture(spell_holy_sealofsacrifice) # Blessing of Sacrifice
 	Texture(spell_holy_layonhands) # Lay on Hands
-
-	# Artifact
-	Texture(inv_shield_1h_artifactnorgannon_d_01) # Eye of Tyr
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 	
 	# Talents
 	Texture(paladin_retribution) # Blessed Hammer (T1)(Replaces Hammer of the Righteous)
@@ -43,6 +43,39 @@ AddIcon
 	# Racials
 	Texture(spell_shadow_teleport) # Arcane Torrent (Blood Elf)
 	Texture(ability_warstomp) # War Stomp (Tauren)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

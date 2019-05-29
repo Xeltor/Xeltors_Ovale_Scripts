@@ -20,6 +20,9 @@ AddIcon
 	# Buffs
 	Texture(ability_deathknight_pillaroffrost) # Pillar of Frost
 	Texture(inv_sword_62) # Empower Rune Weapon
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(inv_misc_horn_02) # Horn of Winter (T2)
@@ -43,29 +46,40 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ]]
 
 	OvaleScripts:RegisterScript("DEATHKNIGHT", "frost", name, desc, code, "script")

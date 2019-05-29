@@ -21,8 +21,8 @@ AddIcon
 	Texture(spell_shadow_shadowfiend) # Shadowfiend
 	Texture(spell_holy_painsupression) # Pain Suppression
 	
-	# Artifact
-	Texture(inv_staff_2h_artifacttome_d_01) # Light's Wrath
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(spell_warlock_focusshadow) # Schism (T1)
@@ -46,6 +46,42 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

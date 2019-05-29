@@ -24,6 +24,9 @@ AddIcon
 	Texture(inv_misc_pheonixpet_01) # Heart of the Phoenix
 	Texture(ability_hunter_beastsoothe) # Revive Pet
 	Texture(icon_orangebird_toy) # Call Pet
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_hunter_longevity) # Dire Beast (T1)
@@ -48,6 +51,33 @@ AddIcon
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 
 

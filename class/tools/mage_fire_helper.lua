@@ -20,9 +20,9 @@ AddIcon
 	# Buffs
 	Texture(spell_fire_sealoffire) # Combustion
 	Texture(ability_mage_moltenarmor) # Blazing Barrier
-
-	# Artifact
-	Texture(artifactability_firemage_phoenixbolt) # Phoenix's Flames
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(spell_arcane_massdispel) # Shimmer (T2)
@@ -46,6 +46,36 @@ AddIcon
 	Texture(ability_racial_darkflight) # Darkflight (Worgen)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

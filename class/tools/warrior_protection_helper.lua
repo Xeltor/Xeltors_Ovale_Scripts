@@ -27,9 +27,9 @@ AddIcon
 	Texture(ability_warrior_warcry) # Demoralizing Shout
 	Texture(spell_holy_ashestoashes) # Last Stand
 	Texture(ability_warrior_shieldwall) # Shield Wall
-
-	# Artifact
-	Texture(inv_shield_1h_artifactmagnar_d_01) # Neltharion's Fury
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_warrior_shockwave) # Shockwave (T1)
@@ -53,11 +53,58 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

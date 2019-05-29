@@ -22,8 +22,8 @@ AddIcon
 	Texture(inv_misc_beer_06) # Purifying Brew
 	Texture(ability_monk_fortifyingale_new) # Fortifying Brew
 	
-	# Artifact
-	Texture(inv_staff_2h_artifactmonkeyking_d_02) # Exploding Keg
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(spell_arcane_arcanetorrent) # Chi Burst (T1)
@@ -51,6 +51,39 @@ AddIcon
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

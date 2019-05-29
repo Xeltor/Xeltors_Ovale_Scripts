@@ -62,11 +62,46 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

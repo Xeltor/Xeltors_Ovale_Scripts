@@ -23,8 +23,8 @@ AddIcon
 	Texture(ability_monk_chicocoon) # Life Cocoon
 	Texture(ability_monk_thunderfocustea) # Thunder Focus Tea
 	
-	# Artifact
-	Texture(inv_staff_2h_artifactshaohao_d_01) # Sheilun's Gift
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(spell_arcane_arcanetorrent) # Chi Burst (T1)
@@ -54,6 +54,38 @@ AddIcon
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

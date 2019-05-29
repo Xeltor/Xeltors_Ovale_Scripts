@@ -25,8 +25,8 @@ AddIcon
 	Texture(ability_druid_markofursol) # Mark of Ursol
 	Texture(spell_nature_healingtouch) # Healing Touch
 	
-	# Artifact
-	Texture(inv_hand_1h_artifactursoc_d_01) # Rage of the Sleeper
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 	
 	# Talents
 	Texture(spell_druid_bristlingfur) # Bristling Fur (T1)
@@ -44,11 +44,43 @@ AddIcon
 	Texture(racial_troll_berserk) # Berserking (Troll)
 	Texture(ability_warstomp) # War Stomp (Tauren)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

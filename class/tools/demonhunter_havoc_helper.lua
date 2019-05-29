@@ -22,6 +22,9 @@ AddIcon
 	# Buffs
 	Texture(ability_demonhunter_metamorphasisdps) # Metamorphosis
 	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
 	# Artifact
 	Texture(inv_glaive_1h_artifactazgalor_d_01) # Fury of the Illidari
 
@@ -35,6 +38,49 @@ AddIcon
 	# Racials
 	Texture(spell_shadow_teleport) # Arcane Torrent (Blood Elf)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

@@ -24,9 +24,9 @@ AddIcon
 	# Buffs
 	Texture(warrior_talent_icon_innerrage) # Battle Cry
 	Texture(spell_nature_ancestralguardian) # Berserker Rage
-
-	# Artifact
-	Texture(inv_sword_2h_artifactarathor_d_01) # Warbreaker
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 	
 	# Talents
 	Texture(ability_meleedamage) # Overpower (T1)
@@ -53,11 +53,47 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night Elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

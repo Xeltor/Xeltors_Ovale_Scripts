@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_pokey"
-	local desc = "[Xel][8.0] Blush: Outlaw edition"
+	local desc = "[Xel][8.1.5] Blush: Outlaw edition"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -113,7 +113,7 @@ AddFunction OutlawDefaultMainActions
 
   unless OutlawCdsMainPostConditions()
   {
-   #call_action_list,name=finish,if=combo_points>=cp_max_spend-(buff.broadside.up+buff.opportunity.up)*(talent.quick_draw.enabled&(!talent.marked_for_death.enabled|cooldown.marked_for_death.remains>1))
+   #run_action_list,name=finish,if=combo_points>=cp_max_spend-(buff.broadside.up+buff.opportunity.up)*(talent.quick_draw.enabled&(!talent.marked_for_death.enabled|cooldown.marked_for_death.remains>1))
    if ComboPoints() >= MaxComboPoints() - { BuffPresent(broadside_buff) + BuffPresent(opportunity_buff) } * { Talent(quick_draw_talent) and { not Talent(marked_for_death_talent) or SpellCooldown(marked_for_death) > 1 } } OutlawFinishMainActions()
 
    unless ComboPoints() >= MaxComboPoints() - { BuffPresent(broadside_buff) + BuffPresent(opportunity_buff) } * { Talent(quick_draw_talent) and { not Talent(marked_for_death_talent) or SpellCooldown(marked_for_death) > 1 } } and OutlawFinishMainPostConditions()
@@ -150,7 +150,7 @@ AddFunction OutlawDefaultShortCdActions
 
   unless OutlawCdsShortCdPostConditions()
   {
-   #call_action_list,name=finish,if=combo_points>=cp_max_spend-(buff.broadside.up+buff.opportunity.up)*(talent.quick_draw.enabled&(!talent.marked_for_death.enabled|cooldown.marked_for_death.remains>1))
+   #run_action_list,name=finish,if=combo_points>=cp_max_spend-(buff.broadside.up+buff.opportunity.up)*(talent.quick_draw.enabled&(!talent.marked_for_death.enabled|cooldown.marked_for_death.remains>1))
    if ComboPoints() >= MaxComboPoints() - { BuffPresent(broadside_buff) + BuffPresent(opportunity_buff) } * { Talent(quick_draw_talent) and { not Talent(marked_for_death_talent) or SpellCooldown(marked_for_death) > 1 } } OutlawFinishShortCdActions()
 
    unless ComboPoints() >= MaxComboPoints() - { BuffPresent(broadside_buff) + BuffPresent(opportunity_buff) } * { Talent(quick_draw_talent) and { not Talent(marked_for_death_talent) or SpellCooldown(marked_for_death) > 1 } } and OutlawFinishShortCdPostConditions()
@@ -186,7 +186,7 @@ AddFunction OutlawDefaultCdActions
 
   unless OutlawCdsCdPostConditions()
   {
-   #call_action_list,name=finish,if=combo_points>=cp_max_spend-(buff.broadside.up+buff.opportunity.up)*(talent.quick_draw.enabled&(!talent.marked_for_death.enabled|cooldown.marked_for_death.remains>1))
+   #run_action_list,name=finish,if=combo_points>=cp_max_spend-(buff.broadside.up+buff.opportunity.up)*(talent.quick_draw.enabled&(!talent.marked_for_death.enabled|cooldown.marked_for_death.remains>1))
    if ComboPoints() >= MaxComboPoints() - { BuffPresent(broadside_buff) + BuffPresent(opportunity_buff) } * { Talent(quick_draw_talent) and { not Talent(marked_for_death_talent) or SpellCooldown(marked_for_death) > 1 } } OutlawFinishCdActions()
 
    unless ComboPoints() >= MaxComboPoints() - { BuffPresent(broadside_buff) + BuffPresent(opportunity_buff) } * { Talent(quick_draw_talent) and { not Talent(marked_for_death_talent) or SpellCooldown(marked_for_death) > 1 } } and OutlawFinishCdPostConditions()
@@ -217,8 +217,8 @@ AddFunction OutlawDefaultCdPostConditions
 
 AddFunction OutlawBuildMainActions
 {
- #pistol_shot,if=combo_points.deficit>=1+buff.broadside.up+talent.quick_draw.enabled&buff.opportunity.up
- if ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) + TalentPoints(quick_draw_talent) and BuffPresent(opportunity_buff) Spell(pistol_shot)
+ #pistol_shot,if=buff.opportunity.up&(buff.keep_your_wits_about_you.stack<25|buff.deadshot.up|energy<45)
+ if BuffPresent(opportunity_buff) and { BuffStacks(keep_your_wits_about_you_buff) < 25 or BuffPresent(deadshot_buff) or Energy() < 45 } Spell(pistol_shot)
  #sinister_strike
  Spell(sinister_strike_outlaw)
 }
@@ -233,7 +233,7 @@ AddFunction OutlawBuildShortCdActions
 
 AddFunction OutlawBuildShortCdPostConditions
 {
- ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) + TalentPoints(quick_draw_talent) and BuffPresent(opportunity_buff) and Spell(pistol_shot) or Spell(sinister_strike_outlaw)
+ BuffPresent(opportunity_buff) and { BuffStacks(keep_your_wits_about_you_buff) < 25 or BuffPresent(deadshot_buff) or Energy() < 45 } and Spell(pistol_shot) or Spell(sinister_strike_outlaw)
 }
 
 AddFunction OutlawBuildCdActions
@@ -242,7 +242,7 @@ AddFunction OutlawBuildCdActions
 
 AddFunction OutlawBuildCdPostConditions
 {
- ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) + TalentPoints(quick_draw_talent) and BuffPresent(opportunity_buff) and Spell(pistol_shot) or Spell(sinister_strike_outlaw)
+ BuffPresent(opportunity_buff) and { BuffStacks(keep_your_wits_about_you_buff) < 25 or BuffPresent(deadshot_buff) or Energy() < 45 } and Spell(pistol_shot) or Spell(sinister_strike_outlaw)
 }
 
 ### actions.cds
@@ -250,7 +250,7 @@ AddFunction OutlawBuildCdPostConditions
 AddFunction OutlawCdsMainActions
 {
  #blade_flurry,if=spell_targets>=2&!buff.blade_flurry.up&(!raid_event.adds.exists|raid_event.adds.remains>8|raid_event.adds.in>(2-cooldown.blade_flurry.charges_fractional)*25)
- if Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } Spell(blade_flurry)
+ if Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and CheckBoxOn(opt_blade_flurry) Spell(blade_flurry)
  #ghostly_strike,if=variable.blade_flurry_sync&combo_points.deficit>=1+buff.broadside.up
  if blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) Spell(ghostly_strike)
 }
@@ -266,7 +266,7 @@ AddFunction OutlawCdsShortCdActions
  #marked_for_death,if=raid_event.adds.in>30-raid_event.adds.duration&!stealthed.rogue&combo_points.deficit>=cp_max_spend-1
  if 600 > 30 - 10 and not Stealthed() and ComboPointsDeficit() >= MaxComboPoints() - 1 Spell(marked_for_death)
 
- unless Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike)
+ unless Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and CheckBoxOn(opt_blade_flurry) and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike)
  {
   #blade_rush,if=variable.blade_flurry_sync&energy.time_to_max>1
   if blade_flurry_sync() and TimeToMaxEnergy() > 1 Spell(blade_rush)
@@ -277,7 +277,7 @@ AddFunction OutlawCdsShortCdActions
 
 AddFunction OutlawCdsShortCdPostConditions
 {
- Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike)
+ Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and CheckBoxOn(opt_blade_flurry) and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike)
 }
 
 AddFunction OutlawCdsCdActions
@@ -297,7 +297,7 @@ AddFunction OutlawCdsCdActions
  #adrenaline_rush,if=!buff.adrenaline_rush.up&energy.time_to_max>1
  if not BuffPresent(adrenaline_rush_buff) and TimeToMaxEnergy() > 1 and EnergyDeficit() > 1 Spell(adrenaline_rush)
 
- unless Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike)
+ unless Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and CheckBoxOn(opt_blade_flurry) and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike)
  {
   #killing_spree,if=variable.blade_flurry_sync&(energy.time_to_max>5|energy<15)
   if blade_flurry_sync() and { TimeToMaxEnergy() > 5 or Energy() < 15 } Spell(killing_spree)
@@ -312,7 +312,7 @@ AddFunction OutlawCdsCdActions
 
 AddFunction OutlawCdsCdPostConditions
 {
- Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike) or blade_flurry_sync() and TimeToMaxEnergy() > 1 and Spell(blade_rush)
+ Enemies(tagged=1) >= 2 and not BuffPresent(blade_flurry_buff) and { not False(raid_event_adds_exists) or 0 > 8 or 600 > { 2 - SpellCharges(blade_flurry count=0) } * 25 } and CheckBoxOn(opt_blade_flurry) and Spell(blade_flurry) or blade_flurry_sync() and ComboPointsDeficit() >= 1 + BuffPresent(broadside_buff) and Spell(ghostly_strike) or blade_flurry_sync() and TimeToMaxEnergy() > 1 and Spell(blade_rush)
 }
 
 ### actions.finish

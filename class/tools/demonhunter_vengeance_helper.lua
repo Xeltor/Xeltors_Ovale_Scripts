@@ -29,8 +29,8 @@ AddIcon
 	Texture(ability_demonhunter_empowerwards) # Empower Wards
 	Texture(ability_demonhunter_metamorphasistank) # Metamorphosis
 	
-	# Artifact
-	Texture(inv_glaive_1h_artifactaldrochi_d_01) # Soul Carver
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_demonhunter_felblade) # Felblade (T3)
@@ -45,6 +45,48 @@ AddIcon
 	# Racials
 	Texture(spell_shadow_teleport) # Arcane Torrent (Blood Elf)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

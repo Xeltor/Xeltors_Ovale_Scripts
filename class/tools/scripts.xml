@@ -10,7 +10,6 @@
 	<Script file="druid_feral_helper.lua" />
 	<Script file="druid_guardian_helper.lua" />
 	<Script file="hunter_beastmaster_helper.lua" />
-	<Script file="hunter_combined_helper.lua" />
 	<Script file="hunter_marksman_helper.lua" />
 	<Script file="hunter_survival_helper.lua" />
 	<Script file="mage_arcane_helper.lua" />

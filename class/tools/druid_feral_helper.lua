@@ -27,8 +27,8 @@ AddIcon
 	Texture(ability_druid_berserk) # Berserk
 	Texture(spell_nature_resistnature) # regrowth
 	
-	# Artifact
-	Texture(inv_knife_1h_artifactfrostsaber_d_01) # Ashamane's Frenzy
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 	
 	# Talents
 	Texture(spell_nature_natureblessing) # Renewal (T2)
@@ -58,11 +58,50 @@ AddIcon
 	Texture(ability_rogue_trip) # Escape Artist (Gnome)
 	Texture(ability_ambush) # Shadowmeld (Night elf)
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

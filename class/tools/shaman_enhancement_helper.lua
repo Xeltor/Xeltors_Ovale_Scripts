@@ -22,8 +22,8 @@ AddIcon
 	Texture(spell_shaman_feralspirit) # Feral Spirit
 	Texture(spell_nature_spiritwolf) # Ghost Wolf
 	
-	# Artifact
-	Texture(inv_mace_1h_artifactdoomhammer_d_01) # Doom Winds
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_skyreach_wind_wall) # Windsong (T1)
@@ -49,12 +49,45 @@ AddIcon
 	Texture(pandarenracial_quiveringpain) # Quaking Palm (Pandaren)
 	Texture(spell_shadow_unholystrength) # Stoneform (Dwarf)
 	Texture(spell_holy_holyprotection) # Gift of the Naaru (Draenei)
+
 	
-	# Legendary Rings
-	Texture(inv_60legendary_ring1c) # Maalus / Thorasus
-	Texture(inv_60legendary_ring1e) # Nithramus
-	Texture(inv_60legendary_ring1a) # Etheralus
-	Texture(inv_60legendary_ring1b) # Sanctus
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 ]]
 

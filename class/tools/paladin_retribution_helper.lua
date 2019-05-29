@@ -32,6 +32,9 @@ AddIcon
 	Texture(ability_paladin_handofhindrance) # Hand of Hindrance
 	Texture(ability_paladin_enlightenedjudgements) # Hammer of Reckoning
 	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
 	# Talents
 	Texture(spell_holy_sealofblood) # Zeal (T1)
 	Texture(spell_paladin_executionsentence) # Execution Sentence (T1)

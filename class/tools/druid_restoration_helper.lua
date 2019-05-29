@@ -32,6 +32,9 @@ AddIcon
 	Texture(spell_arcane_starfire) # Lunar Strike
 	Texture(spell_arcane_arcane03) # Starsurge
 	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
+	
 	# Talents
 	Texture(ability_druid_naturalperfection) # Cenarion Ward (T1)
 	Texture(spell_nature_natureblessing) # Renewal (T2)

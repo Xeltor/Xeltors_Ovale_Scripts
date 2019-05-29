@@ -25,6 +25,9 @@ AddIcon
 	Texture(spell_shadow_shadowworddominate) # Adrenaline Rush
 	Texture(ability_rogue_crimsonvial) # Crimson Vial
 	Texture(ability_warrior_punishingblow) # Blade Flurry
+	
+	# Items
+	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
 
 	# Talents
 	Texture(ability_creature_cursed_02) # Ghostly Strike (T1)
