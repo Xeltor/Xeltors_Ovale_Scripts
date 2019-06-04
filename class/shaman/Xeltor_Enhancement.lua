@@ -3,7 +3,7 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "xeltor_enhancement"
-	local desc = "[Xel][7.3.5] Shaman: Enhancement"
+	local desc = "[Xel][8.1.5] Shaman: Enhancement"
 	local code = [[
 Include(ovale_common)
 Include(ovale_trinkets_mop)
@@ -13,19 +13,23 @@ Include(ovale_shaman_spells)
 # Enhancement
 AddIcon specialization=2 help=main
 {
+	if not InCombat() and not target.IsFriend() and not mounted() and target.Present() and Speed() == 0
+	{
+		if TotemRemaining(totem_mastery_enhancement) <= 2 * GCD() and not BuffPresent(enh_resonance_totem_buff) and Boss() Spell(totem_mastery_enhancement)
+	}
+	
 	# Interrupt
 	if InCombat() InterruptActions()
 	
-	if { Talent(ascendance_talent) and target.InRange(rockbiter) or not Talent(ascendance_talent) and target.InRange(stormstrike) } and HasFullControl()
+	# Save ass
+	if not mounted() SaveActions()
+	
+	if target.InRange(lava_lash) or { target.InRange(wind_shear) and InCombat() and { target.HealthPercent() < 100 or target.istargetingplayer() } }
     {
-		if InCombat() and HealthPercent() <= 90 and Spell(rainfall) and not BuffPresent(rainfall_buff) Spell(rainfall)
 		if InCombat() and target.istargetingplayer() and Maelstrom() >= 20 and HealthPercent() <= 75 and SpellUsable(healing_surge) Spell(healing_surge)
 	
 		# Cooldowns
-		if Boss()
-		{
-			EnhancementDefaultCdActions()
-		}
+		if Boss() EnhancementDefaultCdActions()
 		
 		# Short Cooldowns
 		EnhancementDefaultShortCdActions()
@@ -35,7 +39,7 @@ AddIcon specialization=2 help=main
 	}
 	
 	# Go forth and murder
-	if InCombat() and HasFullControl() and target.Present() and not target.InRange(rockbiter) and { TimeInCombat() < 6 or Falling() }
+	if InCombat() and HasFullControl() and target.Present() and not target.InRange(lava_lash) and { TimeInCombat() < 6 or Falling() }
 	{
 		if target.InRange(feral_lunge) Spell(feral_lunge)
 	}
@@ -43,96 +47,111 @@ AddIcon specialization=2 help=main
 
 AddFunction InterruptActions
 {
-	if not target.IsFriend()
+	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
-		if target.InRange(wind_shear) and target.IsInterruptible() and target.MustBeInterrupted() Spell(wind_shear)
-        if target.Distance(less 5) and not target.Classification(worldboss) and target.MustBeInterrupted() Spell(sundering)
-        if target.Distance(less 8) and not target.Classification(worldboss) and target.RemainingCastTime() > 2 and target.MustBeInterrupted() Spell(lightning_surge_totem)
-        if target.InRange(quaking_palm) and not target.Classification(worldboss) and target.MustBeInterrupted() Spell(quaking_palm)
-        if target.Distance(less 5) and not target.Classification(worldboss) and target.MustBeInterrupted() Spell(war_stomp)
+		if target.InRange(hex) and not target.Classification(worldboss) and target.RemainingCastTime() > CastTime(hex) + GCDRemaining() and target.CreatureType(Humanoid Beast) Spell(hex)
+		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
+		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
+		if not target.Classification(worldboss) and target.RemainingCastTime() > 2 and target.Distance(less 8) Spell(capacitor_totem)
+		if target.Distance(less 5) and not target.Classification(worldboss) Spell(sundering)
+		if target.InRange(wind_shear) and target.IsInterruptible() Spell(wind_shear)
 	}
+}
+
+AddFunction SaveActions
+{
+	if HealthPercent() <= 50 and InCombat() Spell(astral_shift)
+	if { Speed() == 0 or CanMove() > 0 } and HealthPercent() <= 50 and ManaPercent() > 25 and CanCast(healing_surge) and { not InCombat() or target.istargetingplayer() } Spell(healing_surge)
+	if not BuffPresent(earth_shield_buff) and HealthPercent() < 100 and target.istargetingplayer() Spell(earth_shield)
+	if target.istargetingplayer() and HealthPercent() < 50 and not target.Classification(worldboss) Spell(earth_elemental)
+}
+
+AddFunction EnhancementUseItemActions
+{
+	if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+	if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
 }
 
 ### checks
 
-AddFunction furyCheck70
+AddFunction OCPool_FB
 {
- not Talent(fury_of_air_talent) or Talent(fury_of_air_talent) and Maelstrom() > 70
+ OCPool() or Maelstrom() >= TalentPoints(overcharge_talent) * { 40 + PowerCost(frostbrand) }
 }
 
-AddFunction OCPool80
+AddFunction furyCheck_FB
 {
- not Talent(overcharge_talent) or Talent(overcharge_talent) and { Maelstrom() > 80 or SpellCooldown(lightning_bolt_enhancement) > GCD() }
+ Maelstrom() >= TalentPoints(fury_of_air_talent) * { 6 + PowerCost(frostbrand) }
 }
 
-AddFunction OCPool60
+AddFunction freezerburn_enabled
 {
- not Talent(overcharge_talent) or Talent(overcharge_talent) and { Maelstrom() > 60 or SpellCooldown(lightning_bolt_enhancement) > GCD() }
+ Talent(hot_hand_talent) and Talent(hailstorm_talent) and HasAzeriteTrait(primal_primer_trait)
 }
 
-AddFunction heartEquipped
+AddFunction OCPool_SS
 {
- HasEquippedItem(151819)
+ OCPool() or Maelstrom() >= TalentPoints(overcharge_talent) * { 40 + PowerCost(stormstrike) }
 }
 
-AddFunction overcharge
+AddFunction OCPool_LL
 {
- Talent(overcharge_talent) and furyCheck45() and Maelstrom() >= 40
+ OCPool() or Maelstrom() >= TalentPoints(overcharge_talent) * { 40 + PowerCost(lava_lash) }
 }
 
-AddFunction akainuEquipped
+AddFunction cooldown_sync
 {
- HasEquippedItem(137084)
+ Talent(ascendance_talent_enhancement) and { BuffPresent(ascendance_enhancement_buff) or SpellCooldown(ascendance_enhancement) > 50 } or not Talent(ascendance_talent_enhancement) and { TotemRemaining(sprit_wolf) > 5 or SpellCooldown(feral_spirit) > 50 }
 }
 
-AddFunction OCPool70
+AddFunction furyCheck_CL
 {
- not Talent(overcharge_talent) or Talent(overcharge_talent) and { Maelstrom() > 70 or SpellCooldown(lightning_bolt_enhancement) > GCD() }
+ Maelstrom() >= TalentPoints(fury_of_air_talent) * { 6 + PowerCost(crash_lightning) }
 }
 
-AddFunction stormTempests
+AddFunction CLPool_LL
 {
- HasEquippedItem(137103) and not target.DebuffPresent(storm_tempests_debuff)
+ Enemies(tagged=1) == 1 or Maelstrom() >= PowerCost(crash_lightning) + PowerCost(lava_lash)
 }
 
-AddFunction furyCheck80
+AddFunction CLPool_SS
 {
- not Talent(fury_of_air_talent) or Talent(fury_of_air_talent) and Maelstrom() > 80
+ Enemies(tagged=1) == 1 or Maelstrom() >= PowerCost(crash_lightning) + PowerCost(stormstrike)
 }
 
-AddFunction OCPool100
+AddFunction furyCheck_LL
 {
- not Talent(overcharge_talent) or Talent(overcharge_talent) and { Maelstrom() > 100 or SpellCooldown(lightning_bolt_enhancement) > GCD() }
+ Maelstrom() >= TalentPoints(fury_of_air_talent) * { 6 + PowerCost(lava_lash) }
 }
 
-AddFunction furyCheck45
+AddFunction OCPool_CL
 {
- not Talent(fury_of_air_talent) or Talent(fury_of_air_talent) and Maelstrom() > 45
+ OCPool() or Maelstrom() >= TalentPoints(overcharge_talent) * { 40 + PowerCost(crash_lightning) }
 }
 
-AddFunction furyCheck25
+AddFunction OCPool
 {
- not Talent(fury_of_air_talent) or Talent(fury_of_air_talent) and Maelstrom() > 25
+ Enemies(tagged=1) > 1 or SpellCooldown(lightning_bolt_enhancement) >= 2 * GCD()
 }
 
-AddFunction alphaWolfCheck
+AddFunction furyCheck_ES
 {
- pet.BuffRemaining(frost_wolf_alpha_wolf_buff) < 2 and pet.BuffRemaining(fiery_wolf_alpha_wolf_buff) < 2 and pet.BuffRemaining(lightning_wolf_alpha_wolf_buff) < 2 and TotemRemaining(sprit_wolf) > 4
+ Maelstrom() >= TalentPoints(fury_of_air_talent) * { 6 + PowerCost(earthen_spike) }
 }
 
-AddFunction LightningCrashNotUp
+AddFunction rockslide_enabled
 {
- not BuffPresent(lightning_crash_buff) and ArmorSetBonus(T20 2)
+ not freezerburn_enabled() and Talent(boulderfist_talent) and Talent(landslide_talent) and HasAzeriteTrait(strength_of_earth_trait)
 }
 
-AddFunction hailstormCheck
+AddFunction furyCheck_LB
 {
- Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) or not Talent(hailstorm_talent)
+ Maelstrom() >= TalentPoints(fury_of_air_talent) * { 6 + 40 }
 }
 
-AddFunction akainuAS
+AddFunction furyCheck_SS
 {
- akainuEquipped() and BuffPresent(hot_hand_buff) and not BuffPresent(frostbrand_buff)
+ Maelstrom() >= TalentPoints(fury_of_air_talent) * { 6 + PowerCost(stormstrike) }
 }
 
 ### actions.default
@@ -149,23 +168,41 @@ AddFunction EnhancementDefaultMainActions
 
   unless BuffPresent(ascendance_enhancement_buff) and EnhancementAscMainPostConditions()
   {
-   #call_action_list,name=buffs
-   EnhancementBuffsMainActions()
+   #call_action_list,name=priority
+   EnhancementPriorityMainActions()
 
-   unless EnhancementBuffsMainPostConditions()
+   unless EnhancementPriorityMainPostConditions()
    {
-    #call_action_list,name=cds
-    EnhancementCdsMainActions()
+    #call_action_list,name=maintenance,if=active_enemies<3
+    if Enemies(tagged=1) < 3 EnhancementMaintenanceMainActions()
 
-    unless EnhancementCdsMainPostConditions()
+    unless Enemies(tagged=1) < 3 and EnhancementMaintenanceMainPostConditions()
     {
-     #call_action_list,name=core
-     EnhancementCoreMainActions()
+     #call_action_list,name=cds
+     EnhancementCdsMainActions()
 
-     unless EnhancementCoreMainPostConditions()
+     unless EnhancementCdsMainPostConditions()
      {
-      #call_action_list,name=filler
-      EnhancementFillerMainActions()
+      #call_action_list,name=freezerburn_core,if=variable.freezerburn_enabled
+      if freezerburn_enabled() EnhancementFreezerburnCoreMainActions()
+
+      unless freezerburn_enabled() and EnhancementFreezerburnCoreMainPostConditions()
+      {
+       #call_action_list,name=default_core,if=!variable.freezerburn_enabled
+       if not freezerburn_enabled() EnhancementDefaultCoreMainActions()
+
+       unless not freezerburn_enabled() and EnhancementDefaultCoreMainPostConditions()
+       {
+        #call_action_list,name=maintenance,if=active_enemies>=3
+        if Enemies(tagged=1) >= 3 EnhancementMaintenanceMainActions()
+
+        unless Enemies(tagged=1) >= 3 and EnhancementMaintenanceMainPostConditions()
+        {
+         #call_action_list,name=filler
+         EnhancementFillerMainActions()
+        }
+       }
+      }
      }
     }
    }
@@ -175,27 +212,27 @@ AddFunction EnhancementDefaultMainActions
 
 AddFunction EnhancementDefaultMainPostConditions
 {
- EnhancementOpenerMainPostConditions() or BuffPresent(ascendance_enhancement_buff) and EnhancementAscMainPostConditions() or EnhancementBuffsMainPostConditions() or EnhancementCdsMainPostConditions() or EnhancementCoreMainPostConditions() or EnhancementFillerMainPostConditions()
+ EnhancementOpenerMainPostConditions() or BuffPresent(ascendance_enhancement_buff) and EnhancementAscMainPostConditions() or EnhancementPriorityMainPostConditions() or Enemies(tagged=1) < 3 and EnhancementMaintenanceMainPostConditions() or EnhancementCdsMainPostConditions() or freezerburn_enabled() and EnhancementFreezerburnCoreMainPostConditions() or not freezerburn_enabled() and EnhancementDefaultCoreMainPostConditions() or Enemies(tagged=1) >= 3 and EnhancementMaintenanceMainPostConditions() or EnhancementFillerMainPostConditions()
 }
 
 AddFunction EnhancementDefaultShortCdActions
 {
- #variable,name=hailstormCheck,value=((talent.hailstorm.enabled&!buff.frostbrand.up)|!talent.hailstorm.enabled)
- #variable,name=furyCheck80,value=(!talent.fury_of_air.enabled|(talent.fury_of_air.enabled&maelstrom>80))
- #variable,name=furyCheck70,value=(!talent.fury_of_air.enabled|(talent.fury_of_air.enabled&maelstrom>70))
- #variable,name=furyCheck45,value=(!talent.fury_of_air.enabled|(talent.fury_of_air.enabled&maelstrom>45))
- #variable,name=furyCheck25,value=(!talent.fury_of_air.enabled|(talent.fury_of_air.enabled&maelstrom>25))
- #variable,name=overcharge,value=(talent.overcharge.enabled&variable.furyCheck45&maelstrom>=40)
- #variable,name=OCPool100,value=(!talent.overcharge.enabled|(talent.overcharge.enabled&(maelstrom>100|cooldown.lightning_bolt.remains>gcd)))
- #variable,name=OCPool80,value=(!talent.overcharge.enabled|(talent.overcharge.enabled&(maelstrom>80|cooldown.lightning_bolt.remains>gcd)))
- #variable,name=OCPool70,value=(!talent.overcharge.enabled|(talent.overcharge.enabled&(maelstrom>70|cooldown.lightning_bolt.remains>gcd)))
- #variable,name=OCPool60,value=(!talent.overcharge.enabled|(talent.overcharge.enabled&(maelstrom>60|cooldown.lightning_bolt.remains>gcd)))
- #variable,name=heartEquipped,value=(equipped.151819)
- #variable,name=akainuEquipped,value=(equipped.137084)
- #variable,name=stormTempests,value=(equipped.137103&!debuff.storm_tempests.up)
- #variable,name=akainuAS,value=(variable.akainuEquipped&buff.hot_hand.react&!buff.frostbrand.up)
- #variable,name=LightningCrashNotUp,value=(!buff.lightning_crash.up&set_bonus.tier20_2pc)
- #variable,name=alphaWolfCheck,value=((pet.frost_wolf.buff.alpha_wolf.remains<2&pet.fiery_wolf.buff.alpha_wolf.remains<2&pet.lightning_wolf.buff.alpha_wolf.remains<2)&feral_spirit.remains>4)
+ #variable,name=cooldown_sync,value=(talent.ascendance.enabled&(buff.ascendance.up|cooldown.ascendance.remains>50))|(!talent.ascendance.enabled&(feral_spirit.remains>5|cooldown.feral_spirit.remains>50))
+ #variable,name=furyCheck_SS,value=maelstrom>=(talent.fury_of_air.enabled*(6+action.stormstrike.cost))
+ #variable,name=furyCheck_LL,value=maelstrom>=(talent.fury_of_air.enabled*(6+action.lava_lash.cost))
+ #variable,name=furyCheck_CL,value=maelstrom>=(talent.fury_of_air.enabled*(6+action.crash_lightning.cost))
+ #variable,name=furyCheck_FB,value=maelstrom>=(talent.fury_of_air.enabled*(6+action.frostbrand.cost))
+ #variable,name=furyCheck_ES,value=maelstrom>=(talent.fury_of_air.enabled*(6+action.earthen_spike.cost))
+ #variable,name=furyCheck_LB,value=maelstrom>=(talent.fury_of_air.enabled*(6+40))
+ #variable,name=OCPool,value=(active_enemies>1|(cooldown.lightning_bolt.remains>=2*gcd))
+ #variable,name=OCPool_SS,value=(variable.OCPool|maelstrom>=(talent.overcharge.enabled*(40+action.stormstrike.cost)))
+ #variable,name=OCPool_LL,value=(variable.OCPool|maelstrom>=(talent.overcharge.enabled*(40+action.lava_lash.cost)))
+ #variable,name=OCPool_CL,value=(variable.OCPool|maelstrom>=(talent.overcharge.enabled*(40+action.crash_lightning.cost)))
+ #variable,name=OCPool_FB,value=(variable.OCPool|maelstrom>=(talent.overcharge.enabled*(40+action.frostbrand.cost)))
+ #variable,name=CLPool_LL,value=active_enemies=1|maelstrom>=(action.crash_lightning.cost+action.lava_lash.cost)
+ #variable,name=CLPool_SS,value=active_enemies=1|maelstrom>=(action.crash_lightning.cost+action.stormstrike.cost)
+ #variable,name=freezerburn_enabled,value=(talent.hot_hand.enabled&talent.hailstorm.enabled&azerite.primal_primer.enabled)
+ #variable,name=rockslide_enabled,value=(!variable.freezerburn_enabled&(talent.boulderfist.enabled&talent.landslide.enabled&azerite.strength_of_earth.enabled))
  #auto_attack
  # EnhancementGetInMeleeRange()
  #call_action_list,name=opener
@@ -208,23 +245,41 @@ AddFunction EnhancementDefaultShortCdActions
 
   unless BuffPresent(ascendance_enhancement_buff) and EnhancementAscShortCdPostConditions()
   {
-   #call_action_list,name=buffs
-   EnhancementBuffsShortCdActions()
+   #call_action_list,name=priority
+   EnhancementPriorityShortCdActions()
 
-   unless EnhancementBuffsShortCdPostConditions()
+   unless EnhancementPriorityShortCdPostConditions()
    {
-    #call_action_list,name=cds
-    EnhancementCdsShortCdActions()
+    #call_action_list,name=maintenance,if=active_enemies<3
+    if Enemies(tagged=1) < 3 EnhancementMaintenanceShortCdActions()
 
-    unless EnhancementCdsShortCdPostConditions()
+    unless Enemies(tagged=1) < 3 and EnhancementMaintenanceShortCdPostConditions()
     {
-     #call_action_list,name=core
-     EnhancementCoreShortCdActions()
+     #call_action_list,name=cds
+     EnhancementCdsShortCdActions()
 
-     unless EnhancementCoreShortCdPostConditions()
+     unless EnhancementCdsShortCdPostConditions()
      {
-      #call_action_list,name=filler
-      EnhancementFillerShortCdActions()
+      #call_action_list,name=freezerburn_core,if=variable.freezerburn_enabled
+      if freezerburn_enabled() EnhancementFreezerburnCoreShortCdActions()
+
+      unless freezerburn_enabled() and EnhancementFreezerburnCoreShortCdPostConditions()
+      {
+       #call_action_list,name=default_core,if=!variable.freezerburn_enabled
+       if not freezerburn_enabled() EnhancementDefaultCoreShortCdActions()
+
+       unless not freezerburn_enabled() and EnhancementDefaultCoreShortCdPostConditions()
+       {
+        #call_action_list,name=maintenance,if=active_enemies>=3
+        if Enemies(tagged=1) >= 3 EnhancementMaintenanceShortCdActions()
+
+        unless Enemies(tagged=1) >= 3 and EnhancementMaintenanceShortCdPostConditions()
+        {
+         #call_action_list,name=filler
+         EnhancementFillerShortCdActions()
+        }
+       }
+      }
      }
     }
    }
@@ -234,7 +289,7 @@ AddFunction EnhancementDefaultShortCdActions
 
 AddFunction EnhancementDefaultShortCdPostConditions
 {
- EnhancementOpenerShortCdPostConditions() or BuffPresent(ascendance_enhancement_buff) and EnhancementAscShortCdPostConditions() or EnhancementBuffsShortCdPostConditions() or EnhancementCdsShortCdPostConditions() or EnhancementCoreShortCdPostConditions() or EnhancementFillerShortCdPostConditions()
+ EnhancementOpenerShortCdPostConditions() or BuffPresent(ascendance_enhancement_buff) and EnhancementAscShortCdPostConditions() or EnhancementPriorityShortCdPostConditions() or Enemies(tagged=1) < 3 and EnhancementMaintenanceShortCdPostConditions() or EnhancementCdsShortCdPostConditions() or freezerburn_enabled() and EnhancementFreezerburnCoreShortCdPostConditions() or not freezerburn_enabled() and EnhancementDefaultCoreShortCdPostConditions() or Enemies(tagged=1) >= 3 and EnhancementMaintenanceShortCdPostConditions() or EnhancementFillerShortCdPostConditions()
 }
 
 AddFunction EnhancementDefaultCdActions
@@ -242,7 +297,7 @@ AddFunction EnhancementDefaultCdActions
  #wind_shear
  # EnhancementInterruptActions()
  #use_items
- # EnhancementUseItemActions()
+ EnhancementUseItemActions()
  #call_action_list,name=opener
  EnhancementOpenerCdActions()
 
@@ -253,23 +308,41 @@ AddFunction EnhancementDefaultCdActions
 
   unless BuffPresent(ascendance_enhancement_buff) and EnhancementAscCdPostConditions()
   {
-   #call_action_list,name=buffs
-   EnhancementBuffsCdActions()
+   #call_action_list,name=priority
+   EnhancementPriorityCdActions()
 
-   unless EnhancementBuffsCdPostConditions()
+   unless EnhancementPriorityCdPostConditions()
    {
-    #call_action_list,name=cds
-    EnhancementCdsCdActions()
+    #call_action_list,name=maintenance,if=active_enemies<3
+    if Enemies(tagged=1) < 3 EnhancementMaintenanceCdActions()
 
-    unless EnhancementCdsCdPostConditions()
+    unless Enemies(tagged=1) < 3 and EnhancementMaintenanceCdPostConditions()
     {
-     #call_action_list,name=core
-     EnhancementCoreCdActions()
+     #call_action_list,name=cds
+     EnhancementCdsCdActions()
 
-     unless EnhancementCoreCdPostConditions()
+     unless EnhancementCdsCdPostConditions()
      {
-      #call_action_list,name=filler
-      EnhancementFillerCdActions()
+      #call_action_list,name=freezerburn_core,if=variable.freezerburn_enabled
+      if freezerburn_enabled() EnhancementFreezerburnCoreCdActions()
+
+      unless freezerburn_enabled() and EnhancementFreezerburnCoreCdPostConditions()
+      {
+       #call_action_list,name=default_core,if=!variable.freezerburn_enabled
+       if not freezerburn_enabled() EnhancementDefaultCoreCdActions()
+
+       unless not freezerburn_enabled() and EnhancementDefaultCoreCdPostConditions()
+       {
+        #call_action_list,name=maintenance,if=active_enemies>=3
+        if Enemies(tagged=1) >= 3 EnhancementMaintenanceCdActions()
+
+        unless Enemies(tagged=1) >= 3 and EnhancementMaintenanceCdPostConditions()
+        {
+         #call_action_list,name=filler
+         EnhancementFillerCdActions()
+        }
+       }
+      }
      }
     }
    }
@@ -279,19 +352,17 @@ AddFunction EnhancementDefaultCdActions
 
 AddFunction EnhancementDefaultCdPostConditions
 {
- EnhancementOpenerCdPostConditions() or BuffPresent(ascendance_enhancement_buff) and EnhancementAscCdPostConditions() or EnhancementBuffsCdPostConditions() or EnhancementCdsCdPostConditions() or EnhancementCoreCdPostConditions() or EnhancementFillerCdPostConditions()
+ EnhancementOpenerCdPostConditions() or BuffPresent(ascendance_enhancement_buff) and EnhancementAscCdPostConditions() or EnhancementPriorityCdPostConditions() or Enemies(tagged=1) < 3 and EnhancementMaintenanceCdPostConditions() or EnhancementCdsCdPostConditions() or freezerburn_enabled() and EnhancementFreezerburnCoreCdPostConditions() or not freezerburn_enabled() and EnhancementDefaultCoreCdPostConditions() or Enemies(tagged=1) >= 3 and EnhancementMaintenanceCdPostConditions() or EnhancementFillerCdPostConditions()
 }
 
 ### actions.asc
 
 AddFunction EnhancementAscMainActions
 {
- #earthen_spike
- Spell(earthen_spike)
- #crash_lightning,if=!buff.crash_lightning.up&active_enemies>=2
- if not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 Spell(crash_lightning)
- #windstrike,target_if=variable.stormTempests
- if stormTempests() Spell(windstrike)
+ #crash_lightning,if=!buff.crash_lightning.up&active_enemies>1&variable.furyCheck_CL
+ if not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #rockbiter,if=talent.landslide.enabled&!buff.landslide.up&charges_fractional>1.7
+ if Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) Spell(rockbiter)
  #windstrike
  Spell(windstrike)
 }
@@ -302,16 +373,11 @@ AddFunction EnhancementAscMainPostConditions
 
 AddFunction EnhancementAscShortCdActions
 {
- unless Spell(earthen_spike)
- {
-  #doom_winds,if=cooldown.strike.up
-  if not SpellCooldown(stormstrike) > 0 Spell(doom_winds)
- }
 }
 
 AddFunction EnhancementAscShortCdPostConditions
 {
- Spell(earthen_spike) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 and Spell(crash_lightning) or stormTempests() and Spell(windstrike) or Spell(windstrike)
+ not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) and Spell(rockbiter) or Spell(windstrike)
 }
 
 AddFunction EnhancementAscCdActions
@@ -320,49 +386,7 @@ AddFunction EnhancementAscCdActions
 
 AddFunction EnhancementAscCdPostConditions
 {
- Spell(earthen_spike) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 and Spell(crash_lightning) or stormTempests() and Spell(windstrike) or Spell(windstrike)
-}
-
-### actions.buffs
-
-AddFunction EnhancementBuffsMainActions
-{
- #rockbiter,if=talent.landslide.enabled&!buff.landslide.up
- if Talent(landslide_talent) and not BuffPresent(landslide_buff) Spell(rockbiter)
- #fury_of_air,if=!ticking&maelstrom>22
- if not target.DebuffPresent(fury_of_air_debuff) and Maelstrom() > 22 Spell(fury_of_air)
- #crash_lightning,if=artifact.alpha_wolf.rank&prev_gcd.1.feral_spirit
- if ArtifactTraitRank(alpha_wolf) and PreviousGCDSpell(feral_spirit) Spell(crash_lightning)
- #flametongue,if=!buff.flametongue.up
- if not BuffPresent(flametongue_buff) Spell(flametongue)
- #frostbrand,if=talent.hailstorm.enabled&!buff.frostbrand.up&variable.furyCheck45
- if Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) and furyCheck45() Spell(frostbrand)
- #flametongue,if=buff.flametongue.remains<6+gcd&cooldown.doom_winds.remains<gcd*2
- if BuffRemaining(flametongue_buff) < 6 + GCD() and SpellCooldown(doom_winds) < GCD() * 2 Spell(flametongue)
- #frostbrand,if=talent.hailstorm.enabled&buff.frostbrand.remains<6+gcd&cooldown.doom_winds.remains<gcd*2
- if Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 6 + GCD() and SpellCooldown(doom_winds) < GCD() * 2 Spell(frostbrand)
-}
-
-AddFunction EnhancementBuffsMainPostConditions
-{
-}
-
-AddFunction EnhancementBuffsShortCdActions
-{
-}
-
-AddFunction EnhancementBuffsShortCdPostConditions
-{
- Talent(landslide_talent) and not BuffPresent(landslide_buff) and Spell(rockbiter) or not target.DebuffPresent(fury_of_air_debuff) and Maelstrom() > 22 and Spell(fury_of_air) or ArtifactTraitRank(alpha_wolf) and PreviousGCDSpell(feral_spirit) and Spell(crash_lightning) or not BuffPresent(flametongue_buff) and Spell(flametongue) or Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) and furyCheck45() and Spell(frostbrand) or BuffRemaining(flametongue_buff) < 6 + GCD() and SpellCooldown(doom_winds) < GCD() * 2 and Spell(flametongue) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 6 + GCD() and SpellCooldown(doom_winds) < GCD() * 2 and Spell(frostbrand)
-}
-
-AddFunction EnhancementBuffsCdActions
-{
-}
-
-AddFunction EnhancementBuffsCdPostConditions
-{
- Talent(landslide_talent) and not BuffPresent(landslide_buff) and Spell(rockbiter) or not target.DebuffPresent(fury_of_air_debuff) and Maelstrom() > 22 and Spell(fury_of_air) or ArtifactTraitRank(alpha_wolf) and PreviousGCDSpell(feral_spirit) and Spell(crash_lightning) or not BuffPresent(flametongue_buff) and Spell(flametongue) or Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) and furyCheck45() and Spell(frostbrand) or BuffRemaining(flametongue_buff) < 6 + GCD() and SpellCooldown(doom_winds) < GCD() * 2 and Spell(flametongue) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 6 + GCD() and SpellCooldown(doom_winds) < GCD() * 2 and Spell(frostbrand)
+ not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) and Spell(rockbiter) or Spell(windstrike)
 }
 
 ### actions.cds
@@ -377,8 +401,6 @@ AddFunction EnhancementCdsMainPostConditions
 
 AddFunction EnhancementCdsShortCdActions
 {
- #doom_winds,if=cooldown.ascendance.remains>6|talent.boulderfist.enabled|debuff.earthen_spike.up
- if SpellCooldown(ascendance_enhancement) > 6 or Talent(boulderfist_talent) or target.DebuffPresent(earthen_spike_debuff) Spell(doom_winds)
 }
 
 AddFunction EnhancementCdsShortCdPostConditions
@@ -387,113 +409,92 @@ AddFunction EnhancementCdsShortCdPostConditions
 
 AddFunction EnhancementCdsCdActions
 {
- #bloodlust,if=target.health.pct<25|time>0.500
- # if target.HealthPercent() < 25 or TimeInCombat() > 0.5 EnhancementBloodlust()
- #berserking,if=buff.ascendance.up|(cooldown.doom_winds.up)|level<100
- if BuffPresent(ascendance_enhancement_buff) or not SpellCooldown(doom_winds) > 0 or Level() < 100 Spell(berserking)
- #blood_fury,if=buff.ascendance.up|(feral_spirit.remains>5)|level<100
- if BuffPresent(ascendance_enhancement_buff) or TotemRemaining(sprit_wolf) > 5 or Level() < 100 Spell(blood_fury_apsp)
- #potion,if=buff.ascendance.up|(!talent.ascendance.enabled&!variable.heartEquipped&feral_spirit.remains>5)|target.time_to_die<=60
- # if { BuffPresent(ascendance_enhancement_buff) or not Talent(ascendance_talent) and not heartEquipped() and TotemRemaining(sprit_wolf) > 5 or target.TimeToDie() <= 60 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ #bloodlust,if=azerite.ancestral_resonance.enabled
+ # if HasAzeriteTrait(ancestral_resonance_trait) EnhancementBloodlust()
+ #berserking,if=variable.cooldown_sync
+ if cooldown_sync() Spell(berserking)
+ #blood_fury,if=variable.cooldown_sync
+ if cooldown_sync() Spell(blood_fury_apsp)
+ #fireblood,if=variable.cooldown_sync
+ if cooldown_sync() Spell(fireblood)
+ #ancestral_call,if=variable.cooldown_sync
+ if cooldown_sync() Spell(ancestral_call)
+ #potion,if=buff.ascendance.up|!talent.ascendance.enabled&feral_spirit.remains>5|target.time_to_die<=60
+ # if { BuffPresent(ascendance_enhancement_buff) or not Talent(ascendance_talent_enhancement) and TotemRemaining(sprit_wolf) > 5 or target.TimeToDie() <= 60 } and CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_agility usable=1)
  #feral_spirit
  Spell(feral_spirit)
- #ascendance,if=(cooldown.strike.remains>0)&buff.ascendance.down
- if SpellCooldown(stormstrike) > 0 and BuffExpires(ascendance_enhancement_buff) and BuffExpires(ascendance_enhancement_buff) Spell(ascendance_enhancement)
+ #ascendance,if=cooldown.strike.remains>0
+ if SpellCooldown(windstrike) > 0 and BuffExpires(ascendance_enhancement_buff) Spell(ascendance_enhancement)
+ #earth_elemental
+ Spell(earth_elemental)
 }
 
 AddFunction EnhancementCdsCdPostConditions
 {
 }
 
-### actions.core
+### actions.default_core
 
-AddFunction EnhancementCoreMainActions
+AddFunction EnhancementDefaultCoreMainActions
 {
- #earthen_spike,if=variable.furyCheck25
- if furyCheck25() Spell(earthen_spike)
- #crash_lightning,if=!buff.crash_lightning.up&active_enemies>=2
- if not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 Spell(crash_lightning)
- #crash_lightning,if=active_enemies>=8|(active_enemies>=6&talent.crashing_storm.enabled)
- if Enemies(tagged=1) >= 8 or Enemies(tagged=1) >= 6 and Talent(crashing_storm_talent) Spell(crash_lightning)
- #rockbiter,if=buff.force_of_the_mountain.up&charges_fractional>1.7&active_enemies<=4
- if BuffPresent(force_of_the_mountain_buff) and Charges(rockbiter count=0) > 1.7 and Enemies(tagged=1) <= 4 Spell(rockbiter)
- #stormstrike,target_if=variable.stormTempests
- if stormTempests() Spell(stormstrike)
- #stormstrike,if=buff.stormbringer.up&variable.furyCheck25
- if BuffPresent(stormbringer_buff) and furyCheck25() Spell(stormstrike)
- #lightning_bolt,if=variable.overcharge&debuff.exposed_elements.up
- if overcharge() and target.DebuffPresent(exposed_elements_debuff) Spell(lightning_bolt_enhancement)
- #crash_lightning,if=active_enemies>=4|(active_enemies>=2&talent.crashing_storm.enabled)
- if Enemies(tagged=1) >= 4 or Enemies(tagged=1) >= 2 and Talent(crashing_storm_talent) Spell(crash_lightning)
- #rockbiter,if=buff.force_of_the_mountain.up
- if BuffPresent(force_of_the_mountain_buff) Spell(rockbiter)
- #lava_lash,if=(buff.hot_hand.react&((variable.akainuEquipped&buff.frostbrand.up)|(!variable.akainuEquipped)))
- if BuffPresent(hot_hand_buff) and { akainuEquipped() and BuffPresent(frostbrand_buff) or not akainuEquipped() } Spell(lava_lash)
- #lava_lash,if=(maelstrom>=50&variable.OCPool70&variable.furyCheck80&debuff.exposed_elements.up&debuff.lashing_flames.stack>90)
- if Maelstrom() >= 50 and OCPool70() and furyCheck80() and target.DebuffPresent(exposed_elements_debuff) and target.DebuffStacks(lashing_flames_debuff) > 90 Spell(lava_lash)
- #lightning_bolt,if=variable.overcharge
- if overcharge() Spell(lightning_bolt_enhancement)
- #stormstrike,if=variable.furyCheck45&(variable.OCPool80|buff.doom_winds.up)
- if furyCheck45() and { OCPool80() or BuffPresent(doom_winds_buff) } Spell(stormstrike)
- #frostbrand,if=variable.akainuAS
- if akainuAS() Spell(frostbrand)
- #sundering,if=active_enemies>=3
- if Enemies(tagged=1) >= 3 Spell(sundering)
- #crash_lightning,if=active_enemies>=3|variable.LightningCrashNotUp|variable.alphaWolfCheck
- if Enemies(tagged=1) >= 3 or LightningCrashNotUp() or alphaWolfCheck() Spell(crash_lightning)
+ #earthen_spike,if=variable.furyCheck_ES
+ if furyCheck_ES() and target.InRange(earthen_spike) Spell(earthen_spike)
+ #stormstrike,cycle_targets=1,if=active_enemies>1&azerite.lightning_conduit.enabled&!debuff.lightning_conduit.up&variable.furyCheck_SS
+ if Enemies(tagged=1) > 1 and HasAzeriteTrait(lightning_conduit_trait) and not target.DebuffPresent(lightning_conduit_debuff) and furyCheck_SS() and target.InRange(stormstrike) Spell(stormstrike)
+ #stormstrike,if=buff.stormbringer.up|(active_enemies>1&buff.gathering_storms.up&variable.furyCheck_SS)
+ if { BuffPresent(stormbringer_buff) or Enemies(tagged=1) > 1 and BuffPresent(gathering_storms_buff) and furyCheck_SS() } and target.InRange(stormstrike) Spell(stormstrike)
+ #crash_lightning,if=active_enemies>=3&variable.furyCheck_CL
+ if Enemies(tagged=1) >= 3 and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #lightning_bolt,if=talent.overcharge.enabled&active_enemies=1&variable.furyCheck_LB&maelstrom>=40
+ if Talent(overcharge_talent) and Enemies(tagged=1) == 1 and furyCheck_LB() and Maelstrom() >= 40 Spell(lightning_bolt_enhancement)
+ #stormstrike,if=variable.OCPool_SS&variable.furyCheck_SS
+ if OCPool_SS() and furyCheck_SS() and target.InRange(stormstrike) Spell(stormstrike)
 }
 
-AddFunction EnhancementCoreMainPostConditions
+AddFunction EnhancementDefaultCoreMainPostConditions
 {
 }
 
-AddFunction EnhancementCoreShortCdActions
-{
- unless furyCheck25() and Spell(earthen_spike) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 and Spell(crash_lightning)
- {
-  #windsong
-  Spell(windsong)
- }
-}
-
-AddFunction EnhancementCoreShortCdPostConditions
-{
- furyCheck25() and Spell(earthen_spike) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 and Spell(crash_lightning) or { Enemies(tagged=1) >= 8 or Enemies(tagged=1) >= 6 and Talent(crashing_storm_talent) } and Spell(crash_lightning) or BuffPresent(force_of_the_mountain_buff) and Charges(rockbiter count=0) > 1.7 and Enemies(tagged=1) <= 4 and Spell(rockbiter) or stormTempests() and Spell(stormstrike) or BuffPresent(stormbringer_buff) and furyCheck25() and Spell(stormstrike) or overcharge() and target.DebuffPresent(exposed_elements_debuff) and Spell(lightning_bolt_enhancement) or { Enemies(tagged=1) >= 4 or Enemies(tagged=1) >= 2 and Talent(crashing_storm_talent) } and Spell(crash_lightning) or BuffPresent(force_of_the_mountain_buff) and Spell(rockbiter) or BuffPresent(hot_hand_buff) and { akainuEquipped() and BuffPresent(frostbrand_buff) or not akainuEquipped() } and Spell(lava_lash) or Maelstrom() >= 50 and OCPool70() and furyCheck80() and target.DebuffPresent(exposed_elements_debuff) and target.DebuffStacks(lashing_flames_debuff) > 90 and Spell(lava_lash) or overcharge() and Spell(lightning_bolt_enhancement) or furyCheck45() and { OCPool80() or BuffPresent(doom_winds_buff) } and Spell(stormstrike) or akainuAS() and Spell(frostbrand) or Enemies(tagged=1) >= 3 and Spell(sundering) or { Enemies(tagged=1) >= 3 or LightningCrashNotUp() or alphaWolfCheck() } and Spell(crash_lightning)
-}
-
-AddFunction EnhancementCoreCdActions
+AddFunction EnhancementDefaultCoreShortCdActions
 {
 }
 
-AddFunction EnhancementCoreCdPostConditions
+AddFunction EnhancementDefaultCoreShortCdPostConditions
 {
- furyCheck25() and Spell(earthen_spike) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) >= 2 and Spell(crash_lightning) or Spell(windsong) or { Enemies(tagged=1) >= 8 or Enemies(tagged=1) >= 6 and Talent(crashing_storm_talent) } and Spell(crash_lightning) or BuffPresent(force_of_the_mountain_buff) and Charges(rockbiter count=0) > 1.7 and Enemies(tagged=1) <= 4 and Spell(rockbiter) or stormTempests() and Spell(stormstrike) or BuffPresent(stormbringer_buff) and furyCheck25() and Spell(stormstrike) or overcharge() and target.DebuffPresent(exposed_elements_debuff) and Spell(lightning_bolt_enhancement) or { Enemies(tagged=1) >= 4 or Enemies(tagged=1) >= 2 and Talent(crashing_storm_talent) } and Spell(crash_lightning) or BuffPresent(force_of_the_mountain_buff) and Spell(rockbiter) or BuffPresent(hot_hand_buff) and { akainuEquipped() and BuffPresent(frostbrand_buff) or not akainuEquipped() } and Spell(lava_lash) or Maelstrom() >= 50 and OCPool70() and furyCheck80() and target.DebuffPresent(exposed_elements_debuff) and target.DebuffStacks(lashing_flames_debuff) > 90 and Spell(lava_lash) or overcharge() and Spell(lightning_bolt_enhancement) or furyCheck45() and { OCPool80() or BuffPresent(doom_winds_buff) } and Spell(stormstrike) or akainuAS() and Spell(frostbrand) or Enemies(tagged=1) >= 3 and Spell(sundering) or { Enemies(tagged=1) >= 3 or LightningCrashNotUp() or alphaWolfCheck() } and Spell(crash_lightning)
+ furyCheck_ES() and target.InRange(earthen_spike) and Spell(earthen_spike) or Enemies(tagged=1) > 1 and HasAzeriteTrait(lightning_conduit_trait) and not target.DebuffPresent(lightning_conduit_debuff) and furyCheck_SS() and target.InRange(stormstrike) and Spell(stormstrike) or { BuffPresent(stormbringer_buff) or Enemies(tagged=1) > 1 and BuffPresent(gathering_storms_buff) and furyCheck_SS() } and target.InRange(stormstrike) and Spell(stormstrike) or Enemies(tagged=1) >= 3 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Talent(overcharge_talent) and Enemies(tagged=1) == 1 and furyCheck_LB() and Maelstrom() >= 40 and Spell(lightning_bolt_enhancement) or OCPool_SS() and furyCheck_SS() and target.InRange(stormstrike) and Spell(stormstrike)
+}
+
+AddFunction EnhancementDefaultCoreCdActions
+{
+}
+
+AddFunction EnhancementDefaultCoreCdPostConditions
+{
+ furyCheck_ES() and target.InRange(earthen_spike) and Spell(earthen_spike) or Enemies(tagged=1) > 1 and HasAzeriteTrait(lightning_conduit_trait) and not target.DebuffPresent(lightning_conduit_debuff) and furyCheck_SS() and target.InRange(stormstrike) and Spell(stormstrike) or { BuffPresent(stormbringer_buff) or Enemies(tagged=1) > 1 and BuffPresent(gathering_storms_buff) and furyCheck_SS() } and target.InRange(stormstrike) and Spell(stormstrike) or Enemies(tagged=1) >= 3 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Talent(overcharge_talent) and Enemies(tagged=1) == 1 and furyCheck_LB() and Maelstrom() >= 40 and Spell(lightning_bolt_enhancement) or OCPool_SS() and furyCheck_SS() and target.InRange(stormstrike) and Spell(stormstrike)
 }
 
 ### actions.filler
 
 AddFunction EnhancementFillerMainActions
 {
- #rockbiter,if=maelstrom<120&charges_fractional>1.7
- if Maelstrom() < 120 and Charges(rockbiter count=0) > 1.7 Spell(rockbiter)
- #flametongue,if=buff.flametongue.remains<4.8
- if BuffRemaining(flametongue_buff) < 4.8 Spell(flametongue)
- #crash_lightning,if=(talent.crashing_storm.enabled|active_enemies>=2)&debuff.earthen_spike.up&maelstrom>=40&variable.OCPool80
- if { Talent(crashing_storm_talent) or Enemies(tagged=1) >= 2 } and target.DebuffPresent(earthen_spike_debuff) and Maelstrom() >= 40 and OCPool80() Spell(crash_lightning)
- #frostbrand,if=talent.hailstorm.enabled&buff.frostbrand.remains<4.8&maelstrom>40
- if Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 and Maelstrom() > 40 Spell(frostbrand)
- #frostbrand,if=variable.akainuEquipped&!buff.frostbrand.up&maelstrom>=75
- if akainuEquipped() and not BuffPresent(frostbrand_buff) and Maelstrom() >= 75 Spell(frostbrand)
  #sundering
- Spell(sundering)
- #lava_lash,if=maelstrom>=50&variable.OCPool100&variable.furyCheck70
- if Maelstrom() >= 50 and OCPool100() and furyCheck70() Spell(lava_lash)
+ if target.Distance(less 8) Spell(sundering)
+ #crash_lightning,if=talent.forceful_winds.enabled&active_enemies>1&variable.furyCheck_CL
+ if Talent(forceful_winds_talent) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #lava_lash,if=!azerite.primal_primer.enabled&talent.hot_hand.enabled&buff.hot_hand.react
+ if not HasAzeriteTrait(primal_primer_trait) and Talent(hot_hand_talent) and BuffPresent(hot_hand_buff) and target.InRange(lava_lash) Spell(lava_lash)
+ #crash_lightning,if=active_enemies>1&variable.furyCheck_CL
+ if Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #rockbiter,if=maelstrom<70&!buff.strength_of_earth.up
+ if Maelstrom() < 70 and not BuffPresent(strength_of_earth_buff) and target.InRange(rockbiter) Spell(rockbiter)
+ #crash_lightning,if=talent.crashing_storm.enabled&variable.OCPool_CL
+ if Talent(crashing_storm_talent) and OCPool_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #lava_lash,if=variable.OCPool_LL&variable.furyCheck_LL
+ if OCPool_LL() and furyCheck_LL() and target.InRange(lava_lash) Spell(lava_lash)
  #rockbiter
- Spell(rockbiter)
- #crash_lightning,if=(maelstrom>=45|talent.crashing_storm.enabled|active_enemies>=2)&variable.OCPool80
- if { Maelstrom() >= 45 or Talent(crashing_storm_talent) or Enemies(tagged=1) >= 2 } and OCPool80() Spell(crash_lightning)
- #flametongue
- Spell(flametongue)
+ if target.InRange(rockbiter) Spell(rockbiter)
+ #frostbrand,if=talent.hailstorm.enabled&buff.frostbrand.remains<4.8+gcd&variable.furyCheck_FB
+ if Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 + GCD() and furyCheck_FB() and target.InRange(frostbrand) Spell(frostbrand)
 }
 
 AddFunction EnhancementFillerMainPostConditions
@@ -502,11 +503,22 @@ AddFunction EnhancementFillerMainPostConditions
 
 AddFunction EnhancementFillerShortCdActions
 {
+ unless target.Distance(less 8) and Spell(sundering) or Talent(forceful_winds_talent) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning)
+ {
+  #flametongue,if=talent.searing_assault.enabled
+  if Talent(searing_assault_talent) and target.InRange(flametongue) Spell(flametongue)
+
+  unless not HasAzeriteTrait(primal_primer_trait) and Talent(hot_hand_talent) and BuffPresent(hot_hand_buff) and target.InRange(lava_lash) and Spell(lava_lash) or Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Maelstrom() < 70 and not BuffPresent(strength_of_earth_buff) and target.InRange(rockbiter) and Spell(rockbiter) or Talent(crashing_storm_talent) and OCPool_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or OCPool_LL() and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash) or target.InRange(rockbiter) and Spell(rockbiter) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 + GCD() and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand)
+  {
+   #flametongue
+   if target.InRange(flametongue) Spell(flametongue)
+  }
+ }
 }
 
 AddFunction EnhancementFillerShortCdPostConditions
 {
- Maelstrom() < 120 and Charges(rockbiter count=0) > 1.7 and Spell(rockbiter) or BuffRemaining(flametongue_buff) < 4.8 and Spell(flametongue) or { Talent(crashing_storm_talent) or Enemies(tagged=1) >= 2 } and target.DebuffPresent(earthen_spike_debuff) and Maelstrom() >= 40 and OCPool80() and Spell(crash_lightning) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 and Maelstrom() > 40 and Spell(frostbrand) or akainuEquipped() and not BuffPresent(frostbrand_buff) and Maelstrom() >= 75 and Spell(frostbrand) or Spell(sundering) or Maelstrom() >= 50 and OCPool100() and furyCheck70() and Spell(lava_lash) or Spell(rockbiter) or { Maelstrom() >= 45 or Talent(crashing_storm_talent) or Enemies(tagged=1) >= 2 } and OCPool80() and Spell(crash_lightning) or Spell(flametongue)
+ target.Distance(less 8) and Spell(sundering) or Talent(forceful_winds_talent) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or not HasAzeriteTrait(primal_primer_trait) and Talent(hot_hand_talent) and BuffPresent(hot_hand_buff) and target.InRange(lava_lash) and Spell(lava_lash) or Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Maelstrom() < 70 and not BuffPresent(strength_of_earth_buff) and target.InRange(rockbiter) and Spell(rockbiter) or Talent(crashing_storm_talent) and OCPool_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or OCPool_LL() and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash) or target.InRange(rockbiter) and Spell(rockbiter) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 + GCD() and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand)
 }
 
 AddFunction EnhancementFillerCdActions
@@ -515,7 +527,85 @@ AddFunction EnhancementFillerCdActions
 
 AddFunction EnhancementFillerCdPostConditions
 {
- Maelstrom() < 120 and Charges(rockbiter count=0) > 1.7 and Spell(rockbiter) or BuffRemaining(flametongue_buff) < 4.8 and Spell(flametongue) or { Talent(crashing_storm_talent) or Enemies(tagged=1) >= 2 } and target.DebuffPresent(earthen_spike_debuff) and Maelstrom() >= 40 and OCPool80() and Spell(crash_lightning) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 and Maelstrom() > 40 and Spell(frostbrand) or akainuEquipped() and not BuffPresent(frostbrand_buff) and Maelstrom() >= 75 and Spell(frostbrand) or Spell(sundering) or Maelstrom() >= 50 and OCPool100() and furyCheck70() and Spell(lava_lash) or Spell(rockbiter) or { Maelstrom() >= 45 or Talent(crashing_storm_talent) or Enemies(tagged=1) >= 2 } and OCPool80() and Spell(crash_lightning) or Spell(flametongue)
+ target.Distance(less 8) and Spell(sundering) or Talent(forceful_winds_talent) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or not HasAzeriteTrait(primal_primer_trait) and Talent(hot_hand_talent) and BuffPresent(hot_hand_buff) and target.InRange(lava_lash) and Spell(lava_lash) or Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Maelstrom() < 70 and not BuffPresent(strength_of_earth_buff) and target.InRange(rockbiter) and Spell(rockbiter) or Talent(crashing_storm_talent) and OCPool_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or OCPool_LL() and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash) or target.InRange(rockbiter) and Spell(rockbiter) or Talent(hailstorm_talent) and BuffRemaining(frostbrand_buff) < 4.8 + GCD() and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand)
+}
+
+### actions.freezerburn_core
+
+AddFunction EnhancementFreezerburnCoreMainActions
+{
+ #lava_lash,target_if=max:debuff.primal_primer.stack,if=azerite.primal_primer.rank>=2&debuff.primal_primer.stack=10&variable.furyCheck_LL&variable.CLPool_LL
+ if AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and furyCheck_LL() and CLPool_LL() and target.InRange(lava_lash) Spell(lava_lash)
+ #earthen_spike,if=variable.furyCheck_ES
+ if furyCheck_ES() and target.InRange(earthen_spike) Spell(earthen_spike)
+ #stormstrike,cycle_targets=1,if=active_enemies>1&azerite.lightning_conduit.enabled&!debuff.lightning_conduit.up&variable.furyCheck_SS
+ if Enemies(tagged=1) > 1 and HasAzeriteTrait(lightning_conduit_trait) and not target.DebuffPresent(lightning_conduit_debuff) and furyCheck_SS() and target.InRange(stormstrike) Spell(stormstrike)
+ #stormstrike,if=buff.stormbringer.up|(active_enemies>1&buff.gathering_storms.up&variable.furyCheck_SS)
+ if { BuffPresent(stormbringer_buff) or Enemies(tagged=1) > 1 and BuffPresent(gathering_storms_buff) and furyCheck_SS() } and target.InRange(stormstrike) Spell(stormstrike)
+ #crash_lightning,if=active_enemies>=3&variable.furyCheck_CL
+ if Enemies(tagged=1) >= 3 and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #lightning_bolt,if=talent.overcharge.enabled&active_enemies=1&variable.furyCheck_LB&maelstrom>=40
+ if Talent(overcharge_talent) and Enemies(tagged=1) == 1 and furyCheck_LB() and Maelstrom() >= 40 Spell(lightning_bolt_enhancement)
+ #lava_lash,if=azerite.primal_primer.rank>=2&debuff.primal_primer.stack>7&variable.furyCheck_LL&variable.CLPool_LL
+ if AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) > 7 and furyCheck_LL() and CLPool_LL() and target.InRange(lava_lash) Spell(lava_lash)
+ #stormstrike,if=variable.OCPool_SS&variable.furyCheck_SS&variable.CLPool_SS
+ if OCPool_SS() and furyCheck_SS() and CLPool_SS() and target.InRange(stormstrike) Spell(stormstrike)
+ #lava_lash,if=debuff.primal_primer.stack=10&variable.furyCheck_LL
+ if target.DebuffStacks(primal_primer) == 10 and furyCheck_LL() and target.InRange(lava_lash) Spell(lava_lash)
+}
+
+AddFunction EnhancementFreezerburnCoreMainPostConditions
+{
+}
+
+AddFunction EnhancementFreezerburnCoreShortCdActions
+{
+}
+
+AddFunction EnhancementFreezerburnCoreShortCdPostConditions
+{
+ AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and furyCheck_LL() and CLPool_LL() and target.InRange(lava_lash) and Spell(lava_lash) or furyCheck_ES() and target.InRange(earthen_spike) and Spell(earthen_spike) or Enemies(tagged=1) > 1 and HasAzeriteTrait(lightning_conduit_trait) and not target.DebuffPresent(lightning_conduit_debuff) and furyCheck_SS() and target.InRange(stormstrike) and Spell(stormstrike) or { BuffPresent(stormbringer_buff) or Enemies(tagged=1) > 1 and BuffPresent(gathering_storms_buff) and furyCheck_SS() } and target.InRange(stormstrike) and Spell(stormstrike) or Enemies(tagged=1) >= 3 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Talent(overcharge_talent) and Enemies(tagged=1) == 1 and furyCheck_LB() and Maelstrom() >= 40 and Spell(lightning_bolt_enhancement) or AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) > 7 and furyCheck_LL() and CLPool_LL() and target.InRange(lava_lash) and Spell(lava_lash) or OCPool_SS() and furyCheck_SS() and CLPool_SS() and target.InRange(stormstrike) and Spell(stormstrike) or target.DebuffStacks(primal_primer) == 10 and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash)
+}
+
+AddFunction EnhancementFreezerburnCoreCdActions
+{
+}
+
+AddFunction EnhancementFreezerburnCoreCdPostConditions
+{
+ AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and furyCheck_LL() and CLPool_LL() and target.InRange(lava_lash) and Spell(lava_lash) or furyCheck_ES() and target.InRange(earthen_spike) and Spell(earthen_spike) or Enemies(tagged=1) > 1 and HasAzeriteTrait(lightning_conduit_trait) and not target.DebuffPresent(lightning_conduit_debuff) and furyCheck_SS() and target.InRange(stormstrike) and Spell(stormstrike) or { BuffPresent(stormbringer_buff) or Enemies(tagged=1) > 1 and BuffPresent(gathering_storms_buff) and furyCheck_SS() } and target.InRange(stormstrike) and Spell(stormstrike) or Enemies(tagged=1) >= 3 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or Talent(overcharge_talent) and Enemies(tagged=1) == 1 and furyCheck_LB() and Maelstrom() >= 40 and Spell(lightning_bolt_enhancement) or AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) > 7 and furyCheck_LL() and CLPool_LL() and target.InRange(lava_lash) and Spell(lava_lash) or OCPool_SS() and furyCheck_SS() and CLPool_SS() and target.InRange(stormstrike) and Spell(stormstrike) or target.DebuffStacks(primal_primer) == 10 and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash)
+}
+
+### actions.maintenance
+
+AddFunction EnhancementMaintenanceMainActions
+{
+ #frostbrand,if=talent.hailstorm.enabled&!buff.frostbrand.up&variable.furyCheck_FB
+ if Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) and furyCheck_FB() and target.InRange(frostbrand) Spell(frostbrand)
+}
+
+AddFunction EnhancementMaintenanceMainPostConditions
+{
+}
+
+AddFunction EnhancementMaintenanceShortCdActions
+{
+ #flametongue,if=!buff.flametongue.up
+ if not BuffPresent(flametongue_buff) and target.InRange(flametongue) Spell(flametongue)
+}
+
+AddFunction EnhancementMaintenanceShortCdPostConditions
+{
+ Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand)
+}
+
+AddFunction EnhancementMaintenanceCdActions
+{
+}
+
+AddFunction EnhancementMaintenanceCdPostConditions
+{
+ Talent(hailstorm_talent) and not BuffPresent(frostbrand_buff) and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand)
 }
 
 ### actions.opener
@@ -523,7 +613,7 @@ AddFunction EnhancementFillerCdPostConditions
 AddFunction EnhancementOpenerMainActions
 {
  #rockbiter,if=maelstrom<15&time<gcd
- if Maelstrom() < 15 and TimeInCombat() < GCD() Spell(rockbiter)
+ if Maelstrom() < 15 and TimeInCombat() < GCD() and target.InRange(rockbiter) Spell(rockbiter)
 }
 
 AddFunction EnhancementOpenerMainPostConditions
@@ -536,7 +626,7 @@ AddFunction EnhancementOpenerShortCdActions
 
 AddFunction EnhancementOpenerShortCdPostConditions
 {
- Maelstrom() < 15 and TimeInCombat() < GCD() and Spell(rockbiter)
+ Maelstrom() < 15 and TimeInCombat() < GCD() and target.InRange(rockbiter) and Spell(rockbiter)
 }
 
 AddFunction EnhancementOpenerCdActions
@@ -545,7 +635,7 @@ AddFunction EnhancementOpenerCdActions
 
 AddFunction EnhancementOpenerCdPostConditions
 {
- Maelstrom() < 15 and TimeInCombat() < GCD() and Spell(rockbiter)
+ Maelstrom() < 15 and TimeInCombat() < GCD() and target.InRange(rockbiter) and Spell(rockbiter)
 }
 
 ### actions.precombat
@@ -576,12 +666,65 @@ AddFunction EnhancementPrecombatCdActions
  #augmentation
  #snapshot_stats
  #potion
- # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(prolonged_power_potion usable=1)
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(battle_potion_of_agility usable=1)
 }
 
 AddFunction EnhancementPrecombatCdPostConditions
 {
  Spell(lightning_shield)
+}
+
+### actions.priority
+
+AddFunction EnhancementPriorityMainActions
+{
+ #crash_lightning,if=active_enemies>=(8-(talent.forceful_winds.enabled*3))&variable.freezerburn_enabled&variable.furyCheck_CL
+ if Enemies(tagged=1) >= 8 - TalentPoints(forceful_winds_talent) * 3 and freezerburn_enabled() and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #lava_lash,if=azerite.primal_primer.rank>=2&debuff.primal_primer.stack=10&active_enemies=1&variable.freezerburn_enabled&variable.furyCheck_LL
+ if AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and Enemies(tagged=1) == 1 and freezerburn_enabled() and furyCheck_LL() and target.InRange(lava_lash) Spell(lava_lash)
+ #crash_lightning,if=!buff.crash_lightning.up&active_enemies>1&variable.furyCheck_CL
+ if not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) Spell(crash_lightning)
+ #fury_of_air,if=!buff.fury_of_air.up&maelstrom>=20&spell_targets.fury_of_air_damage>=(1+variable.freezerburn_enabled)
+ if not BuffPresent(fury_of_air_buff) and Maelstrom() >= 20 and Enemies(tagged=1) >= 1 + freezerburn_enabled() and target.Distance(less 8) Spell(fury_of_air)
+ #fury_of_air,if=buff.fury_of_air.up&&spell_targets.fury_of_air_damage<(1+variable.freezerburn_enabled)
+ if BuffPresent(fury_of_air_buff) and Enemies(tagged=1) < 1 + freezerburn_enabled() and target.Distance(less 8) Spell(fury_of_air)
+ #totem_mastery,if=buff.resonance_totem.remains<=2*gcd
+ if TotemRemaining(totem_mastery_enhancement) <= 2 * GCD() and { InCombat() or not BuffPresent(enh_resonance_totem_buff) } Spell(totem_mastery_enhancement)
+ #sundering,if=active_enemies>=3
+ if Enemies(tagged=1) >= 3 and target.Distance(less 8) Spell(sundering)
+ #rockbiter,if=talent.landslide.enabled&!buff.landslide.up&charges_fractional>1.7
+ if Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) Spell(rockbiter)
+ #frostbrand,if=(azerite.natural_harmony.enabled&buff.natural_harmony_frost.remains<=2*gcd)&talent.hailstorm.enabled&variable.furyCheck_FB
+ if HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_frost) <= 2 * GCD() and Talent(hailstorm_talent) and furyCheck_FB() and target.InRange(frostbrand) Spell(frostbrand)
+ #rockbiter,if=(azerite.natural_harmony.enabled&buff.natural_harmony_nature.remains<=2*gcd)&maelstrom<70
+ if HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_nature) <= 2 * GCD() and Maelstrom() < 70 and target.InRange(rockbiter) Spell(rockbiter)
+}
+
+AddFunction EnhancementPriorityMainPostConditions
+{
+}
+
+AddFunction EnhancementPriorityShortCdActions
+{
+ unless Enemies(tagged=1) >= 8 - TalentPoints(forceful_winds_talent) * 3 and freezerburn_enabled() and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and Enemies(tagged=1) == 1 and freezerburn_enabled() and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or not BuffPresent(fury_of_air_buff) and Maelstrom() >= 20 and Enemies(tagged=1) >= 1 + freezerburn_enabled() and target.Distance(less 8) and Spell(fury_of_air) or BuffPresent(fury_of_air_buff) and Enemies(tagged=1) < 1 + freezerburn_enabled() and target.Distance(less 8) and Spell(fury_of_air) or TotemRemaining(totem_mastery_enhancement) <= 2 * GCD() and { InCombat() or not BuffPresent(enh_resonance_totem_buff) } and Spell(totem_mastery_enhancement) or Enemies(tagged=1) >= 3 and target.Distance(less 8) and Spell(sundering) or Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) and Spell(rockbiter) or HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_frost) <= 2 * GCD() and Talent(hailstorm_talent) and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand)
+ {
+  #flametongue,if=(azerite.natural_harmony.enabled&buff.natural_harmony_fire.remains<=2*gcd)
+  if HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_fire) <= 2 * GCD() and target.InRange(flametongue) Spell(flametongue)
+ }
+}
+
+AddFunction EnhancementPriorityShortCdPostConditions
+{
+ Enemies(tagged=1) >= 8 - TalentPoints(forceful_winds_talent) * 3 and freezerburn_enabled() and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and Enemies(tagged=1) == 1 and freezerburn_enabled() and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or not BuffPresent(fury_of_air_buff) and Maelstrom() >= 20 and Enemies(tagged=1) >= 1 + freezerburn_enabled() and target.Distance(less 8) and Spell(fury_of_air) or BuffPresent(fury_of_air_buff) and Enemies(tagged=1) < 1 + freezerburn_enabled() and target.Distance(less 8) and Spell(fury_of_air) or TotemRemaining(totem_mastery_enhancement) <= 2 * GCD() and { InCombat() or not BuffPresent(enh_resonance_totem_buff) } and Spell(totem_mastery_enhancement) or Enemies(tagged=1) >= 3 and target.Distance(less 8) and Spell(sundering) or Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) and Spell(rockbiter) or HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_frost) <= 2 * GCD() and Talent(hailstorm_talent) and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand) or HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_nature) <= 2 * GCD() and Maelstrom() < 70 and target.InRange(rockbiter) and Spell(rockbiter)
+}
+
+AddFunction EnhancementPriorityCdActions
+{
+}
+
+AddFunction EnhancementPriorityCdPostConditions
+{
+ Enemies(tagged=1) >= 8 - TalentPoints(forceful_winds_talent) * 3 and freezerburn_enabled() and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or AzeriteTraitRank(primal_primer_trait) >= 2 and target.DebuffStacks(primal_primer) == 10 and Enemies(tagged=1) == 1 and freezerburn_enabled() and furyCheck_LL() and target.InRange(lava_lash) and Spell(lava_lash) or not BuffPresent(crash_lightning_buff) and Enemies(tagged=1) > 1 and furyCheck_CL() and target.InRange(crash_lightning) and Spell(crash_lightning) or not BuffPresent(fury_of_air_buff) and Maelstrom() >= 20 and Enemies(tagged=1) >= 1 + freezerburn_enabled() and target.Distance(less 8) and Spell(fury_of_air) or BuffPresent(fury_of_air_buff) and Enemies(tagged=1) < 1 + freezerburn_enabled() and target.Distance(less 8) and Spell(fury_of_air) or TotemRemaining(totem_mastery_enhancement) <= 2 * GCD() and { InCombat() or not BuffPresent(enh_resonance_totem_buff) } and Spell(totem_mastery_enhancement) or Enemies(tagged=1) >= 3 and target.Distance(less 8) and Spell(sundering) or Talent(landslide_talent) and not BuffPresent(landslide_buff) and Charges(rockbiter count=0) > 1.7 and target.InRange(rockbiter) and Spell(rockbiter) or HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_frost) <= 2 * GCD() and Talent(hailstorm_talent) and furyCheck_FB() and target.InRange(frostbrand) and Spell(frostbrand) or HasAzeriteTrait(natural_harmony_trait) and DebuffRemaining(natural_harmony_nature) <= 2 * GCD() and Maelstrom() < 70 and target.InRange(rockbiter) and Spell(rockbiter)
 }
 ]]
 
