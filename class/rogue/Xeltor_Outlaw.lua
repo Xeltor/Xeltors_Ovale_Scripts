@@ -18,7 +18,7 @@ AddIcon specialization=outlaw help=main
 	{
 		unless target.Present() and target.Distance(less 5)
 		{
-			Spell(stealth)
+			if Speed() > 0 Spell(stealth)
 		}
 	}
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted() and not Dead()
@@ -29,9 +29,9 @@ AddIcon specialization=outlaw help=main
 	}
 
 	if InCombat() and { not target.IsFriend() or target.IsPvP() } InterruptActions()
-	if { HealthPercent() <= 25 or HealthPercent() < 70 and not InCombat() and not mounted() } and not Dead() and Energy() > 24 Spell(crimson_vial)
+	if { HealthPercent() <= 25 or HealthPercent() < 70 and not InCombat() and not mounted() } and not Dead() and Energy() > 30 Spell(crimson_vial)
 
-	if { target.InRange(sinister_strike_outlaw) or target.InRange(sinister_strike) } and HasFullControl()
+	if target.InRange(sinister_strike_outlaw) and HasFullControl()
 	{
 		# Cooldowns
 		if Boss() OutlawDefaultCdActions()

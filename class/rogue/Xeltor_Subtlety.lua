@@ -17,7 +17,7 @@ AddIcon specialization=3 help=main
 	{
 		unless target.Present() and target.Distance(less 5)
 		{
-			Spell(stealth)
+			if Speed() > 0 Spell(stealth)
 		}
 	}
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted() and not Dead()

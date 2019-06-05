@@ -15,7 +15,13 @@ Include(ovale_rogue_spells)
 AddIcon specialization=1 help=main
 {
 	# Stealth
-	if not Stealthed() and not PlayerIsResting() and not InCombat() and not mounted() and HealthPercent() > 0 Spell(stealth)
+	if not mounted() and not Stealthed() and not InCombat() and not Dead() and not PlayerIsResting()
+	{
+		unless target.Present() and target.Distance(less 5)
+		{
+			if Speed() > 0 Spell(stealth)
+		}
+	}
 	
 	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not mounted()
 	{
