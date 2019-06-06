@@ -13,7 +13,7 @@ Include(ovale_shaman_spells)
 # Enhancement
 AddIcon specialization=2 help=main
 {
-	if not mounted() and not BuffPresent(ghost_wolf) and not InCombat() and not Dead() and not PlayerIsResting()
+	if not mounted() and not BuffPresent(ghost_wolf_buff) and not InCombat() and not Dead() and not PlayerIsResting()
 	{
 		unless target.Present() and target.Distance(less 5)
 		{
