@@ -22,6 +22,7 @@ AddIcon
 	Texture(spell_shaman_hex) # Hex
 
 	# Buffs
+	Texture(spell_nature_earthelemental_totem) # Earth Elemental Totem
 	Texture(spell_shaman_feralspirit) # Feral Spirit
 	Texture(spell_nature_spiritwolf) # Ghost Wolf
 	Texture(spell_nature_healingway) # Healing Surge
