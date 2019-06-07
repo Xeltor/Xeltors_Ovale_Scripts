@@ -31,10 +31,8 @@ AddIcon specialization=2 help=main
 	# Save ass
 	if not mounted() SaveActions()
 	
-	if target.InRange(lava_lash) or { target.InRange(wind_shear) and InCombat() and { target.HealthPercent() < 100 or target.istargetingplayer() } }
+	if target.InRange(lava_lash) or target.InRange(wind_shear) and InCombat() and { target.HealthPercent() < 100 or target.istargetingplayer() }
     {
-		if InCombat() and target.istargetingplayer() and Maelstrom() >= 20 and HealthPercent() <= 75 and SpellUsable(healing_surge) Spell(healing_surge)
-	
 		# Cooldowns
 		if Boss() EnhancementDefaultCdActions()
 		
@@ -56,7 +54,7 @@ AddFunction InterruptActions
 {
 	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
-		if target.InRange(hex) and not target.Classification(worldboss) and target.RemainingCastTime() > CastTime(hex) + GCDRemaining() and target.CreatureType(Humanoid Beast) Spell(hex)
+		if target.InRange(hex) and not target.Classification(worldboss) and target.RemainingCastTime() > CastTime(hex) + GCDRemaining() and target.CreatureType(Humanoid Beast) and { Speed() == 0 or CanMove() > 0 } Spell(hex)
 		if target.Distance(less 5) and not target.Classification(worldboss) Spell(war_stomp)
 		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
 		if not target.Classification(worldboss) and target.RemainingCastTime() > 2 and target.Distance(less 8) Spell(capacitor_totem)
@@ -68,7 +66,7 @@ AddFunction InterruptActions
 AddFunction SaveActions
 {
 	if HealthPercent() <= 50 and InCombat() Spell(astral_shift)
-	if { Speed() == 0 or CanMove() > 0 } and HealthPercent() <= 50 and ManaPercent() > 25 and CanCast(healing_surge) and { not InCombat() or target.istargetingplayer() } Spell(healing_surge)
+	if { Speed() == 0 or CanMove() > 0 } and { HealthPercent() <= 50 and not target.IsPvP() or HealthPercent() <= 30 and target.IsPvP() } and ManaPercent() > 25 and CanCast(healing_surge) and { not InCombat() or target.istargetingplayer() } Spell(healing_surge)
 	if not BuffPresent(earth_shield_buff) and HealthPercent() < 100 and target.istargetingplayer() Spell(earth_shield)
 	if target.istargetingplayer() and HealthPercent() < 50 and not target.Classification(worldboss) Spell(earth_elemental)
 }
