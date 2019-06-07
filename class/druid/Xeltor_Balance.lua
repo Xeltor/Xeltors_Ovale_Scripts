@@ -9,6 +9,7 @@ Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_druid_spells)
+Include(druid_common_functions)
 
 AddIcon specialization=1 help=main
 {
@@ -52,25 +53,6 @@ AddFunction InterruptActions
   if target.InRange(mighty_bash) and not target.Classification(worldboss) Spell(mighty_bash)
   if target.InRange(solar_beam) and target.IsInterruptible() Spell(solar_beam)
  }
-}
-
-AddFunction SaveActions
-{
-	if HealthPercent() <= 50 and { not InCombat() or target.istargetingplayer() } and not target.IsFriend() Spell(swiftmend)
-	if HealthPercent() <= 50 and { not InCombat() or target.istargetingplayer() } and not target.IsFriend() and not BuffPresent(rejuvenation_buff) Spell(rejuvenation)
-	if { Speed() == 0 or CanMove() > 0 } and HealthPercent() <= 50 and { not InCombat() or target.istargetingplayer() } and not target.IsFriend() Spell(regrowth)
-}
-
-AddFunction MoveActions
-{
-	if not InCombat() and not Mounted() and not BuffPresent(travel_form) and not BuffPresent(dash) and Speed() > 0 and not InDoors() Spell(travel_form)
-	if not InCombat() and not Mounted() and not BuffPresent(cat_form) and Speed() > 0 and InDoors() Spell(cat_form)
-	
-	if BuffPresent(cat_form) and Speed() > 0 
-	{
-		Spell(prowl)
-		Spell(dash)
-	}
 }
 
 AddFunction sf_targets

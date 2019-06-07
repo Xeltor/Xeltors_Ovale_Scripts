@@ -9,6 +9,7 @@ Include(ovale_common)
 Include(ovale_trinkets_mop)
 Include(ovale_trinkets_wod)
 Include(ovale_druid_spells)
+Include(druid_common_functions)
 
 AddIcon specialization=4 help=main
 {

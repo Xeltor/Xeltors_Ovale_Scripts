@@ -3,6 +3,7 @@
 	<!-- <Script file="Hooves_Balance.lua" /> -->
 	<!-- <Script file="Hooves_Guardian.lua" /> -->
 	<!-- <Script file="Hooves_Guardian_73.lua" /> -->
+	<Script file="Druid_Common.lua" />
 	<Script file="Xeltor_Balance.lua" />
 	<Script file="Xeltor_Feral.lua" />
 	<Script file="Xeltor_Guardian.lua" />
