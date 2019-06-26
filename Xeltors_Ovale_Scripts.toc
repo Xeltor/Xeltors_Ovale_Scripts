@@ -4,7 +4,7 @@
 ## Version: 8.0.0.0
 ## Author: Xeltor
 ##
-## Interface: 80000
+## Interface: 80200
 ## X-Min-Interface: 80000
 ## Dependencies: Ovale
 
