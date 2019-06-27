@@ -27,6 +27,17 @@ AddIcon
 	
 	# Artifact
 	Texture(inv_mace_1h_artifactazshara_d_02) # Gift of the Queen
+	
+	# Heart of Azeroth Skills
+	Texture(spell_azerite_essence_15) # Concentrated Flame
+	Texture(spell_azerite_essence05) # Memory of Lucid Dreams
+	Texture(inv__azerite-explosion) # Blood of the Enemy
+	Texture(spell_azerite_essence14) # Guardian of Azeroth
+	Texture(spell_azerite_essence12) # Focused Azerite Beam
+	Texture(spell_azerite_essence04) # Purifying Blast
+	Texture(spell_azerite_essence10) # Ripple in Space
+	Texture(spell_azerite_essence03) # The Unbound Force
+	Texture(inv_misc_azerite_01) # Worldvein Resonance
 
 	# Talents
 	Texture(spell_shaman_unleashweapon_life) # Unleash Life (T1)
