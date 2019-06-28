@@ -59,10 +59,10 @@ AddFunction InterruptActions
 {
 	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
+		if target.InRange(kick) and target.IsInterruptible() Spell(kick)
 		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
 		if target.InRange(kidney_shot) and not target.Classification(worldboss) and ComboPoints() >= 1 Spell(kidney_shot)
 		if target.InRange(cheap_shot) and not target.Classification(worldboss) Spell(cheap_shot)
-		if target.InRange(kick) and target.IsInterruptible() Spell(kick)
 	}
 }
 

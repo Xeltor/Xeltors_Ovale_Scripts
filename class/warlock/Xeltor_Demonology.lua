@@ -151,7 +151,9 @@ AddFunction DemonologyDefaultShortCdActions
   if { Demons(wild_imp) < 6 or DebuffPresent(demonic_power) or Enemies(tagged=1) < 2 } and not pet.BuffPresent(pet_auto_spin) and pet.CreatureFamily(Felguard) Spell(demonic_strength)
   #call_action_list,name=nether_portal,if=talent.nether_portal.enabled&spell_targets.implosion<=2
   if Talent(nether_portal_talent) and Enemies(tagged=1) <= 2 DemonologyNetherPortalShortCdActions()
-
+  #hoa skill
+  Spell(concentrated_flame)
+  
   unless Talent(nether_portal_talent) and Enemies(tagged=1) <= 2 and DemonologyNetherPortalShortCdPostConditions()
   {
    #call_action_list,name=implosion,if=spell_targets.implosion>1

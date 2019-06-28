@@ -50,11 +50,11 @@ AddFunction InterruptActions
 {
 	if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
 	{
-		if target.InRange(gouge) and not target.Classification(worldboss) Spell(gouge)
+		if target.InRange(kick) and target.IsInterruptible() Spell(kick)
+		if target.InRange(gouge) and not target.Classification(worldboss) and target.istargetingplayer() Spell(gouge)
 		if target.InRange(quaking_palm) and not target.Classification(worldboss) Spell(quaking_palm)
 		if target.InRange(between_the_eyes) and not target.Classification(worldboss) and ComboPoints() >= 1 Spell(between_the_eyes)
 		if target.InRange(cheap_shot) and not target.Classification(worldboss) Spell(cheap_shot)
-		if target.InRange(kick) and target.IsInterruptible() Spell(kick)
 	}
 }
 
