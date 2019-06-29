@@ -51,7 +51,7 @@ AddFunction InterruptActions
 AddFunction VengeanceDefaultMainActions
 {
  #consume_magic
- if target.HasDebuffType(magic) Spell(consume_magic)
+ if target.HasDebuffType(magic) and PainDeficit() > 20 Spell(consume_magic)
  #call_action_list,name=brand,if=talent.charred_flesh.enabled
  if Talent(charred_flesh_talent) VengeanceBrandMainActions()
 
@@ -78,7 +78,7 @@ AddFunction VengeanceDefaultShortCdActions
  #auto_attack
  # VengeanceGetInMeleeRange()
 
- unless target.HasDebuffType(magic) and Spell(consume_magic)
+ unless target.HasDebuffType(magic) and PainDeficit() > 20 and Spell(consume_magic)
  {
   #call_action_list,name=brand,if=talent.charred_flesh.enabled
   if Talent(charred_flesh_talent) VengeanceBrandShortCdActions()
@@ -99,14 +99,15 @@ AddFunction VengeanceDefaultShortCdActions
 
 AddFunction VengeanceDefaultShortCdPostConditions
 {
- target.HasDebuffType(magic) and Spell(consume_magic) or Talent(charred_flesh_talent) and VengeanceBrandShortCdPostConditions() or VengeanceDefensivesShortCdPostConditions() or VengeanceNormalShortCdPostConditions()
+ target.HasDebuffType(magic) and PainDeficit() > 20 and Spell(consume_magic) or Talent(charred_flesh_talent) and VengeanceBrandShortCdPostConditions() or VengeanceDefensivesShortCdPostConditions() or VengeanceNormalShortCdPostConditions()
 }
 
 AddFunction VengeanceDefaultCdActions
 {
  # VengeanceInterruptActions()
+ if target.HasDebuffType(magic) and PainDeficit() > 15 Spell(arcane_torrent_dh)
 
- unless target.HasDebuffType(magic) and Spell(consume_magic)
+ unless target.HasDebuffType(magic) and PainDeficit() > 20 and Spell(consume_magic)
  {
   #call_action_list,name=brand,if=talent.charred_flesh.enabled
   if Talent(charred_flesh_talent) VengeanceBrandCdActions()
@@ -127,7 +128,7 @@ AddFunction VengeanceDefaultCdActions
 
 AddFunction VengeanceDefaultCdPostConditions
 {
- target.HasDebuffType(magic) and Spell(consume_magic) or Talent(charred_flesh_talent) and VengeanceBrandCdPostConditions() or VengeanceDefensivesCdPostConditions() or VengeanceNormalCdPostConditions()
+ target.HasDebuffType(magic) and PainDeficit() > 20 and Spell(consume_magic) or Talent(charred_flesh_talent) and VengeanceBrandCdPostConditions() or VengeanceDefensivesCdPostConditions() or VengeanceNormalCdPostConditions()
 }
 
 ### actions.brand
