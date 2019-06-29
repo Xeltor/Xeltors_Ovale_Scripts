@@ -42,7 +42,7 @@ AddFunction InterruptActions
   if target.IsInterruptible() and target.Distance(less 6) and not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_silence)
   if not target.Classification(worldboss) and target.Distance(less 6) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_chains)
   if not target.Classification(worldboss) and target.Distance(less 6) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_misery)
-  if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) and SpellUsable(imprison) Texture(spell_fire_felflamering)
+  if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) and SpellUsable(imprison) and not PreviousGCDSpell(imprison) Texture(spell_fire_felflamering)
  }
 }
 
