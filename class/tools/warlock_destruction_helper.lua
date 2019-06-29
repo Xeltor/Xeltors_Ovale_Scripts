@@ -42,7 +42,7 @@ AddIcon
 	# Heart of Azeroth Skills
 	Texture(spell_azerite_essence_15) # Concentrated Flame
 	Texture(spell_azerite_essence05) # Memory of Lucid Dreams
-	Texture(inv__azerite-explosion) # Blood of the Enemy
+	Texture(298277) # Blood of the Enemy
 	Texture(spell_azerite_essence14) # Guardian of Azeroth
 	Texture(spell_azerite_essence12) # Focused Azerite Beam
 	Texture(spell_azerite_essence04) # Purifying Blast

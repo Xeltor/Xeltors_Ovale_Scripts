@@ -2,97 +2,265 @@ local __Scripts = LibStub:GetLibrary("ovale/Scripts")
 local OvaleScripts = __Scripts.OvaleScripts
 
 do
-	local name = "xeltor_vengeance_functions"
-	local desc = "[Xel][7.3.5] Demon Hunter: Vengeance Functions"
+	local name = "xeltor_vengeance"
+	local desc = "[Xel][8.2] Demon Hunter: Vengeance"
 	local code = [[
-AddFunction SigilOfFlameLock
+Include(ovale_common)
+Include(ovale_trinkets_mop)
+Include(ovale_trinkets_wod)
+Include(ovale_demonhunter_spells)
+
+AddIcon specialization=2 help=main
 {
-	SpellCooldown(sigil_of_flame) > GCD() and TimeSincePreviousSpell(sigil_of_flame) > { 2 - Talent(concentrated_sigils) } and TimeSincePreviousSpell(infernal_strike) > { 1 + 2 - Talent(concentrated_sigils) } and DebuffRemainingOnAny(sigil_of_flame_debuff) < { 3 - Talent(concentrated_sigils) }
+	# Interrupt
+	if InCombat() InterruptActions()
+	
+    if target.InRange(shear) and HasFullControl()
+    {
+		# Cooldown
+		VengeanceDefaultCdActions()
+		
+		# Short Cooldown
+		VengeanceDefaultShortCdActions()
+		
+		# Main rotation
+		VengeanceDefaultMainActions()
+    }
+	
+	if InCombat() and not target.InRange(shear) and { target.HealthPercent() < 100 or targettarget.Present() }
+	{
+		#throw_glaive
+		Spell(throw_glaive_veng)
+	}
+}
+
+AddFunction InterruptActions
+{
+ if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
+ {
+  if target.InRange(disrupt) and target.IsInterruptible() Spell(disrupt)
+  if target.IsInterruptible() and target.Distance(less 6) and not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_silence)
+  if not target.Classification(worldboss) and target.Distance(less 6) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_chains)
+  if not target.Classification(worldboss) and target.Distance(less 6) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_misery)
+  if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) and SpellUsable(imprison) Texture(spell_fire_felflamering)
+ }
 }
 
 ### actions.default
 
 AddFunction VengeanceDefaultMainActions
 {
- #infernal_strike,if=!sigil_placed&!in_flight&remains-travel_time-delay<0.3*duration&artifact.fiery_demise.enabled&dot.fiery_brand.ticking
- if SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) < 0.3 * BaseDuration(infernal_strike_debuff) and HasArtifactTrait(fiery_demise) and target.DebuffPresent(fiery_brand_debuff) Spell(infernal_strike)
- #infernal_strike,if=!sigil_placed&!in_flight&remains-travel_time-delay<0.3*duration&(!artifact.fiery_demise.enabled|(max_charges-charges_fractional)*recharge_time<cooldown.fiery_brand.remains+5)&(cooldown.sigil_of_flame.remains>7|charges=2)
- if SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) < 0.3 * BaseDuration(infernal_strike_debuff) and { not HasArtifactTrait(fiery_demise) or { SpellMaxCharges(infernal_strike) - Charges(infernal_strike count=0) } * SpellChargeCooldown(infernal_strike) < SpellCooldown(fiery_brand) + 5 } and { SpellCooldown(sigil_of_flame) > 7 or Charges(infernal_strike) == 2 } Spell(infernal_strike)
- #spirit_bomb,if=soul_fragments=5|debuff.frailty.down
- if BuffStacks(soulfragment) == 5 or target.DebuffExpires(frailty_debuff) Spell(spirit_bomb)
- #soul_carver,if=dot.fiery_brand.ticking
- if target.DebuffPresent(fiery_brand_debuff) Spell(soul_carver)
- #immolation_aura,if=pain<=80
- if Pain() <= 80 Spell(immolation_aura)
- #felblade,if=pain<=70
- if Pain() <= 70 Spell(felblade)
- #soul_barrier
- Spell(soul_barrier)
- #soul_cleave,if=soul_fragments=5
- if BuffStacks(soulfragment) == 5 Spell(soul_cleave)
- #soul_cleave,if=incoming_damage_5s>=health.max*0.70
- if IncomingDamage(5) >= MaxHealth() * 0.7 Spell(soul_cleave)
- #fel_eruption
- Spell(fel_eruption)
- #sigil_of_flame,if=remains-delay<=0.3*duration
- if target.DebuffRemaining(sigil_of_flame_debuff) - 0 <= 0.3 * BaseDuration(sigil_of_flame_debuff) Spell(sigil_of_flame)
- #fracture,if=pain>=80&soul_fragments<4&incoming_damage_4s<=health.max*0.20
- if Pain() >= 80 and BuffStacks(soulfragment) < 4 and IncomingDamage(4) <= MaxHealth() * 0.2 Spell(fracture)
- #soul_cleave,if=pain>=80
- if Pain() >= 80 Spell(soul_cleave)
- #sever
- Spell(sever)
- #shear
- Spell(shear)
+ #consume_magic
+ if target.HasDebuffType(magic) Spell(consume_magic)
+ #call_action_list,name=brand,if=talent.charred_flesh.enabled
+ if Talent(charred_flesh_talent) VengeanceBrandMainActions()
+
+ unless Talent(charred_flesh_talent) and VengeanceBrandMainPostConditions()
+ {
+  #call_action_list,name=defensives
+  VengeanceDefensivesMainActions()
+
+  unless VengeanceDefensivesMainPostConditions()
+  {
+   #call_action_list,name=normal
+   VengeanceNormalMainActions()
+  }
+ }
 }
 
 AddFunction VengeanceDefaultMainPostConditions
 {
+ Talent(charred_flesh_talent) and VengeanceBrandMainPostConditions() or VengeanceDefensivesMainPostConditions() or VengeanceNormalMainPostConditions()
 }
 
 AddFunction VengeanceDefaultShortCdActions
 {
  #auto_attack
  # VengeanceGetInMeleeRange()
- #demonic_infusion,if=cooldown.demon_spikes.charges=0&pain.deficit>60
- if SpellCharges(demon_spikes) == 0 and PainDeficit() > 60 Spell(demonic_infusion)
- #demon_spikes,if=charges=2|buff.demon_spikes.down&!dot.fiery_brand.ticking&buff.metamorphosis.down
- if Charges(demon_spikes) == 2 or BuffExpires(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and BuffExpires(metamorphosis_veng_buff) Spell(demon_spikes)
 
- unless SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and HasArtifactTrait(fiery_demise) and target.DebuffPresent(fiery_brand_debuff) and Spell(infernal_strike) or SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and { not HasArtifactTrait(fiery_demise) or { SpellMaxCharges(infernal_strike) - Charges(infernal_strike count=0) } * SpellChargeCooldown(infernal_strike) < SpellCooldown(fiery_brand) + 5 } and { SpellCooldown(sigil_of_flame) > 7 or Charges(infernal_strike) == 2 } and Spell(infernal_strike) or { BuffStacks(soulfragment) == 5 or target.DebuffExpires(frailty_debuff) } and Spell(spirit_bomb) or target.DebuffPresent(fiery_brand_debuff) and Spell(soul_carver) or Pain() <= 80 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or Spell(soul_barrier) or BuffStacks(soulfragment) == 5 and Spell(soul_cleave)
+ unless target.HasDebuffType(magic) and Spell(consume_magic)
  {
-  #fel_devastation,if=incoming_damage_5s>health.max*0.70
-  if IncomingDamage(5) > MaxHealth() * 0.7 Spell(fel_devastation)
+  #call_action_list,name=brand,if=talent.charred_flesh.enabled
+  if Talent(charred_flesh_talent) VengeanceBrandShortCdActions()
+
+  unless Talent(charred_flesh_talent) and VengeanceBrandShortCdPostConditions()
+  {
+   #call_action_list,name=defensives
+   VengeanceDefensivesShortCdActions()
+
+   unless VengeanceDefensivesShortCdPostConditions()
+   {
+    #call_action_list,name=normal
+    VengeanceNormalShortCdActions()
+   }
+  }
  }
 }
 
 AddFunction VengeanceDefaultShortCdPostConditions
 {
- SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and HasArtifactTrait(fiery_demise) and target.DebuffPresent(fiery_brand_debuff) and Spell(infernal_strike) or SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and { not HasArtifactTrait(fiery_demise) or { SpellMaxCharges(infernal_strike) - Charges(infernal_strike count=0) } * SpellChargeCooldown(infernal_strike) < SpellCooldown(fiery_brand) + 5 } and { SpellCooldown(sigil_of_flame) > 7 or Charges(infernal_strike) == 2 } and Spell(infernal_strike) or { BuffStacks(soulfragment) == 5 or target.DebuffExpires(frailty_debuff) } and Spell(spirit_bomb) or target.DebuffPresent(fiery_brand_debuff) and Spell(soul_carver) or Pain() <= 80 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or Spell(soul_barrier) or BuffStacks(soulfragment) == 5 and Spell(soul_cleave) or IncomingDamage(5) >= MaxHealth() * 0.7 and Spell(soul_cleave) or Spell(fel_eruption) or target.DebuffRemaining(sigil_of_flame_debuff) - 0 <= 0.3 * BaseDuration(sigil_of_flame_debuff) and Spell(sigil_of_flame) or Pain() >= 80 and BuffStacks(soulfragment) < 4 and IncomingDamage(4) <= MaxHealth() * 0.2 and Spell(fracture) or Pain() >= 80 and Spell(soul_cleave) or Spell(sever) or Spell(shear)
+ target.HasDebuffType(magic) and Spell(consume_magic) or Talent(charred_flesh_talent) and VengeanceBrandShortCdPostConditions() or VengeanceDefensivesShortCdPostConditions() or VengeanceNormalShortCdPostConditions()
 }
 
 AddFunction VengeanceDefaultCdActions
 {
- #consume_magic
  # VengeanceInterruptActions()
- #use_item,slot=trinket2
- # VengeanceUseItemActions()
 
-	#fiery_brand,if=buff.demon_spikes.down&buff.metamorphosis.down
-	if not BuffPresent(demon_spikes_buff) and not BuffPresent(metamorphosis_veng_buff) Spell(fiery_brand)
-	#empower_wards,if=debuff.casting.up
-	if target.IsInterruptible() Spell(empower_wards)
+ unless target.HasDebuffType(magic) and Spell(consume_magic)
+ {
+  #call_action_list,name=brand,if=talent.charred_flesh.enabled
+  if Talent(charred_flesh_talent) VengeanceBrandCdActions()
 
-	unless SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and HasArtifactTrait(fiery_demise) and target.DebuffPresent(fiery_brand_debuff) and Spell(infernal_strike) or SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and { not HasArtifactTrait(fiery_demise) or { SpellMaxCharges(infernal_strike) - Charges(infernal_strike count=0) } * SpellChargeCooldown(infernal_strike) < SpellCooldown(fiery_brand) + 5 } and { SpellCooldown(sigil_of_flame) > 7 or Charges(infernal_strike) == 2 } and Spell(infernal_strike) or { BuffStacks(soulfragment) == 5 or target.DebuffExpires(frailty_debuff) } and Spell(spirit_bomb) or target.DebuffPresent(fiery_brand_debuff) and Spell(soul_carver) or Pain() <= 80 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or Spell(soul_barrier) or BuffStacks(soulfragment) == 5 and Spell(soul_cleave)
-	{
-		#metamorphosis,if=buff.demon_spikes.down&!dot.fiery_brand.ticking&buff.metamorphosis.down&incoming_damage_5s>health.max*0.70
-		if BuffExpires(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and BuffExpires(metamorphosis_veng_buff) and IncomingDamage(5) > MaxHealth() * 0.7 Spell(metamorphosis_veng)
-	}
+  unless Talent(charred_flesh_talent) and VengeanceBrandCdPostConditions()
+  {
+   #call_action_list,name=defensives
+   VengeanceDefensivesCdActions()
+
+   unless VengeanceDefensivesCdPostConditions()
+   {
+    #call_action_list,name=normal
+    VengeanceNormalCdActions()
+   }
+  }
+ }
 }
 
 AddFunction VengeanceDefaultCdPostConditions
 {
- SpellCharges(demon_spikes) == 0 and PainDeficit() > 60 and Spell(demonic_infusion) or SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and HasArtifactTrait(fiery_demise) and target.DebuffPresent(fiery_brand_debuff) and Spell(infernal_strike) or SigilOfFlameLock() and not InFlightToTarget(infernal_strike) and target.DebuffRemaining(infernal_strike_debuff) - TravelTime(infernal_strike) - 0 < 0.3 * BaseDuration(infernal_strike_debuff) and { not HasArtifactTrait(fiery_demise) or { SpellMaxCharges(infernal_strike) - Charges(infernal_strike count=0) } * SpellChargeCooldown(infernal_strike) < SpellCooldown(fiery_brand) + 5 } and { SpellCooldown(sigil_of_flame) > 7 or Charges(infernal_strike) == 2 } and Spell(infernal_strike) or { BuffStacks(soulfragment) == 5 or target.DebuffExpires(frailty_debuff) } and Spell(spirit_bomb) or target.DebuffPresent(fiery_brand_debuff) and Spell(soul_carver) or Pain() <= 80 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or Spell(soul_barrier) or BuffStacks(soulfragment) == 5 and Spell(soul_cleave) or IncomingDamage(5) > MaxHealth() * 0.7 and Spell(fel_devastation) or IncomingDamage(5) >= MaxHealth() * 0.7 and Spell(soul_cleave) or Spell(fel_eruption) or target.DebuffRemaining(sigil_of_flame_debuff) - 0 <= 0.3 * BaseDuration(sigil_of_flame_debuff) and Spell(sigil_of_flame) or Pain() >= 80 and BuffStacks(soulfragment) < 4 and IncomingDamage(4) <= MaxHealth() * 0.2 and Spell(fracture) or Pain() >= 80 and Spell(soul_cleave) or Spell(sever) or Spell(shear)
+ target.HasDebuffType(magic) and Spell(consume_magic) or Talent(charred_flesh_talent) and VengeanceBrandCdPostConditions() or VengeanceDefensivesCdPostConditions() or VengeanceNormalCdPostConditions()
+}
+
+### actions.brand
+
+AddFunction VengeanceBrandMainActions
+{
+ #sigil_of_flame,if=cooldown.fiery_brand.remains<2
+ if SpellCooldown(fiery_brand) < 2 Spell(sigil_of_flame)
+ #immolation_aura,if=dot.fiery_brand.ticking
+ if target.DebuffPresent(fiery_brand_debuff) Spell(immolation_aura)
+ #sigil_of_flame,if=dot.fiery_brand.ticking
+ if target.DebuffPresent(fiery_brand_debuff) Spell(sigil_of_flame)
+}
+
+AddFunction VengeanceBrandMainPostConditions
+{
+}
+
+AddFunction VengeanceBrandShortCdActions
+{
+ unless SpellCooldown(fiery_brand) < 2 and Spell(sigil_of_flame)
+ {
+  #infernal_strike,if=cooldown.fiery_brand.remains=0
+  if not SpellCooldown(fiery_brand) > 0 Spell(infernal_strike)
+  #fiery_brand
+  Spell(fiery_brand)
+
+  unless target.DebuffPresent(fiery_brand_debuff) and Spell(immolation_aura)
+  {
+   #fel_devastation,if=dot.fiery_brand.ticking
+   if target.DebuffPresent(fiery_brand_debuff) Spell(fel_devastation)
+   #infernal_strike,if=dot.fiery_brand.ticking
+   if target.DebuffPresent(fiery_brand_debuff) Spell(infernal_strike)
+  }
+ }
+}
+
+AddFunction VengeanceBrandShortCdPostConditions
+{
+ SpellCooldown(fiery_brand) < 2 and Spell(sigil_of_flame) or target.DebuffPresent(fiery_brand_debuff) and Spell(immolation_aura) or target.DebuffPresent(fiery_brand_debuff) and Spell(sigil_of_flame)
+}
+
+AddFunction VengeanceBrandCdActions
+{
+}
+
+AddFunction VengeanceBrandCdPostConditions
+{
+ SpellCooldown(fiery_brand) < 2 and Spell(sigil_of_flame) or target.DebuffPresent(fiery_brand_debuff) and Spell(immolation_aura) or target.DebuffPresent(fiery_brand_debuff) and Spell(fel_devastation) or target.DebuffPresent(fiery_brand_debuff) and Spell(sigil_of_flame)
+}
+
+### actions.defensives
+
+AddFunction VengeanceDefensivesMainActions
+{
+}
+
+AddFunction VengeanceDefensivesMainPostConditions
+{
+}
+
+AddFunction VengeanceDefensivesShortCdActions
+{
+ #demon_spikes,if=charges=2|buff.demon_spikes.down&!dot.fiery_brand.ticking&buff.metamorphosis.down
+ if Charges(demon_spikes) == 2 or BuffExpires(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and BuffExpires(metamorphosis_veng_buff) Spell(demon_spikes)
+ #fiery_brand,if=buff.demon_spikes.down&buff.metamorphosis.down
+ if BuffExpires(demon_spikes_buff) and BuffExpires(metamorphosis_veng_buff) Spell(fiery_brand)
+}
+
+AddFunction VengeanceDefensivesShortCdPostConditions
+{
+}
+
+AddFunction VengeanceDefensivesCdActions
+{
+ #metamorphosis,if=buff.demon_spikes.down&!dot.fiery_brand.ticking&buff.metamorphosis.down&incoming_damage_5s>health.max*0.70
+ if BuffExpires(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and BuffExpires(metamorphosis_veng_buff) and IncomingDamage(5) > MaxHealth() * 0.7 Spell(metamorphosis_veng)
+}
+
+AddFunction VengeanceDefensivesCdPostConditions
+{
+}
+
+### actions.normal
+
+AddFunction VengeanceNormalMainActions
+{
+ #spirit_bomb,if=soul_fragments>=4
+ if SoulFragments() >= 4 Spell(spirit_bomb)
+ #soul_cleave,if=!talent.spirit_bomb.enabled
+ if not Talent(spirit_bomb_talent) Spell(soul_cleave)
+ #soul_cleave,if=talent.spirit_bomb.enabled&soul_fragments=0
+ if Talent(spirit_bomb_talent) and SoulFragments() == 0 Spell(soul_cleave)
+ #immolation_aura,if=pain<=90
+ if Pain() <= 90 Spell(immolation_aura)
+ #felblade,if=pain<=70
+ if Pain() <= 70 Spell(felblade)
+ #fracture,if=soul_fragments<=3
+ if SoulFragments() <= 3 Spell(fracture)
+ #sigil_of_flame
+ Spell(sigil_of_flame)
+ #shear
+ Spell(shear)
+}
+
+AddFunction VengeanceNormalMainPostConditions
+{
+}
+
+AddFunction VengeanceNormalShortCdActions
+{
+ #infernal_strike
+ Spell(infernal_strike)
+
+ unless SoulFragments() >= 4 and Spell(spirit_bomb) or not Talent(spirit_bomb_talent) and Spell(soul_cleave) or Talent(spirit_bomb_talent) and SoulFragments() == 0 and Spell(soul_cleave) or Pain() <= 90 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or SoulFragments() <= 3 and Spell(fracture)
+ {
+  #fel_devastation
+  Spell(fel_devastation)
+ }
+}
+
+AddFunction VengeanceNormalShortCdPostConditions
+{
+ SoulFragments() >= 4 and Spell(spirit_bomb) or not Talent(spirit_bomb_talent) and Spell(soul_cleave) or Talent(spirit_bomb_talent) and SoulFragments() == 0 and Spell(soul_cleave) or Pain() <= 90 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or SoulFragments() <= 3 and Spell(fracture) or Spell(sigil_of_flame) or Spell(shear) or Spell(throw_glaive_veng)
+}
+
+AddFunction VengeanceNormalCdActions
+{
+}
+
+AddFunction VengeanceNormalCdPostConditions
+{
+ SoulFragments() >= 4 and Spell(spirit_bomb) or not Talent(spirit_bomb_talent) and Spell(soul_cleave) or Talent(spirit_bomb_talent) and SoulFragments() == 0 and Spell(soul_cleave) or Pain() <= 90 and Spell(immolation_aura) or Pain() <= 70 and Spell(felblade) or SoulFragments() <= 3 and Spell(fracture) or Spell(fel_devastation) or Spell(sigil_of_flame) or Spell(shear) or Spell(throw_glaive_veng)
 }
 
 ### actions.precombat
@@ -120,7 +288,7 @@ AddFunction VengeancePrecombatCdActions
  #food
  #snapshot_stats
  #potion
- # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(unbending_potion usable=1)
+ # if CheckBoxOn(opt_use_consumables) and target.Classification(worldboss) Item(item_steelskin_potion usable=1)
 }
 
 AddFunction VengeancePrecombatCdPostConditions
@@ -128,5 +296,5 @@ AddFunction VengeancePrecombatCdPostConditions
 }
 ]]
 
-	OvaleScripts:RegisterScript("DEMONHUNTER", nil, name, desc, code, "include")
+	OvaleScripts:RegisterScript("DEMONHUNTER", "vengeance", name, desc, code, "script")
 end
