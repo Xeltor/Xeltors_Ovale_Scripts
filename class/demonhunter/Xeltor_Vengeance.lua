@@ -27,7 +27,7 @@ AddIcon specialization=2 help=main
 		VengeanceDefaultMainActions()
     }
 	
-	if InCombat() and not target.InRange(shear) and { target.HealthPercent() < 100 or targettarget.Present() }
+	if InCombat() and not target.InRange(shear) and { target.HealthPercent() < 100 or targettarget.Present() } and not target.IsFriend() and target.Present()
 	{
 		#throw_glaive
 		Spell(throw_glaive_veng)
@@ -136,11 +136,11 @@ AddFunction VengeanceDefaultCdPostConditions
 AddFunction VengeanceBrandMainActions
 {
  #sigil_of_flame,if=cooldown.fiery_brand.remains<2
- if SpellCooldown(fiery_brand) < 2 Spell(sigil_of_flame)
+ if SpellCooldown(fiery_brand) < 2 and not SigilCharging(flame) and target.DebuffRemaining(sigil_of_flame_debuff) <= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_flame)
  #immolation_aura,if=dot.fiery_brand.ticking
  if target.DebuffPresent(fiery_brand_debuff) Spell(immolation_aura)
  #sigil_of_flame,if=dot.fiery_brand.ticking
- if target.DebuffPresent(fiery_brand_debuff) Spell(sigil_of_flame)
+ if target.DebuffPresent(fiery_brand_debuff) and not SigilCharging(flame) and target.DebuffRemaining(sigil_of_flame_debuff) <= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_flame)
 }
 
 AddFunction VengeanceBrandMainPostConditions
@@ -229,7 +229,7 @@ AddFunction VengeanceNormalMainActions
  #fracture,if=soul_fragments<=3
  if SoulFragments() <= 3 Spell(fracture)
  #sigil_of_flame
- Spell(sigil_of_flame)
+ if not SigilCharging(flame) and target.DebuffRemaining(sigil_of_flame_debuff) <= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_flame)
  #shear
  Spell(shear)
 }
