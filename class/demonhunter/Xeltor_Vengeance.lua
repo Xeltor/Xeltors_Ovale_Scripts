@@ -27,7 +27,7 @@ AddIcon specialization=2 help=main
 		VengeanceDefaultMainActions()
     }
 	
-	if InCombat() and not target.InRange(shear) and { target.HealthPercent() < 100 or targettarget.Present() } and not target.IsFriend() and target.Present()
+	if InCombat() and not target.InRange(shear) and { target.HealthPercent() < 100 or targettarget.Present() } and not target.IsFriend() and target.Present() and not target.DebuffPresent(imprison)
 	{
 		#throw_glaive
 		Spell(throw_glaive_veng)
@@ -38,12 +38,18 @@ AddFunction InterruptActions
 {
  if { target.HasManagedInterrupts() and target.MustBeInterrupted() } or { not target.HasManagedInterrupts() and target.IsInterruptible() }
  {
-  if target.InRange(disrupt) and target.IsInterruptible() Spell(disrupt)
+  if target.InRange(disrupt) and not SigilCharging(silence misery chains) and target.IsInterruptible() Spell(disrupt)
   if target.IsInterruptible() and target.Distance(less 6) and not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_silence)
   if not target.Classification(worldboss) and target.Distance(less 6) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_chains)
   if not target.Classification(worldboss) and target.Distance(less 6) and not SigilCharging(silence misery chains) and target.RemainingCastTime() >= 2 - Talent(quickened_sigils_talent) + GCDRemaining() Spell(sigil_of_misery)
-  if target.InRange(imprison) and not target.Classification(worldboss) and target.CreatureType(Demon Humanoid Beast) and SpellUsable(imprison) and not PreviousGCDSpell(imprison) Texture(spell_fire_felflamering)
+  if target.InRange(imprison) and not target.Classification(worldboss) and not SigilCharging(silence misery chains) and target.CreatureType(Demon Humanoid Beast) and Spell(imprison usable=1) and not PreviousGCDSpell(imprison) Texture(spell_fire_felflamering)
  }
+}
+
+AddFunction VengeanceUseItemActions
+{
+	if Item(Trinket0Slot usable=1) Texture(inv_jewelry_talisman_12)
+	if Item(Trinket1Slot usable=1) Texture(inv_jewelry_talisman_12)
 }
 
 ### actions.default
@@ -193,9 +199,11 @@ AddFunction VengeanceDefensivesMainPostConditions
 AddFunction VengeanceDefensivesShortCdActions
 {
  #demon_spikes,if=charges=2|buff.demon_spikes.down&!dot.fiery_brand.ticking&buff.metamorphosis.down
- if Charges(demon_spikes) == 2 or BuffExpires(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and BuffExpires(metamorphosis_veng_buff) Spell(demon_spikes)
+ if Charges(demon_spikes) == 2 or not BuffPresent(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and not BuffPresent(metamorphosis_veng_buff) Spell(demon_spikes)
  #fiery_brand,if=buff.demon_spikes.down&buff.metamorphosis.down
- if BuffExpires(demon_spikes_buff) and BuffExpires(metamorphosis_veng_buff) Spell(fiery_brand)
+ if not BuffPresent(demon_spikes_buff) and not BuffPresent(metamorphosis_veng_buff) Spell(fiery_brand)
+ #use_items,if=buff.demon_spikes.down&buff.metamorphosis.down
+ if not BuffPresent(demon_spikes_buff) and not BuffPresent(metamorphosis_veng_buff) VengeanceUseItemActions()
 }
 
 AddFunction VengeanceDefensivesShortCdPostConditions
@@ -205,7 +213,7 @@ AddFunction VengeanceDefensivesShortCdPostConditions
 AddFunction VengeanceDefensivesCdActions
 {
  #metamorphosis,if=buff.demon_spikes.down&!dot.fiery_brand.ticking&buff.metamorphosis.down&incoming_damage_5s>health.max*0.70
- if BuffExpires(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and BuffExpires(metamorphosis_veng_buff) and IncomingDamage(5) > MaxHealth() * 0.7 Spell(metamorphosis_veng)
+ if not BuffPresent(demon_spikes_buff) and not target.DebuffPresent(fiery_brand_debuff) and not BuffPresent(metamorphosis_veng_buff) and IncomingDamage(5) > MaxHealth() * 0.7 Spell(metamorphosis_veng)
 }
 
 AddFunction VengeanceDefensivesCdPostConditions

@@ -20,10 +20,10 @@ AddIcon
 	# Buffs
 	Texture(spell_shadow_lifedrain) # Vampiric Blood
 	Texture(inv_sword_07) # Dancing Rune Weapon
-	
+
 	# Items
 	Texture(inv_jewelry_talisman_12) # Link to a trinket macro
-	
+
 	# Heart of Azeroth Skills
 	Texture(spell_azerite_essence_15) # Concentrated Flame
 	Texture(spell_azerite_essence05) # Memory of Lucid Dreams
@@ -43,6 +43,8 @@ AddIcon
 	Texture(spell_deathknight_runetap) # Rune Tap (T4)
 	Texture(ability_hunter_rapidkilling) # Mark of Blood (T6)
 	Texture(achievement_boss_lordmarrowgar) # Bonestorm (T7)
+	Texture(ability_ironmaidens_bloodritual) # Blood for Blood (PvP talent)
+	Texture(ability_deathknight_deathchain) # Death Chains (PvP talent)
 
 	# Racials
 	Texture(racial_orc_berserkerstrength) # Blood Fury (Orc)
