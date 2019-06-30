@@ -17,6 +17,7 @@ AddIcon specialization=2 help=main
 	{
 		unless target.Present() and target.Distance(less 5)
 		{
+			if not BuffPresent(lightning_shield) Spell(lightning_shield)
 			if Speed() > 0 Spell(ghost_wolf)
 		}
 	}
@@ -37,6 +38,7 @@ AddIcon specialization=2 help=main
 		if Boss() EnhancementDefaultCdActions()
 		
 		# Short Cooldowns
+		if not BuffPresent(lightning_shield) Spell(lightning_shield)
 		EnhancementDefaultShortCdActions()
 		
 		# Default rotation
