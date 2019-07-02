@@ -3,21 +3,22 @@ local OvaleScripts = __Scripts.OvaleScripts
 
 do
 	local name = "Xelhelpmark"
-	local desc = "[Xel][7.0.3] Spellhelper: Marksman"
+	local desc = "[Xel][8.x] Spellhelper: Marksman"
 	local code = [[
 AddIcon
 {
 	# Remove a line when you have its colour
 	# Spells
 	Texture(ability_impalingbolt) # Arcane Shot
-	Texture(inv_spear_07) # Aimed Shot
-	Texture(ability_hunter_markedshot) # Marked Shot
 	Texture(ability_upgrademoonglaive) # Multi-Shot
+	Texture(inv_spear_07) # Aimed Shot
+	Texture(ability_hunter_steadyshot) # Steady Shot
+	Texture(ability_hunter_efficiency) # Rapid Fire
 	Texture(ability_hunter_burstingshot) # Bursting Shot
 	Texture(inv_ammo_arrow_03) # Counter Shot
 
 	# Buffs
-	Texture(ability_trueshot) # True Shot
+	Texture(ability_trueshot) # Trueshot
 	Texture(ability_hunter_onewithnature) # Exhilaration
 	
 	# Items
@@ -35,16 +36,14 @@ AddIcon
 	Texture(inv_misc_azerite_01) # Worldvein Resonance
 
 	# Talents
-	Texture(spell_shadow_painspike) # Black Arrow (T2)
-	Texture(ability_hunter_explosiveshot) # Explosive Shot (T4)
-	Texture(spell_nature_sentinal) # Sentinel (T4)
+	Texture(spell_hunter_exoticmunitions_poisoned) # Serpent Sting (T1)
+	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T1)
+	Texture(ability_hunter_explosiveshot) # Explosive Shot (T2)
+	Texture(ability_hunter_camouflage) # Camouflage (T3)
+	Texture(ability_hunter_markedfordeath) # Hunter's Mark (T4)
 	Texture(spell_shaman_bindelemental) # Binding Shot (T5)
-	Texture(inv_spear_02) # Wyvern Sting (T5)
-	Texture(ability_hunter_camouflage) # Camouflage (T5)
-	Texture(ability_hunter_murderofcrows) # A Murder of Crows (T6)
 	Texture(ability_hunter_rapidregeneration) # Barrage (T6)
-	Texture(ability_marksmanship) # Volley (T6)
-	Texture(ability_hunter_serpentswiftness) # Sidewinders (T7)
+	Texture(ability_hunter_crossfire) # Double Tap (T6)
 	Texture(ability_cheapshot) # Piercing Shot (T7)
 
 	# Racials
