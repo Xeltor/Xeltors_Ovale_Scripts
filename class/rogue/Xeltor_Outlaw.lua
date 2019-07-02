@@ -60,7 +60,7 @@ AddFunction InterruptActions
 
 AddFunction VanishAllowed
 {
-	{ not target.istargetingplayer() or unitinparty() or unitinraid() }
+	{ not target.istargetingplayer() or { unitinparty() and PartyMemberCount() >= 5 } or unitinraid() }
 }
 
 AddFunction OutlawGetInMeleeRange
