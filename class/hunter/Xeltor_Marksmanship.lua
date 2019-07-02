@@ -13,6 +13,11 @@ Include(ovale_hunter_spells)
 
 AddIcon specialization=2 help=main
 {
+	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not target.DebuffPresent(hunters_mark_debuff) and target.InRange(hunters_mark)
+	{
+		Spell(hunters_mark)
+	}
+	
 	if HasFullControl() and InCombat() and target.Present() and target.InRange(arcane_shot)
 	{
 		InterruptActions()
