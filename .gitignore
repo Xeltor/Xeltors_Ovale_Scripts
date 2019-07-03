@@ -3,3 +3,4 @@
 /@tools/Source/AHK_Builder/WindowsApplication1/Objects
 /@tools/Source/AHK_Builder/.vs/AHK Builder/v14/*.suo
 *.suo
+/@tools/tmp_backup.xml

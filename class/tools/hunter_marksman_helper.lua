@@ -16,10 +16,14 @@ AddIcon
 	Texture(ability_hunter_efficiency) # Rapid Fire
 	Texture(ability_hunter_burstingshot) # Bursting Shot
 	Texture(inv_ammo_arrow_03) # Counter Shot
+	Texture(spell_frost_stun) # Concussive Shot
 
 	# Buffs
 	Texture(ability_trueshot) # Trueshot
 	Texture(ability_hunter_onewithnature) # Exhilaration
+	Texture(ability_hunter_mendpet) # Mend Pet
+	Texture(inv_misc_pheonixpet_01) # Heart of the Phoenix
+	Texture(ability_hunter_beastsoothe) # Revive Pet
 	
 	# Items
 	Texture(inv_jewelry_talisman_12) # Link to a trinket macro

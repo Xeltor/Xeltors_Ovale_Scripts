@@ -17,6 +17,7 @@ AddIcon
 	Texture(spell_nature_tranquility) # Tranquility
 	Texture(spell_nature_reincarnation) # Rebirth
 	Texture(ability_druid_empoweredtouch) # Revitalize
+	Texture(ability_shaman_cleansespirit) # Nature's Cure
 	Texture(ability_mage_firestarter) # Sunfire
 	Texture(spell_nature_starfall) # Moonfire
 	Texture(spell_nature_wrathv2) # Solar Wrath

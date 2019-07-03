@@ -19,6 +19,7 @@ AddIcon
 	Texture(spell_shaman_earthquake) # Earthquake
 	Texture(spell_nature_cyclone) # Wind Shear
 	Texture(spell_shaman_hex) # Hex
+	Texture(shaman_pvp_lightninglasso) # Lightning Lasso
 
 	# Buffs
 	Texture(spell_fire_elemental_totem) # Fire Elemental Totem

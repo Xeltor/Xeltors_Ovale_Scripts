@@ -13,9 +13,9 @@ Include(ovale_hunter_spells)
 
 AddIcon specialization=2 help=main
 {
-	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not target.DebuffPresent(hunters_mark_debuff) and target.InRange(hunters_mark)
+	if not InCombat() and target.Present() and target.Exists() and not target.IsFriend() and not target.DebuffPresent(hunters_mark_debuff) and target.InRange(hunters_mark) and not Mounted()
 	{
-		Spell(hunters_mark)
+		if Boss() Spell(hunters_mark)
 	}
 	
 	if HasFullControl() and InCombat() and target.Present() and target.InRange(arcane_shot)
@@ -23,6 +23,7 @@ AddIcon specialization=2 help=main
 		InterruptActions()
 		if not IsDead() and not Dead() and HealthPercent() < 50  Spell(exhilaration)
 		if target.istargetingplayer() and target.Distance(less 8) Spell(bursting_shot)
+		SummonPet()
 	
 		# Cooldowns
 		if Boss() MarksmanshipDefaultCdActions()
@@ -54,6 +55,16 @@ AddFunction MarksmanshipUseItemActions
 AddFunction CanBurst
 {
 	{ not target.istargetingplayer() or { unitinparty() and PartyMemberCount() >= 5 } or unitinraid() }
+}
+
+AddFunction SummonPet
+{
+ if pet.HealthPercent() <= 0 and pet.Exists()
+ {
+  if not DebuffPresent(heart_of_the_phoenix_debuff) Spell(heart_of_the_phoenix)
+  if Spell(revive_pet) Spell(revive_pet)
+ }
+ if not pet.HealthPercent() <= 0 and pet.HealthPercent() < 85 and not pet.BuffStacks(mend_pet) and pet.InRange(mend_pet) and pet.Present() and pet.Exists() Spell(mend_pet)
 }
 
 ### actions.default
