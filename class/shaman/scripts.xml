@@ -2,8 +2,7 @@
 ..\FrameXML\UI.xsd">
 	<Script file="Presdec_Restoration.lua" />
 	<Script file="Hooves_Elemental.lua" />
-	<Script file="Xeltor_Elemental_810.lua" />
-	<Script file="Xeltor_Elemental_815.lua" />
+	<Script file="Xeltor_Elemental.lua" />
 	<Script file="Xeltor_Enhancement.lua" />
 	<Script file="Xeltor_Restoration.lua" />
 </Ui>
