@@ -157,7 +157,7 @@ AddFunction DemonologyDefaultShortCdActions
   #bilescourge_bombers,if=azerite.explosive_potential.rank>0&time<10&spell_targets.implosion<2&buff.dreadstalkers.remains&talent.nether_portal.enabled
   if AzeriteTraitRank(explosive_potential_trait) > 0 and TimeInCombat() < 10 and Enemies(tagged=1) < 2 and DemonDuration(dreadstalker) and Talent(nether_portal_talent) Spell(bilescourge_bombers)
   #demonic_strength,if=(buff.wild_imps.stack<6|buff.demonic_power.up)|spell_targets.implosion<2
-  if Demons(wild_imp) + Demons(wild_imp_inner_demons) < 6 or BuffPresent(demonic_power) or Enemies(tagged=1) < 2 Spell(demonic_strength)
+  if { Demons(wild_imp) + Demons(wild_imp_inner_demons) < 6 or BuffPresent(demonic_power) or Enemies(tagged=1) < 2 } and not pet.BuffPresent(pet_auto_spin) Spell(demonic_strength)
   #call_action_list,name=nether_portal,if=talent.nether_portal.enabled&spell_targets.implosion<=2
   if Talent(nether_portal_talent) and Enemies(tagged=1) <= 2 DemonologyNetherPortalShortCdActions()
 
@@ -339,7 +339,7 @@ AddFunction DemonologyDconOpenerShortCdActions
  unless HasAzeriteTrait(explosive_potential_trait) and TimeSincePreviousSpell(hand_of_guldan) > 30 and Spell(hand_of_guldan) or HasAzeriteTrait(explosive_potential_trait) and Demons(wild_imp) + Demons(wild_imp_inner_demons) > 2 and BuffExpires(explosive_potential) and Spell(implosion) or TimeSincePreviousSpell(doom) > 30 and Spell(doom) or PreviousGCDSpell(hand_of_guldan) and SoulShards() > 0 and PreviousGCDSpell(soul_strike count=2) and Spell(hand_of_guldan)
  {
   #demonic_strength,if=prev_gcd.1.hand_of_guldan&!prev_gcd.2.hand_of_guldan&(buff.wild_imps.stack>1&action.hand_of_guldan.in_flight)
-  if PreviousGCDSpell(hand_of_guldan) and not PreviousGCDSpell(hand_of_guldan count=2) and Demons(wild_imp) + Demons(wild_imp_inner_demons) > 1 and InFlightToTarget(hand_of_guldan) Spell(demonic_strength)
+  if PreviousGCDSpell(hand_of_guldan) and not PreviousGCDSpell(hand_of_guldan count=2) and Demons(wild_imp) + Demons(wild_imp_inner_demons) > 1 and InFlightToTarget(hand_of_guldan) and not pet.BuffPresent(pet_auto_spin) Spell(demonic_strength)
   #bilescourge_bombers
   Spell(bilescourge_bombers)
 
