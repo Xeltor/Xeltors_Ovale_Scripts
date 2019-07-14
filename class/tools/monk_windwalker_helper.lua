@@ -36,6 +36,7 @@ AddIcon
 	Texture(spell_azerite_essence10) # Ripple in Space
 	Texture(spell_azerite_essence03) # The Unbound Force
 	Texture(inv_misc_azerite_01) # Worldvein Resonance
+	Texture(ability_monk_expelharm) # Conflict and Strife: Reverse Harm
 
 	# Talents
 	Texture(ability_monk_chiwave) # Chi Wave (T1)

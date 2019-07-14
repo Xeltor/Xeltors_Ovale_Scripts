@@ -68,7 +68,11 @@ AddFunction PetStuff
 AddFunction SaveActions
 {
 	if HealthPercent() < 30 and InCombat() Spell(unending_resolve)
-	if HealthPercent() < 50 and ItemCharges(healthstone) > 0 and Item(healthstone usable=1) Texture(inv_stone_04)
+	if HealthPercent() < 50
+	{
+		if ItemCharges(healthstone) > 0 and Item(healthstone usable=1) Texture(inv_stone_04)
+		Spell(drain_life)
+	}
 }
 
 AddFunction OutOfCombatActions
