@@ -59,11 +59,31 @@ AddFunction Party_Auto_Target
 {
 	unless UnitInRaid()
 	{
-		if PartyMemberWithLowestHealth() == 1 ThePlayer()
-		if PartyMemberWithLowestHealth() == 2 PartyMemberOne()
-		if PartyMemberWithLowestHealth() == 3 PartyMemberTwo()
-		if PartyMemberWithLowestHealth() == 4 PartyMemberThree()
-		if PartyMemberWithLowestHealth() == 5 PartyMemberFour()
+		# Self healing.
+		if player.HealthPercent() < 50 ThePlayer()
+		
+		# Focus healing.
+		unless player.HealthPercent() < 50
+		{
+			if HasFocus() and focus.HealthPercent() < 50
+			{
+				if player.IsFocus() ThePlayer()
+				if player2.IsFocus() PartyMemberOne()
+				if player3.IsFocus() PartyMemberTwo()
+				if player4.IsFocus() PartyMemberThree()
+				if player5.IsFocus() PartyMemberFour()
+			}
+		}
+		
+		# Normal healing.
+		unless player.HealthPercent() < 50 or HasFocus() and focus.HealthPercent() < 50
+		{
+			if PartyMemberWithLowestHealth() == 1 ThePlayer()
+			if PartyMemberWithLowestHealth() == 2 PartyMemberOne()
+			if PartyMemberWithLowestHealth() == 3 PartyMemberTwo()
+			if PartyMemberWithLowestHealth() == 4 PartyMemberThree()
+			if PartyMemberWithLowestHealth() == 5 PartyMemberFour()
+		}
 	}
 }
 
