@@ -1,5 +1,5 @@
-## Title: Xel's Ovale Scripts
-## Notes: Ovale script manager that allows choosing between scripts contributed by various authors.
+## Title: Xel's Ovale Scripts [Deprecated]
+## Notes: Please remove this addon from your WoW it is no longer needed.
 ##
 ## Version: 8.0.0.0
 ## Author: Xeltor
@@ -9,4 +9,3 @@
 ## Dependencies: Ovale
 
 Core.lua
-class\class.xml
